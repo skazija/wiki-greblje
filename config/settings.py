@@ -164,6 +164,8 @@ if DATABASE_URL:
         conn_max_age=600,
     )
 
+    DATABASES["default"]["ENGINE"] = "django.contrib.gis.db.backends.postgis"
+
 
 import os
 
