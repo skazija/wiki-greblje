@@ -169,8 +169,9 @@ if DATABASE_URL:
 
 import os
 
-GDAL_LIBRARY_PATH = r"C:\Users\Administrator\AppData\Local\Programs\OSGeo4W\bin\gdal312.dll"
-GEOS_LIBRARY_PATH = r"C:\Users\Administrator\AppData\Local\Programs\OSGeo4W\bin\geos_c.dll"
+if os.name == "nt":
+    GDAL_LIBRARY_PATH = r"C:\Users\Administrator\AppData\Local\Programs\OSGeo4W\bin\gdal312.dll"
+    GEOS_LIBRARY_PATH = r"C:\Users\Administrator\AppData\Local\Programs\OSGeo4W\bin\geos_c.dll"
 os.environ["PATH"] = r"C:\Users\Administrator\AppData\Local\Programs\OSGeo4W\bin;" + os.environ["PATH"]
 os.environ["GDAL_DATA"] = r"C:\Users\Administrator\AppData\Local\Programs\OSGeo4W\share\gdal"
 os.environ["PROJ_LIB"] = r"C:\Users\Administrator\AppData\Local\Programs\OSGeo4W\share\proj"
