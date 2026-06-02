@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+{% extends "graves/base.html" %}
+
+{% block title %}Wiki Greblje{% endblock %}
+
+{% block extra_head %}
+<style>
+    .hero {
+        background: linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.55)),
+                    url('https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=1600');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 120px 20px;
+        border-radius: 16px;
+        margin-bottom: 40px;
+    }
+
+    .grave-image {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="hero text-center shadow">
+    <h1 class="display-4 fw-bold">Wiki Greblje</h1>
+
+    <p class="lead mt-3">
+        Digitalni arhiv starih grobalja, spomenika i historijskih podataka.
+    </p>
+
+    <div class="mt-4">
+        <a href="{% url 'graves:cemetery_list' %}"
+           class="btn btn-light btn-lg">
+            Pregled grobalja
+        </a>
+    </div>
+
+    <form method="get"
+          action="{% url 'graves:search' %}"
+          class="mt-4">
+
+        <div class="input-group input-group-lg w-75 mx-auto">
+            <input
+                type="text"
+                name="q"
+                class="form-control"
+                placeholder="Pretraži osobe, grobove, natpise..."
+            >
+
+            <button class="btn btn-dark" type="submit">
+                Pretraži
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="row text-center mb-5">
+
+    <div class="col-md mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2>{{ cemetery_count }}</h2>
+                <p class="mb-0">Groblja</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2>{{ grave_count }}</h2>
+                <p class="mb-0">Grobovi</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2>{{ person_count }}</h2>
+                <p class="mb-0">Osobe</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2>{{ photo_count }}</h2>
+                <p class="mb-0">Fotografije</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2>{{ user_count }}</h2>
+                 <p class="mb-0">Korisnici</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<h2 class="mb-4">Najnovije dodani grobovi</h2>
+
+<div class="row">
+
+    {% for grave in latest_graves %}
+        <div class="col-md-4 mb-4">
+
+            <div class="card shadow-sm h-100">
+
+                {% with first_photo=grave.photos.first %}
+                    {% if first_photo %}
+                        <img src="{{ first_photo.image.url }}"
+                             class="grave-image">
+                    {% endif %}
+                {% endwith %}
+
+                <div class="card-body">
+
+                    <h5>
+                        {{ grave.title|default:"Neimenovan grob" }}
+                    </h5>
+
+                    <p class="text-muted">
+                        {{ grave.cemetery.name }}
+                    </p>
+
+                    <p>
+                        {{ grave.inscription|truncatechars:120 }}
+                    </p>
+
+                    <a href="{% url 'graves:grave_detail' grave.id %}"
+                       class="btn btn-outline-dark">
+                        Otvori detalje
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+    {% endfor %}
+
+</div>
+<h2 class="mb-4 mt-5">Najnovije fotografije</h2>
+
+<div class="row">
+
+    {% for photo in latest_photos %}
+        <div class="col-md-3 mb-4">
+
+            <div class="card shadow-sm h-100">
+
+                <img src="{{ photo.image.url }}"
+                     class="grave-image">
+
+                <div class="card-body">
+
+                    <h6>
+                        <a href="{% url 'graves:grave_detail' photo.grave.id %}">
+                            {{ photo.grave.title|default:"Grob" }}
+                        </a>
+                    </h6>
+
+                    <p class="text-muted small">
+                        {{ photo.grave.cemetery.name }}
+                    </p>
+
+                    {% if photo.caption %}
+                        <p class="small">
+                            {{ photo.caption|truncatechars:60 }}
+                        </p>
+                    {% endif %}
+
+                </div>
+            </div>
+
+        </div>
+
+    {% endfor %}
+    
+</div>
+{% endblock %}
+</html>

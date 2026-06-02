@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+{% extends "graves/base.html" %}
+
+{% block title %}Pretraga - Wiki Greblje{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+
+<style>
+    #search-map {
+        height: 500px !important;
+        width: 100% !important;
+        min-height: 500px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        background: #e5e5e5;
+        z-index: 1;
+    }
+
+    .leaflet-container {
+        height: 500px !important;
+        width: 100% !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<h1>Pretraga</h1>
+
+<form method="get" action="{% url 'graves:search' %}" class="mb-4">
+    <div class="input-group">
+        <input
+            type="text"
+            name="q"
+            value="{{ query }}"
+            class="form-control"
+            placeholder="Pretraži ime, prezime, grob, natpis..."
+        >
+        <button type="submit" class="btn btn-dark">Pretraži</button>
+    </div>
+</form>
+
+{% if query %}
+    <h4 class="mb-3">Rezultati za: "{{ query }}"</h4>
+
+    <div class="row">
+        <div class="col-md-5">
+
+            <h5>Osobe</h5>
+
+            {% for person in persons %}
+                <div class="card shadow-sm mb-2">
+                    <div class="card-body">
+                        <strong>{{ person.first_name }} {{ person.last_name }}</strong>
+
+                        <p class="mb-1">
+                            {{ person.birth_year|default:"?" }} -
+                            {{ person.death_year|default:"?" }}
+                        </p>
+
+                        <p class="mb-2">
+                            {{ person.grave.cemetery.name }}
+                        </p>
+
+                        <a class="btn btn-sm btn-outline-dark"
+                           href="{% url 'graves:grave_detail' person.grave.id %}">
+                            Otvori grob
+                        </a>
+
+                        {% if person.grave.location %}
+                            <button class="btn btn-sm btn-outline-primary"
+                                    onclick="focusGrave({{ person.grave.id }})">
+                                Prikaži na mapi
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            {% empty %}
+                <p>Nema pronađenih osoba.</p>
+            {% endfor %}
+
+            <h5 class="mt-4">Grobovi</h5>
+
+            {% for grave in graves %}
+                <div class="card shadow-sm mb-2">
+                    <div class="card-body">
+                        <strong>{{ grave.title|default:"Neimenovan grob" }}</strong>
+
+                        <p class="mb-1">{{ grave.cemetery.name }}</p>
+                        <p>{{ grave.inscription|truncatechars:120 }}</p>
+
+                        <a class="btn btn-sm btn-outline-dark"
+                           href="{% url 'graves:grave_detail' grave.id %}">
+                            Otvori grob
+                        </a>
+
+                        {% if grave.location %}
+                            <button class="btn btn-sm btn-outline-primary"
+                                    onclick="focusGrave({{ grave.id }})">
+                                Prikaži na mapi
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            {% empty %}
+                <p>Nema pronađenih grobova.</p>
+            {% endfor %}
+
+        </div>
+
+        <div class="col-md-7">
+            <h5>Mapa rezultata</h5>
+            <div id="search-map"></div>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+{% if query %}
+    var map = L.map('search-map').setView([43.9889, 18.1781], 14);
+
+    var osm = L.tileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {
+            maxZoom: 22,
+            attribution: '© OpenStreetMap'
+        }
+    );
+
+    var satellite = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        {
+            maxZoom: 22,
+            attribution: 'Tiles © Esri'
+        }
+    );
+
+    map.addLayer(osm);
+
+    L.control.layers({
+        "Mapa": osm,
+        "Satelit": satellite
+    }).addTo(map);
+
+    var markers = {};
+    var markerGroup = [];
+
+    {% for grave in map_graves %}
+        var marker{{ grave.id }} = L.marker([
+            {{ grave.location.y }},
+            {{ grave.location.x }}
+        ]).addTo(map);
+
+        marker{{ grave.id }}.bindPopup(`
+            <b>{{ grave.title|default:"Grob" }}</b><br>
+            {{ grave.cemetery.name }}<br>
+            <a href="{% url 'graves:grave_detail' grave.id %}">Otvori detalje</a>
+        `);
+
+        markers[{{ grave.id }}] = marker{{ grave.id }};
+        markerGroup.push(marker{{ grave.id }});
+    {% endfor %}
+
+    if (markerGroup.length > 0) {
+        var group = L.featureGroup(markerGroup);
+        map.fitBounds(group.getBounds(), {
+            padding: [40, 40],
+            maxZoom: 19
+        });
+    }
+
+    setTimeout(function () {
+        map.invalidateSize();
+    }, 500);
+
+    function focusGrave(id) {
+        var marker = markers[id];
+
+        if (marker) {
+            map.setView(marker.getLatLng(), 20);
+            marker.openPopup();
+
+            setTimeout(function () {
+                map.invalidateSize();
+            }, 200);
+        }
+    }
+{% endif %}
+</script>
+{% endblock %}
+</html>

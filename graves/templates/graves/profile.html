@@ -1,0 +1,108 @@
+{% extends "graves/base.html" %}
+
+{% block title %}Moj profil{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+
+    <div class="col-md-8">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <h2 class="mb-4">
+                    Moj profil
+                </h2>
+
+                <p>
+                    <strong>Korisničko ime:</strong>
+                    {{ user.username }}
+                </p>
+
+                <p>
+                    <strong>Datum registracije:</strong>
+                    {{ user.date_joined }}
+                </p>
+
+                <hr>
+
+                <div class="row text-center">
+
+                    <div class="col-md-4">
+
+                        <div class="card bg-dark text-white mb-3">
+
+                            <div class="card-body">
+
+                                <h3>
+                                    {{ total_graves }}
+                                </h3>
+
+                                <p>
+                                    Ukupno grobova
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                   
+
+                    <div class="col-md-4">
+
+                        <div class="card bg-success text-white mb-3">
+
+                            <div class="card-body">
+
+                                <h3>
+                                    {{ approved_graves }}
+                                </h3>
+
+                                <p>
+                                    Odobreno
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div class="card bg-warning text-dark mb-3">
+
+                            <div class="card-body">
+
+                                <h3>
+                                    {{ pending_graves }}
+                                </h3>
+
+                                <p>
+                                    Na čekanju
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                     <div class="mt-4 text-center">
+                        <a href="{% url 'graves:my_graves' %}" class="btn btn-outline-dark">Moji grobovi</a>
+                        <a href="{% url 'graves:add_grave' %}" class="btn btn-dark">Dodaj novi grob</a>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

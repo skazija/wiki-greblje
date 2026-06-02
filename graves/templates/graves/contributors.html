@@ -1,0 +1,63 @@
+{% extends "graves/base.html" %}
+
+{% block title %}Doprinosi{% endblock %}
+
+{% block content %}
+
+<h1 class="mb-4">
+    Najaktivniji korisnici
+</h1>
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        <table class="table">
+
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Korisnik</th>
+                    <th>Grobovi</th>
+                    <th>Komentari</th>
+                    <th>Ukupno</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for user in users %}
+
+                <tr>
+
+                    <td>{{ forloop.counter }}</td>
+
+                    <td>
+                        {{ user.username }}
+                    </td>
+
+                    <td>
+                        {{ user.grave_count }}
+                    </td>
+
+                    <td>
+                        {{ user.comment_count }}
+                    </td>
+
+                    <td>
+                        {{ user.grave_count|add:user.comment_count }}
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

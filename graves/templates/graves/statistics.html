@@ -1,0 +1,103 @@
+{% extends "graves/base.html" %}
+
+{% block title %}Statistika{% endblock %}
+
+{% block content %}
+
+<h1 class="mb-4">Statistika projekta</h1>
+
+<div class="row text-center">
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2>{{ stats.cemetery_count }}</h2>
+                <p>Groblja</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2>{{ stats.grave_count }}</h2>
+                <p>Ukupno grobova</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-success">
+            <div class="card-body">
+                <h2>{{ stats.approved_grave_count }}</h2>
+                <p>Odobreni grobovi</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-warning">
+            <div class="card-body">
+                <h2>{{ stats.pending_grave_count }}</h2>
+                <p>Grobovi na čekanju</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-danger">
+            <div class="card-body">
+                <h2>{{ stats.rejected_grave_count }}</h2>
+                <p>Odbijeni grobovi</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2>{{ stats.person_count }}</h2>
+                <p>Osobe</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2>{{ stats.photo_count }}</h2>
+                <p>Fotografije</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2>{{ stats.user_count }}</h2>
+                <p>Korisnici</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2>{{ stats.edit_suggestion_count }}</h2>
+                <p>Prijedlozi izmjena</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-warning">
+            <div class="card-body">
+                <h2>{{ stats.pending_edit_suggestion_count }}</h2>
+                <p>Izmjene na čekanju</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

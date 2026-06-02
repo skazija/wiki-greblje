@@ -1,0 +1,86 @@
+{% extends "graves/base.html" %}
+
+{% block title %}Osobe{% endblock %}
+
+{% block content %}
+
+<h1 class="mb-4">
+    Pretraga osoba
+</h1>
+
+<form method="get" class="mb-4">
+
+    <div class="input-group">
+
+        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Ime ili prezime">
+        <input type="number" name="birth_year" value="{{ birth_year }}"  class="form-control"  placeholder="Godina rođenja">
+        <input type="number" name="death_year" value="{{ death_year }}"  class="form-control"  placeholder="Godina smrti">    
+        <button class="btn btn-dark" type="submit">Pretraži</button>
+
+    </div>
+
+</form>
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        <h5>
+            Pronađeno:
+            {{ persons|length }}
+        </h5>
+
+    </div>
+
+</div>
+
+<br>
+
+{% for person in persons %}
+
+    <div class="card shadow-sm mb-3">
+
+        <div class="card-body">
+
+            <h5>
+
+                {{ person.first_name }}
+                {{ person.last_name }}
+
+            </h5>
+
+            <p class="mb-1">
+
+                {{ person.birth_year|default:"?" }}
+                -
+                {{ person.death_year|default:"?" }}
+
+            </p>
+
+            <p class="text-muted">
+
+                {{ person.grave.cemetery.name }}
+
+            </p>
+
+            <a
+                href="{% url 'graves:grave_detail' person.grave.id %}"
+                class="btn btn-sm btn-dark">
+
+                Otvori grob
+
+            </a>
+
+        </div>
+
+    </div>
+
+{% empty %}
+
+    <p>
+        Nema rezultata.
+    </p>
+
+{% endfor %}
+
+{% endblock %}

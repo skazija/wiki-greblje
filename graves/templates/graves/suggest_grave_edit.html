@@ -1,0 +1,47 @@
+{% extends "graves/base.html" %}
+
+{% block title %}Predloži izmjenu{% endblock %}
+
+{% block content %}
+
+<a href="{% url 'graves:grave_detail' grave.id %}"
+   class="btn btn-sm btn-outline-dark mb-3">
+    ← Nazad na grob
+</a>
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-body">
+
+                <h2 class="mb-3">Predloži izmjenu</h2>
+
+                <p class="text-muted">
+                    Grob:
+                    <strong>{{ grave.title|default:"Neimenovan grob" }}</strong>
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        {{ form.field_name.label_tag }}
+                        {{ form.field_name }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.new_value.label_tag }}
+                        {{ form.new_value }}
+                    </div>
+
+                    <button type="submit" class="btn btn-dark">
+                        Pošalji prijedlog
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

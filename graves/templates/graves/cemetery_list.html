@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+{% extends "graves/base.html" %}
+
+{% block title %}Groblja - Wiki Greblje{% endblock %}
+
+{% block content %}
+
+<h1>Groblja</h1>
+
+<form method="get" action="{% url 'graves:search' %}" class="mb-4">
+    <div class="input-group">
+        <input
+            type="text"
+            name="q"
+            class="form-control"
+            placeholder="Pretraži osobe, grobove, natpise..."
+        >
+        <button class="btn btn-dark" type="submit">Pretraži</button>
+    </div>
+</form>
+
+{% for cemetery in cemeteries %}
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <h3>
+                <a href="{% url 'graves:cemetery_detail' cemetery.id %}">
+                    {{ cemetery.name }}
+                </a>
+            </h3>
+
+            <p class="mb-1">{{ cemetery.city }} {{ cemetery.village }}</p>
+            <p>{{ cemetery.description }}</p>
+        </div>
+    </div>
+{% empty %}
+    <p>Nema unesenih grobalja.</p>
+{% endfor %}
+
+{% endblock %}
+</html>

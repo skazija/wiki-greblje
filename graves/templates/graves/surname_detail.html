@@ -1,0 +1,124 @@
+{% extends "graves/base.html" %}
+
+{% block title %}Prezime {{ last_name }}{% endblock %}
+{% block extra_head %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+{% endblock %}
+{% block content %}
+
+<a href="{% url 'graves:surname_list' %}" class="btn btn-sm btn-outline-dark mb-3">
+    ← Nazad na prezimena
+</a>
+
+<h1 class="mb-4">Prezime: {{ last_name }}</h1>
+
+{% if map_graves %}
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+
+        <h4>Raspored grobova na mapi</h4>
+
+        <div id="surname-map"
+             style="height:500px;border-radius:8px;">
+        </div>
+
+    </div>
+</div>
+{% endif %}
+
+{% for person in persons %}
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <h5>
+                {{ person.first_name }} {{ person.last_name }}
+            </h5>
+
+            <p class="mb-1">
+                {{ person.birth_year|default:"?" }} -
+                {{ person.death_year|default:"?" }}
+            </p>
+
+            <p class="text-muted mb-2">
+                {{ person.grave.cemetery.name }}
+            </p>
+
+            <a href="{% url 'graves:grave_detail' person.grave.id %}"
+               class="btn btn-sm btn-dark">
+                Otvori grob
+            </a>
+        </div>
+    </div>
+{% empty %}
+    <p>Nema osoba sa ovim prezimenom.</p>
+{% endfor %}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+{% if map_graves %}
+
+{{ map_graves|json_script:"surname-graves-data" }}
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function() {
+
+    const data = JSON.parse(
+        document.getElementById("surname-graves-data").textContent
+    );
+
+    if (!data.length) return;
+
+    const map = L.map("surname-map");
+
+    const first = data[0];
+
+    map.setView(
+        [first.lat, first.lng],
+        14
+    );
+
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            attribution: "&copy; OpenStreetMap contributors"
+        }
+    ).addTo(map);
+
+    const bounds = [];
+
+    data.forEach(function(grave) {
+
+        const marker = L.marker([
+            grave.lat,
+            grave.lng
+        ]).addTo(map);
+
+        marker.bindPopup(
+            `
+            <strong>${grave.title}</strong>
+            <br>
+            ${grave.cemetery}
+            <br><br>
+            <a href="/grobovi/${grave.id}/">
+                Otvori grob
+            </a>
+            `
+        );
+
+        bounds.push([
+            grave.lat,
+            grave.lng
+        ]);
+
+    });
+
+    if (bounds.length > 1) {
+        map.fitBounds(bounds);
+    }
+
+});
+
+</script>
+
+{% endif %}
+
+{% endblock %}

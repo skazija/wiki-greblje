@@ -1,0 +1,136 @@
+{% extends "graves/base.html" %}
+
+{% block title %}Dodaj grob{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+
+<style>
+    #map {
+        height: 450px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<h1 class="mb-4">Dodaj grob</h1>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                {{ form.cemetery.label_tag }}
+                {{ form.cemetery }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.title.label_tag }}
+                {{ form.title }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.inscription.label_tag }}
+                {{ form.inscription }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.condition.label_tag }}
+                {{ form.condition }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.notes.label_tag }}
+                {{ form.notes }}
+            </div>
+
+            <hr>
+
+            <h4>Osoba</h4>
+
+            <div class="mb-3">
+                {{ form.first_name.label_tag }}
+                {{ form.first_name }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.last_name.label_tag }}
+                {{ form.last_name }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.birth_year.label_tag }}
+                {{ form.birth_year }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.death_year.label_tag }}
+                {{ form.death_year }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.person_notes.label_tag }}
+                {{ form.person_notes }}
+            </div>
+
+            <hr>
+
+            <div class="mb-3">
+                <label>Fotografije</label>
+                {{ form.photos }}
+            </div>
+
+            {{ form.latitude }}
+            {{ form.longitude }}
+            
+            <div id="map"></div>
+
+            <button type="submit" class="btn btn-dark">
+                Sačuvaj
+            </button>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<p class="text-muted">
+    Ako ne kliknete lokaciju na mapi, sistem će pokušati preuzeti GPS lokaciju iz fotografije.
+</p>
+<script>
+    var map = L.map('map').setView([43.9889, 18.1781], 16);
+
+    L.tileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {
+            maxZoom: 22
+        }
+    ).addTo(map);
+
+    var marker = null;
+
+    map.on('click', function(e) {
+
+        if (marker) {
+            map.removeLayer(marker);
+        }
+
+        marker = L.marker(e.latlng).addTo(map);
+
+        document.getElementById("id_latitude").value = e.latlng.lat;
+        document.getElementById("id_longitude").value = e.latlng.lng;
+    });
+
+    setTimeout(function () {
+        map.invalidateSize();
+    }, 400);
+</script>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "graves/base.html" %}
+
+{% block title %}Grob na čekanju{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+
+    <div class="col-md-8">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body text-center">
+
+                <h2 class="mb-4 text-warning">
+                    Unos čeka odobrenje
+                </h2>
+
+                <p>
+                    Grob:
+                    <strong>
+                        {{ grave.title|default:"Neimenovan grob" }}
+                    </strong>
+                </p>
+
+                <p class="text-muted">
+                    Ovaj unos još nije javno dostupan.
+                </p>
+
+                <a href="{% url 'graves:my_graves' %}"
+                   class="btn btn-dark mt-3">
+                    Nazad na moje grobove
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

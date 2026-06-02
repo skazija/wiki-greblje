@@ -1,0 +1,59 @@
+{% extends "graves/base.html" %}
+
+{% block title %}Moji grobovi{% endblock %}
+
+{% block content %}
+
+<h1 class="mb-4">Moji dodani grobovi</h1>
+
+{% for grave in graves %}
+    <div class="card shadow-sm mb-3">
+              
+        <div class="card-body">
+            {% with first_photo=grave.photos.first %}
+                {% if first_photo %}
+                    <a href="{{ first_photo.image.url }}" target="_blank">
+                        <img src="{{ first_photo.image.url }}"
+                            style="
+                                width:100%;
+                                height:220px;
+                                object-fit:cover;
+                                border-top-left-radius:6px;
+                                border-top-right-radius:6px;
+                                cursor:zoom-in;
+                            ">
+                    </a>
+                {% endif %}
+            {% endwith %}
+            
+            <h4>
+                <a href="{% url 'graves:grave_detail' grave.id %}">
+                    {{ grave.title|default:"Neimenovan grob" }}
+                </a>
+            </h4>
+
+            <p class="text-muted mb-1">
+                {{ grave.cemetery.name }}
+            </p>
+            <p class="text-muted small">Fotografije: {{ grave.photo_count }}</p>
+            <p>{{ grave.inscription|truncatechars:150 }}</p>
+            {% if grave.status == "approved" %}
+                <span class="badge bg-success">Odobreno</span>
+            {% elif grave.status == "pending" %}
+                <span class="badge bg-warning text-dark">Čeka odobrenje</span>
+            {% elif grave.status == "rejected" %}
+                <span class="badge bg-danger">Odbijeno</span>
+            {% endif %}
+            <a href="{% url 'graves:grave_detail' grave.id %}"
+               class="btn btn-sm btn-outline-dark">
+                Otvori detalje
+            </a>
+             <p class="text-muted small mt-2 ">  Dodano: {{ grave.created_at }}</p>
+        </div>
+       
+    </div>
+{% empty %}
+    <p>Još nisi dodao nijedan grob.</p>
+{% endfor %}
+
+{% endblock %}
