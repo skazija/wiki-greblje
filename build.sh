@@ -8,14 +8,13 @@ python manage.py migrate
 
 
 python manage.py shell -c "
-from django.contrib.auth import get_user_model;
-User = get_user_model();
-username='admin';
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
-if not User.objects.filter(username=username).exists():
+if not User.objects.filter(username='skazija').exists():
     User.objects.create_superuser(
-        skazija,
+        'skazija',
         'skazija@yahoo.com',
         'HamuZUZU2026!'
     )
-    "
+"
