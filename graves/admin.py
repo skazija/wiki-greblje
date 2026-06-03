@@ -87,6 +87,17 @@ class CemeteryAdmin(GISModelAdmin):
             "map_srid": 4326,
         }
     }
+    fieldsets = (
+        ("Osnovni podaci", {
+            "fields": (
+                "name",
+                "city",
+                "village",
+                "description",
+            )
+        }),
+
+    )
     list_display = ("name", "city", "village", "created_at")
     search_fields = ("name", "city", "village")
 
