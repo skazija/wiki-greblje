@@ -168,7 +168,11 @@ if DATABASE_URL:
 
 
 import os
-
+if os.name != "nt":
+    os.environ.setdefault("PROJ_LIB", "/usr/share/proj")
+    os.environ.setdefault("PROJ_DATA", "/usr/share/proj")
+    os.environ.setdefault("GDAL_DATA", "/usr/share/gdal")
+    
 if os.name == "nt":
     GDAL_LIBRARY_PATH = r"C:\Users\Administrator\AppData\Local\Programs\OSGeo4W\bin\gdal312.dll"
     GEOS_LIBRARY_PATH = r"C:\Users\Administrator\AppData\Local\Programs\OSGeo4W\bin\geos_c.dll"
