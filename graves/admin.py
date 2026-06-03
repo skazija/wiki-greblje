@@ -82,6 +82,11 @@ class PhotoInline(admin.TabularInline):
 
 @admin.register(Cemetery)
 class CemeteryAdmin(GISModelAdmin):
+    gis_widget_kwargs = {
+        "attrs": {
+            "map_srid": 4326,
+        }
+    }
     list_display = ("name", "city", "village", "created_at")
     search_fields = ("name", "city", "village")
 
