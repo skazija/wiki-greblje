@@ -73,6 +73,16 @@ class PublicGraveForm(forms.ModelForm):
         if user:
             grave.created_by = user
 
+        lat = self.cleaned_data.get("latitude")
+        lon = self.cleaned_data.get("longitude")
+
+        if lat and lon:
+            grave.location = Point(
+                float(lon),
+                float(lat),
+                srid=4326
+            )
+            
         if commit:
             grave.save()
 
