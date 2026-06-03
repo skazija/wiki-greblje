@@ -17,4 +17,5 @@ if not User.objects.filter(username=username).exists():
         skazija,
         'skazija@yahoo.com',
         'HamuZUZU2026!'
-    )
+    )ˇ
+    "
