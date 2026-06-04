@@ -20,4 +20,5 @@ urlpatterns = [
     path("prezimena/", views.surname_list, name="surname_list"),
     path("prezimena/<str:last_name>/", views.surname_detail, name="surname_detail"),
     path("doprinosi/",views.contributors,name="contributors",),
+    path("grobovi/<int:pk>/prijavi-problem/",views.report_problem,name="report_problem",),
 ]
