@@ -94,6 +94,8 @@ class CemeteryAdmin(GISModelAdmin):
                 "city",
                 "village",
                 "description",
+                "latitude",
+                "longitude",
             )
         }),
 

@@ -13,7 +13,8 @@ class Cemetery(models.Model):
 
     location = gis_models.PointField(null=True, blank=True)
     boundary = gis_models.PolygonField(null=True, blank=True)
-
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True,blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -22,6 +23,16 @@ class Cemetery(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+
+        if self.latitude and self.longitude:
+            self.location = Point(
+                float(self.longitude),
+                float(self.latitude),
+                srid=4326
+            )
+        super().save(*args, **kwargs)
+    
 
 class Grave(models.Model):
     cemetery = models.ForeignKey(
