@@ -179,7 +179,11 @@
     {% empty %}
         <p class="text-muted">Još nema odobrenih komentara.</p>
     {% endfor %}
-
+    
+    {% if user.is_authenticated %}
+        <a href="{% url 'graves:report_problem' grave.id %}" class="btn btn-outline-danger mb-3">Prijavi problem</a>
+    {% endif %}
+    
     {% if user.is_authenticated %}
         <div class="card shadow-sm mt-4">
             <div class="card-body">

@@ -1,12 +1,12 @@
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
 
-from .models import Cemetery, Grave, Person, Photo, EditSuggestion, Comment
+from .models import Cemetery, Grave, Person, Photo, EditSuggestion, Comment, ProblemReport
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 
-from .forms import PublicGraveForm, EditSuggestionForm, CommentForm
+from .forms import PublicGraveForm, EditSuggestionForm, CommentForm, ProblemReportForm
 from django.http import JsonResponse
 
 from django.db.models import Count
@@ -409,3 +409,31 @@ def contributors(request):
             "users": users,
         }
     )
+
+@login_required
+def report_problem(request, pk):
+    grave = get_object_or_404(
+        Grave,
+        pk=pk,
+        status=Grave.STATUS_APPROVED
+    )
+
+    if request.method == "POST":
+        form = ProblemReportForm(request.POST)
+
+        if form.is_valid():
+            report = form.save(commit=False)
+            report.grave = grave
+            report.reported_by = request.user
+            report.status = ProblemReport.STATUS_OPEN
+            report.save()
+
+            return redirect("graves:grave_detail", pk=grave.id)
+
+    else:
+        form = ProblemReportForm()
+
+    return render(request, "graves/report_problem.html", {
+        "form": form,
+        "grave": grave,
+    })

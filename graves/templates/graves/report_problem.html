@@ -1,0 +1,47 @@
+{% extends "graves/base.html" %}
+
+{% block title %}Prijavi problem{% endblock %}
+
+{% block content %}
+
+<a href="{% url 'graves:grave_detail' grave.id %}"
+   class="btn btn-sm btn-outline-dark mb-3">
+    ← Nazad na grob
+</a>
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-body">
+
+                <h2 class="mb-3">Prijavi problem</h2>
+
+                <p class="text-muted">
+                    Grob:
+                    <strong>{{ grave.title|default:"Neimenovan grob" }}</strong>
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        {{ form.problem_type.label_tag }}
+                        {{ form.problem_type }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.description.label_tag }}
+                        {{ form.description }}
+                    </div>
+
+                    <button type="submit" class="btn btn-dark">
+                        Pošalji prijavu
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

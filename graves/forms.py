@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.gis.geos import Point
 
-from .models import Grave, Photo, Person, EditSuggestion, Comment
+from .models import Grave, Photo, Person, EditSuggestion, Comment, ProblemReport
 
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
@@ -158,4 +158,28 @@ class CommentForm(forms.ModelForm):
         labels = {
             "text": "Komentar",
             "photo": "Fotografija"
+        }
+        
+class ProblemReportForm(forms.ModelForm):
+    class Meta:
+        model = ProblemReport
+        fields = [
+            "problem_type",
+            "description",
+        ]
+
+        widgets = {
+            "problem_type": forms.Select(attrs={
+                "class": "form-control",
+            }),
+            "description": forms.Textarea(attrs={
+                "rows": 4,
+                "class": "form-control",
+                "placeholder": "Opišite problem..."
+            }),
+        }
+
+        labels = {
+            "problem_type": "Vrsta problema",
+            "description": "Opis problema",
         }

@@ -4,7 +4,7 @@ from django import forms
 from django.contrib import admin
 from django.contrib.gis.admin import GISModelAdmin
 from django.contrib.gis.geos import Point
-from .models import Cemetery, Grave, Person, Photo, EditHistory, LocationSuggestion, EditSuggestion, Comment
+from .models import Cemetery, Grave, Person, Photo, EditHistory, LocationSuggestion, EditSuggestion, Comment, ProblemReport
 from django.db.models import Case, When, Value, IntegerField
 
 
@@ -475,3 +475,38 @@ class CommentAdmin(admin.ModelAdmin):
     @admin.action(description="Odobri odabrane komentare")
     def approve_comments(self, request, queryset):
         queryset.update(status=Comment.STATUS_APPROVED)
+
+@admin.register(ProblemReport)
+class ProblemReportAdmin(admin.ModelAdmin):
+    list_display = (
+        "grave",
+        "problem_type",
+        "reported_by",
+        "status",
+        "created_at",
+    )
+
+    list_filter = (
+        "status",
+        "problem_type",
+        "created_at",
+    )
+
+    search_fields = (
+        "grave__title",
+        "description",
+        "reported_by__username",
+    )
+
+    actions = [
+        "mark_resolved",
+        "mark_rejected",
+    ]
+
+    @admin.action(description="Označi kao riješeno")
+    def mark_resolved(self, request, queryset):
+        queryset.update(status=ProblemReport.STATUS_RESOLVED)
+
+    @admin.action(description="Označi kao odbijeno")
+    def mark_rejected(self, request, queryset):
+        queryset.update(status=ProblemReport.STATUS_REJECTED)

@@ -323,3 +323,62 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Komentar za {self.grave}"
+
+
+class ProblemReport(models.Model):
+    TYPE_LOCATION = "location"
+    TYPE_WRONG_CEMETERY = "wrong_cemetery"
+    TYPE_DUPLICATE = "duplicate"
+    TYPE_PHOTO = "photo"
+    TYPE_TEXT = "text"
+    TYPE_OTHER = "other"
+
+    TYPE_CHOICES = [
+        (TYPE_LOCATION, "Pogrešna lokacija"),
+        (TYPE_WRONG_CEMETERY, "Pogrešno groblje"),
+        (TYPE_DUPLICATE, "Duplikat"),
+        (TYPE_PHOTO, "Problem sa fotografijom"),
+        (TYPE_TEXT, "Problem sa tekstom/natpisom"),
+        (TYPE_OTHER, "Ostalo"),
+    ]
+
+    STATUS_OPEN = "open"
+    STATUS_RESOLVED = "resolved"
+    STATUS_REJECTED = "rejected"
+
+    STATUS_CHOICES = [
+        (STATUS_OPEN, "Otvoreno"),
+        (STATUS_RESOLVED, "Riješeno"),
+        (STATUS_REJECTED, "Odbijeno"),
+    ]
+
+    grave = models.ForeignKey(
+        Grave,
+        on_delete=models.CASCADE,
+        related_name="problem_reports"
+    )
+
+    reported_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    problem_type = models.CharField(
+        max_length=30,
+        choices=TYPE_CHOICES
+    )
+
+    description = models.TextField()
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_OPEN
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Problem za {self.grave}"
