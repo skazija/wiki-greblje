@@ -7,6 +7,24 @@ from django.contrib.gis.geos import Point
 from .models import Cemetery, Grave, Person, Photo, EditHistory, LocationSuggestion, EditSuggestion, Comment, ProblemReport
 from django.db.models import Case, When, Value, IntegerField
 
+class CemeteryAdminForm(forms.ModelForm):
+
+    class Meta:
+        model = Cemetery
+        fields = "__all__"
+
+    class Media:
+        css = {
+            "all": (
+                "https://unpkg.com/leaflet/dist/leaflet.css",
+            )
+        }
+
+        js = (
+            "https://unpkg.com/leaflet/dist/leaflet.js",
+            "admin/js/cemetery_location_editor.js",
+        )
+
 
 class GraveAdminForm(forms.ModelForm):
     latitude = forms.FloatField(required=False, label="Latitude")
@@ -82,6 +100,7 @@ class PhotoInline(admin.TabularInline):
 
 @admin.register(Cemetery)
 class CemeteryAdmin(GISModelAdmin):
+    form = CemeteryAdminForm
     gis_widget_kwargs = {
         "attrs": {
             "map_srid": 4326,

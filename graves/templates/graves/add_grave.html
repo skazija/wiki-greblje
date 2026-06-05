@@ -110,24 +110,45 @@
 
     L.tileLayer(
         'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        {
-            maxZoom: 22
-        }
+        { maxZoom: 22 }
     ).addTo(map);
 
     var marker = null;
 
-    map.on('click', function(e) {
-
+    function setMarker(lat, lng) {
         if (marker) {
             map.removeLayer(marker);
         }
 
-        marker = L.marker(e.latlng).addTo(map);
+        marker = L.marker([lat, lng]).addTo(map);
 
-        document.getElementById("id_latitude").value = e.latlng.lat;
-        document.getElementById("id_longitude").value = e.latlng.lng;
+        document.getElementById("id_latitude").value = lat;
+        document.getElementById("id_longitude").value = lng;
+    }
+
+    map.on('click', function(e) {
+        setMarker(e.latlng.lat, e.latlng.lng);
     });
+
+    const cemeterySelect = document.getElementById("id_cemetery");
+
+    if (cemeterySelect) {
+        cemeterySelect.addEventListener("change", function () {
+            const cemeteryId = this.value;
+
+            if (!cemeteryId) {
+                return;
+            }
+
+            fetch(`/api/cemetery-location/${cemeteryId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.lat && data.lng) {
+                        map.setView([data.lat, data.lng], 18);
+                    }
+                });
+        });
+    }
 
     setTimeout(function () {
         map.invalidateSize();
