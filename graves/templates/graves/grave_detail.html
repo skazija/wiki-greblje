@@ -56,6 +56,34 @@
 
 <div id="map"></div>
 
+<hr class="my-5">
+
+<h2 class="mb-3">Ostali grobovi u blizini</h2>
+
+{% for nearby in nearby_graves %}
+    <div class="card shadow-sm mb-2">
+        <div class="card-body">
+            <h5>
+                {{ nearby.title|default:"Neimenovan grob" }}
+            </h5>
+
+            <p class="text-muted mb-2">
+                Udaljenost:
+                {{ nearby.distance.m|floatformat:1 }} m
+            </p>
+
+            <a href="{% url 'graves:grave_detail' nearby.id %}"
+               class="btn btn-sm btn-outline-dark">
+                Otvori grob
+            </a>
+        </div>
+    </div>
+{% empty %}
+    <p class="text-muted">
+        Nema drugih grobova u blizini.
+    </p>
+{% endfor %}
+
 <div class="row">
     <div class="col-md-5">
         <h2 class="mb-3">Osobe</h2>

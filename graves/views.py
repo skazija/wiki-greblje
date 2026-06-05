@@ -13,6 +13,8 @@ from django.db.models import Count
 from django.http import Http404
 
 from django.contrib.auth.models import User
+from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.measure import D
 
 
 def cemetery_list(request):
@@ -78,12 +80,29 @@ def grave_detail(request, pk):
 
     comment_form = CommentForm()
 
+    nearby_graves = []
+
+    if grave.location:
+        nearby_graves = (
+            Grave.objects
+            .filter(
+                cemetery=grave.cemetery,
+                status=Grave.STATUS_APPROVED,
+                location__isnull=False,
+                location__distance_lte=(grave.location, D(m=50)),
+            )                
+            .exclude(id=grave.id)
+            .annotate(distance=Distance("location", grave.location))
+            .order_by("distance")[:10]
+        )
+
     return render(request, "graves/grave_detail.html", {
         "grave": grave,
         "edit_history": edit_history,
         "related_persons": related_persons,
         "comments": comments,
         "comment_form": comment_form,
+        "nearby_graves": nearby_graves,
     })
 
 
