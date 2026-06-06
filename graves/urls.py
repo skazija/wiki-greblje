@@ -21,4 +21,5 @@ urlpatterns = [
     path("prezimena/<str:last_name>/", views.surname_detail, name="surname_detail"),
     path("doprinosi/",views.contributors,name="contributors",),
     path("grobovi/<int:pk>/prijavi-problem/",views.report_problem,name="report_problem",),
+    path("fotografije/<int:pk>/ocr/",views.photo_ocr,name="photo_ocr",),
 ]

@@ -3,3 +3,10 @@ libgdal-dev
 proj-bin
 libproj-dev
 proj-data
+tesseract-ocr
+tesseract-ocr-eng
+tesseract-ocr-bos
+tesseract-ocr-hrv
+tesseract-ocr-srp
+tesseract-ocr-tur
+tesseract-ocr-ara

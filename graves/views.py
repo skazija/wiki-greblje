@@ -1,3 +1,11 @@
+import os
+import easyocr
+import pytesseract
+if os.name == "nt":
+    pytesseract.pytesseract.tesseract_cmd = (
+        r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    )
+from .models import EditSuggestion    
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
 
@@ -15,6 +23,11 @@ from django.http import Http404
 from django.contrib.auth.models import User
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.measure import D
+
+from django.contrib.admin.views.decorators import staff_member_required
+
+from PIL import Image
+from .models import Photo
 
 
 def cemetery_list(request):
@@ -455,4 +468,44 @@ def report_problem(request, pk):
     return render(request, "graves/report_problem.html", {
         "form": form,
         "grave": grave,
+    })
+reader = easyocr.Reader(
+    ['en', 'hr'],
+    gpu=False
+)
+
+@staff_member_required
+def photo_ocr(request, pk):
+    photo = get_object_or_404(Photo, pk=pk)
+    if request.method == "POST":
+
+        EditSuggestion.objects.create(
+            grave=photo.grave,
+            suggested_by=request.user,
+            field_name="inscription",
+            old_value=photo.grave.inscription or "",
+            new_value=request.POST.get("ocr_text", ""),
+        )
+
+        return redirect(
+            "graves:grave_detail",
+            pk=photo.grave.id
+        )
+        
+    text = ""
+
+    try:
+        image_path = photo.image.path
+        image = Image.open(image_path)
+
+        results = reader.readtext(image_path)
+
+        text = "\n".join([result[1] for result in results])    
+
+    except Exception as e:
+        text = f"OCR greška: {e}"
+
+    return render(request, "graves/photo_ocr.html", {
+        "photo": photo,
+        "text": text,
     })

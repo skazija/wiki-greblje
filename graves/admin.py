@@ -387,13 +387,23 @@ class EditSuggestionAdmin(admin.ModelAdmin):
         "suggested_by__username",
     )
 
-    readonly_fields = (
+    fields = (
         "grave",
         "suggested_by",
         "field_name",
         "old_value",
         "new_value",
+        "status",
+        "admin_note",
+    )
+    
+    readonly_fields = (
+        "grave",
+        "suggested_by",
+        "field_name",
+        "old_value",
         "created_at",
+        "reviewed_at",
     )
 
     @admin.action(description="Odobri i primijeni prijedloge")

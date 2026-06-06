@@ -1,0 +1,44 @@
+{% extends "graves/base.html" %}
+
+{% block title %}OCR rezultat{% endblock %}
+
+{% block content %}
+
+<a href="{% url 'graves:grave_detail' photo.grave.id %}"
+   class="btn btn-sm btn-outline-dark mb-3">
+    ← Nazad na grob
+</a>
+
+<h1 class="mb-4">OCR rezultat</h1>
+
+<div class="row">
+    <div class="col-md-5">
+        <img src="{{ photo.image.url }}"
+             class="img-fluid rounded shadow-sm">
+    </div>
+
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5>Prepoznati tekst</h5>
+
+                <pre style="white-space: pre-wrap;">{{ text }}</pre>
+                {% if user.is_staff and text %}
+
+                <form method="post" class="mt-3">
+
+                    {% csrf_token %}
+
+                    <input type="hidden" name="ocr_text" value="{{ text }}">
+
+                    <button type="submit" class="btn btn-success">Predloži kao natpis</button>
+
+                </form>
+
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
