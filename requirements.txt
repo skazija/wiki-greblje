@@ -25,6 +25,7 @@ pyclipper==1.4.0
 pytesseract==0.3.13
 python-bidi==0.6.10
 python-decouple==3.8
+python-dotenv==1.2.2
 PyYAML==6.0.3
 scikit-image==0.26.0
 scipy==1.17.1

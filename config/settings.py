@@ -12,11 +12,11 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 import dj_database_url
 from pathlib import Path
-
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+load_dotenv("/opt/wiki-greblje/.env", override=True)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -31,6 +31,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
     ".onrender.com",
+    "172.30.137.192",
 ]
 
 
@@ -89,16 +90,28 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'wiki_groblje',
-        'USER': 'wiki_user',
-        'PASSWORD': 'HamuZUZU2026',
-        'HOST': 'localhost',
-        'PORT': '5432',
+if os.name == "nt":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.contrib.gis.db.backends.postgis",
+            "NAME": "wiki_groblje",
+            "USER": "wiki_user",
+            "PASSWORD": "HamuZUZU2026",
+            "HOST": "localhost",
+            "PORT": "5432",
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.contrib.gis.db.backends.postgis",
+            "NAME": "wiki_greblje",
+            "USER": "wikiadmin",
+            "PASSWORD": "HamuZUZU2026",
+            "HOST": "localhost",
+            "PORT": "5432",
+        }
+    }
 
 
 
@@ -176,7 +189,7 @@ if os.name != "nt":
 if os.name == "nt":
     GDAL_LIBRARY_PATH = r"C:\Users\Administrator\AppData\Local\Programs\OSGeo4W\bin\gdal312.dll"
     GEOS_LIBRARY_PATH = r"C:\Users\Administrator\AppData\Local\Programs\OSGeo4W\bin\geos_c.dll"
-os.environ["PATH"] = r"C:\Users\Administrator\AppData\Local\Programs\OSGeo4W\bin;" + os.environ["PATH"]
-os.environ["GDAL_DATA"] = r"C:\Users\Administrator\AppData\Local\Programs\OSGeo4W\share\gdal"
-os.environ["PROJ_LIB"] = r"C:\Users\Administrator\AppData\Local\Programs\OSGeo4W\share\proj"
-os.environ["PROJ_DATA"] = r"C:\Users\Administrator\AppData\Local\Programs\OSGeo4W\share\proj"
+    os.environ["PATH"] = r"C:\Users\Administrator\AppData\Local\Programs\OSGeo4W\bin;" + os.environ["PATH"]
+    os.environ["GDAL_DATA"] = r"C:\Users\Administrator\AppData\Local\Programs\OSGeo4W\share\gdal"
+    os.environ["PROJ_LIB"] = r"C:\Users\Administrator\AppData\Local\Programs\OSGeo4W\share\proj"
+    os.environ["PROJ_DATA"] = r"C:\Users\Administrator\AppData\Local\Programs\OSGeo4W\share\proj"
