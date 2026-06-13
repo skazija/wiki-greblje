@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv("/opt/wiki-greblje/.env", override=True)
+load_dotenv(BASE_DIR / ".env", override=True)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -27,12 +27,7 @@ SECRET_KEY = 'django-insecure-=(l(ohfm_6qq66098vz9dj(sck^nk=_b^+(22e3hw=*ql%*5@f
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "localhost",
-    ".onrender.com",
-    "172.30.137.192",
-]
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -90,28 +85,16 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-if os.name == "nt":
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.contrib.gis.db.backends.postgis",
-            "NAME": "wiki_groblje",
-            "USER": "wiki_user",
-            "PASSWORD": "HamuZUZU2026",
-            "HOST": "localhost",
-            "PORT": "5432",
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': os.environ.get("DB_NAME"),
+        'USER': os.environ.get("DB_USER"),
+        'PASSWORD': os.environ.get("DB_PASSWORD"),
+        'HOST': os.environ.get("DB_HOST", "localhost"),
+        'PORT': os.environ.get("DB_PORT", "5432"),
     }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.contrib.gis.db.backends.postgis",
-            "NAME": "wiki_greblje",
-            "USER": "wikiadmin",
-            "PASSWORD": "HamuZUZU2026",
-            "HOST": "localhost",
-            "PORT": "5432",
-        }
-    }
+}
 
 
 
@@ -171,13 +154,6 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-if DATABASE_URL:
-    DATABASES["default"] = dj_database_url.config(
-        default=DATABASE_URL,
-        conn_max_age=600,
-    )
-
-    DATABASES["default"]["ENGINE"] = "django.contrib.gis.db.backends.postgis"
 
 
 import os
