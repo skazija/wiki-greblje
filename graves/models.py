@@ -1,3 +1,6 @@
+from PIL import Image
+from io import BytesIO
+from django.core.files.base import ContentFile
 import exifread
 from django.contrib.gis.geos import Point
 from django.db import models
@@ -229,10 +232,53 @@ class Photo(models.Model):
         return None
 
     def save(self, *args, **kwargs):
+
+        # GPS iz EXIF-a
         if self.image and not self.gps_location:
             gps_point = self.extract_gps_from_image()
             if gps_point:
                 self.gps_location = gps_point
+
+        # Resize slike prije spremanja
+        if self.image:
+            try:
+                img = Image.open(self.image)
+
+                # ispravi rotaciju sa telefona
+                try:
+                    from PIL import ImageOps
+                    img = ImageOps.exif_transpose(img)
+                except Exception:
+                    pass
+
+                MAX_SIZE = (1600, 1600)
+
+                if img.width > 1600 or img.height > 1600:
+
+                    img.thumbnail(MAX_SIZE, Image.LANCZOS)
+
+                    buffer = BytesIO()
+
+                    if img.mode in ("RGBA", "P"):
+                        img = img.convert("RGB")
+
+                    img.save(
+                        buffer,
+                        format="JPEG",
+                        quality=85,
+                        optimize=True
+                    )
+
+                    buffer.seek(0)
+
+                    self.image.save(
+                        self.image.name,
+                        ContentFile(buffer.read()),
+                        save=False
+                    )
+
+            except Exception as e:
+                print(f"Image resize error: {e}")
 
         super().save(*args, **kwargs)
 
