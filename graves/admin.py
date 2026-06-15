@@ -6,6 +6,8 @@ from django.contrib.gis.admin import GISModelAdmin
 from django.contrib.gis.geos import Point
 from .models import Cemetery, Grave, Person, Photo, EditHistory, LocationSuggestion, EditSuggestion, Comment, ProblemReport
 from django.db.models import Case, When, Value, IntegerField
+import json
+from django.contrib.gis.geos import Polygon
 
 class CemeteryAdminForm(forms.ModelForm):
 
@@ -25,6 +27,31 @@ class CemeteryAdminForm(forms.ModelForm):
             "admin/js/cemetery_location_editor.js",
         )
 
+    boundary_geojson = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
+
+    def save(self, commit=True):
+        cemetery = super().save(commit=False)
+
+        boundary_data = self.cleaned_data.get("boundary_geojson")
+
+        if boundary_data:
+            coords = json.loads(boundary_data)
+
+            if len(coords) >= 3:
+                points = [(float(lng), float(lat)) for lat, lng in coords]
+
+                if points[0] != points[-1]:
+                    points.append(points[0])
+
+                cemetery.boundary = Polygon(points, srid=4326)
+
+        if commit:
+            cemetery.save()
+
+        return cemetery
 
 class GraveAdminForm(forms.ModelForm):
     latitude = forms.FloatField(required=False, label="Latitude")
@@ -99,13 +126,9 @@ class PhotoInline(admin.TabularInline):
     gps_text.short_description = "GPS"
 
 @admin.register(Cemetery)
-class CemeteryAdmin(GISModelAdmin):
+class CemeteryAdmin(admin.ModelAdmin):
     form = CemeteryAdminForm
-    gis_widget_kwargs = {
-        "attrs": {
-            "map_srid": 4326,
-        }
-    }
+ 
     fieldsets = (
         ("Osnovni podaci", {
             "fields": (
@@ -115,6 +138,7 @@ class CemeteryAdmin(GISModelAdmin):
                 "description",
                 "latitude",
                 "longitude",
+                "boundary_geojson",
             )
         }),
 
