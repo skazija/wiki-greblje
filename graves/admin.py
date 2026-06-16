@@ -8,12 +8,28 @@ from .models import Cemetery, Grave, Person, Photo, EditHistory, LocationSuggest
 from django.db.models import Case, When, Value, IntegerField
 import json
 from django.contrib.gis.geos import Polygon
+from django.shortcuts import redirect
+from django.urls import path
 
 class CemeteryAdminForm(forms.ModelForm):
 
+    boundary_geojson = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
+    
+    
     class Meta:
         model = Cemetery
         fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance and self.instance.location:
+            self.fields["latitude"].initial = self.instance.location.y
+            self.fields["longitude"].initial = self.instance.location.x
+
 
     class Media:
         css = {
@@ -189,6 +205,28 @@ class GraveAdmin(GISModelAdmin):
         }),
     )
 
+    def get_urls(self):
+        urls = super().get_urls()
+
+        custom_urls = [
+            path(
+                "<int:grave_id>/approve/",
+                self.admin_site.admin_view(self.approve_grave),
+                name="graves_grave_approve",
+            ),
+        ]
+
+        return custom_urls + urls
+
+
+    def approve_grave(self, request, grave_id):
+        grave = Grave.objects.get(id=grave_id)
+        grave.status = Grave.STATUS_APPROVED
+        grave.save()
+
+        return redirect("/admin/graves/grave/")
+
+
     def latitude_display(self, obj):
         if obj.location:
             return obj.location.y
@@ -199,8 +237,8 @@ class GraveAdmin(GISModelAdmin):
     def approve_link(self, obj):
         if obj.status == Grave.STATUS_PENDING:
             return format_html(
-                '<a class="button" href="{}">Odobri</a>',
-                f"/admin/graves/grave/{obj.id}/change/"
+                '<a class="button" href="{}">Odobri odmah</a>',
+                f"/admin/graves/grave/{obj.id}/approve/"
             )
         return "-"
 
