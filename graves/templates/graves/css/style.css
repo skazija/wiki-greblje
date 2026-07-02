@@ -1,0 +1,281 @@
+/* ======================================================
+   Wiki Greblje
+   Version: 1.1
+   ====================================================== */
+
+:root {
+/* Typography */
+
+    --font-small: 0.95rem;
+    --font-normal: 1.05rem;
+    --font-large: 1.3rem;
+    --font-title: 2.4rem;
+
+/* Spacing */
+
+    --space-xs: .35rem;
+    --space-sm: .75rem;
+    --space-md: 1rem;
+    --space-lg: 2rem;
+    --space-xl: 3rem;
+
+/* Animation */
+
+    --transition: .25s ease;
+
+    --primary: #2c3e50;
+    --secondary: #6c757d;
+    --success: #198754;
+    --background: #f8f9fa;
+    --card-radius: 12px;
+    --shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+
+
+/* =====================================================
+   HOME
+===================================================== */
+
+.hero {
+
+    background:
+        linear-gradient(rgba(0,0,0,.55),
+        rgba(0,0,0,.55));
+
+    color:white;
+
+    border-radius:18px;
+
+    padding:6rem 2rem;
+
+    margin-bottom:3rem;
+
+    text-align:center;
+
+}
+
+.hero h1{
+
+    font-size:var(--font-title);
+
+    font-weight:700;
+
+}
+
+.hero p{
+
+    font-size:1.2rem;
+
+    max-width:700px;
+
+    margin:auto;
+
+}
+
+.hero .btn{
+
+    min-width:180px;
+
+}
+
+.hero-search {
+    max-width: 760px;
+}
+
+@media (max-width: 576px) {
+    .hero {
+        padding: 4rem 1rem;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .hero p {
+        font-size: 1.05rem;
+    }
+
+    .hero-search {
+        width: 100%;
+    }
+}
+
+
+/* Home actions */
+
+.hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: .75rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+}
+
+.hero-actions .btn {
+    padding: .85rem 1.4rem;
+    font-weight: 600;
+}
+
+
+.footer {
+
+    margin-top: 5rem;
+
+    padding: 3rem 0;
+
+    background: #212529;
+
+    color: rgba(255,255,255,.85);
+
+}
+
+.footer h5 {
+
+    font-weight:700;
+
+    margin-bottom:1rem;
+
+}
+
+.footer p {
+
+    color:rgba(255,255,255,.75);
+
+    margin-bottom:.5rem;
+
+}
+
+.footer small{
+
+    color:rgba(255,255,255,.55);
+
+}
+
+/* Better mobile buttons */
+
+@media (max-width: 576px) {
+    .hero-actions {
+        flex-direction: column;
+    }
+
+    .hero-actions .btn {
+        width: 100%;
+    }
+
+    .input-group.hero-search {
+        flex-direction: column;
+        gap: .5rem;
+    }
+
+    .hero-search .form-control,
+    .hero-search .btn {
+        width: 100%;
+        border-radius: .5rem !important;
+    }
+}
+
+
+/* Navbar */
+
+.navbar-brand {
+    letter-spacing: 0.3px;
+}
+
+.navbar .nav-link {
+    border-radius: 8px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.navbar .nav-link:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+.navbar .btn.nav-link {
+    color: rgba(255,255,255,.75);
+    text-align: left;
+    padding-left: 12px;
+}
+
+.navbar .btn.nav-link:hover {
+    color: white;
+    background: rgba(255,255,255,0.08);
+}
+
+.stat-section{
+    margin-top: 2.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card{
+
+    text-align:center;
+
+    padding:2rem 1rem;
+
+}
+
+.stat-card h2{
+
+    font-size:2.6rem;
+
+    font-weight:700;
+
+    color:var(--primary);
+
+}
+
+.stat-card p{
+
+    margin:0;
+
+    color:#666;
+
+    font-size:1rem;
+
+}
+/* Mobile navbar */
+
+@media (max-width: 991.98px) {
+    .navbar {
+        margin-bottom: 1rem !important;
+    }
+
+    .navbar .container {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .navbar-collapse {
+        margin-top: 12px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .navbar-nav {
+        gap: 4px;
+    }
+
+    .navbar .nav-link,
+    .navbar .btn.nav-link {
+        width: 100%;
+        display: block;
+        text-align: left;
+        padding: 10px 12px;
+    }
+}
+
+body{
+    background: var(--background);
+}
+
+.card{
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow);
+}
+
+img{
+    max-width:100%;
+    height:auto;
+}
