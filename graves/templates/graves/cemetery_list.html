@@ -1,41 +1,104 @@
-<!DOCTYPE html>
-<html>
 {% extends "graves/base.html" %}
 
 {% block title %}Groblja - Wiki Greblje{% endblock %}
 
 {% block content %}
 
-<h1>Groblja</h1>
+<div class="container py-4">
 
-<form method="get" action="{% url 'graves:search' %}" class="mb-4">
-    <div class="input-group">
-        <input
-            type="text"
-            name="q"
-            class="form-control"
-            placeholder="Pretraži osobe, grobove, natpise..."
-        >
-        <button class="btn btn-dark" type="submit">Pretraži</button>
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+        <h1 class="mb-3 mb-md-0">Groblja</h1>
+
+        <form method="get"
+              action="{% url 'graves:search' %}"
+              class="d-flex">
+
+            <div class="input-group">
+
+                <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                </span>
+
+                <input
+                    type="text"
+                    name="q"
+                    class="form-control"
+                    placeholder="Pretraži osobe, grobove, natpise..."
+                >
+
+                <button class="btn btn-dark" type="submit">
+                    Pretraži
+                </button>
+
+            </div>
+
+        </form>
+
     </div>
-</form>
 
-{% for cemetery in cemeteries %}
-    <div class="card shadow-sm mb-3">
+    {% for cemetery in cemeteries %}
+
+    <div class="card cemetery-card mb-4">
+
         <div class="card-body">
-            <h3>
-                <a href="{% url 'graves:cemetery_detail' cemetery.id %}">
-                    {{ cemetery.name }}
-                </a>
+
+            <h3 class="cemetery-title">
+
+                <i class="bi bi-geo-alt-fill me-2"></i>
+
+                {{ cemetery.name }}
+
             </h3>
 
-            <p class="mb-1">{{ cemetery.city }} {{ cemetery.village }}</p>
-            <p>{{ cemetery.description }}</p>
+            <p class="text-muted mb-2">
+
+                <i class="bi bi-pin-map me-1"></i>
+
+                {{ cemetery.city }}
+
+                {% if cemetery.village %}
+                    • {{ cemetery.village }}
+                {% endif %}
+
+            </p>
+
+            {% if cemetery.description %}
+
+            <p class="cemetery-description">
+
+                {{ cemetery.description }}
+
+            </p>
+
+            {% endif %}
+
+            <div class="d-flex justify-content-end mt-3">
+
+                <a
+                    href="{% url 'graves:cemetery_detail' cemetery.id %}"
+                    class="btn btn-outline-dark"
+                >
+
+                    Otvori groblje
+
+                </a>
+
+            </div>
+
         </div>
+
     </div>
-{% empty %}
-    <p>Nema unesenih grobalja.</p>
-{% endfor %}
+
+    {% empty %}
+
+        <div class="alert alert-light border">
+
+            Trenutno nema unesenih grobalja.
+
+        </div>
+
+    {% endfor %}
+
+</div>
 
 {% endblock %}
-</html>

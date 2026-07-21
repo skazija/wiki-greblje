@@ -3,193 +3,509 @@
 {% block title %}{{ cemetery.name }} - Wiki Greblje{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
-
-<style>
-    #map {
-        height: 550px;
-        width: 100%;
-        border-radius: 12px;
-        border: 1px solid #ccc;
-        margin-bottom: 25px;
-    }
-</style>
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+>
 {% endblock %}
 
 {% block content %}
 
-<a href="{% url 'graves:cemetery_list' %}" class="btn btn-sm btn-outline-dark mb-3">
-    ← Nazad na groblja
-</a>
+<!-- =====================================================
+     Breadcrumb
+===================================================== -->
 
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
-        <h1>{{ cemetery.name }}</h1>
-        <p class="text-muted mb-1">{{ cemetery.city }} {{ cemetery.village }}</p>
-        <p>{{ cemetery.description }}</p>
-    </div>
-</div>
-
-<div id="map"></div>
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
-        <h5>Pretraga u ovom groblju</h5>
-
-        <input
-            type="text"
-            id="graveSearch"
-            class="form-control"
-            placeholder="Pretraži grobove, natpise, osobe..."
-        >
-    </div>
-</div>
-<h2 class="mb-3">Grobovi<span class="badge bg-dark">{{ graves|length }}</span></h2>
-
-<div class="card shadow-sm mb-3 grave-card"
-     data-title="{{ grave.title|default:''|lower }}"
-     data-inscription="{{ grave.inscription|default:''|lower }}">
-
-<h2 class="mb-3">Grobovi</h2>
-
-{% for grave in graves %}
-    <div class="card shadow-sm mb-3">
-        <div class="card-body">
-            <h4>
-                <a href="{% url 'graves:grave_detail' grave.id %}">
-                    {{ grave.title|default:"Neimenovan grob" }}
-                </a>
-            </h4>
-
-            <p>{{ grave.inscription|truncatechars:160 }}</p>
-
-            <a href="{% url 'graves:grave_detail' grave.id %}"
-               class="btn btn-sm btn-outline-dark">
-                Otvori detalje
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item">
+            <a href="{% url 'graves:cemetery_list' %}">
+                Groblja
             </a>
+        </li>
+
+        <li class="breadcrumb-item active" aria-current="page">
+            {{ cemetery.name }}
+        </li>
+    </ol>
+</nav>
+
+
+<!-- =====================================================
+     Cemetery Header
+===================================================== -->
+
+<section class="card content-card cemetery-detail-header">
+    <div class="card-body">
+
+        <div class="d-flex align-items-start gap-3">
+
+            <div class="detail-icon" aria-hidden="true">
+                <i class="bi bi-geo-alt-fill"></i>
+            </div>
+
+            <div class="flex-grow-1">
+
+                <h1 class="cemetery-detail-title">
+                    {{ cemetery.name }}
+                </h1>
+
+                {% if cemetery.city or cemetery.village %}
+                    <p class="cemetery-detail-location">
+                        <i class="bi bi-pin-map me-1"></i>
+
+                        {% if cemetery.city %}
+                            {{ cemetery.city }}
+                        {% endif %}
+
+                        {% if cemetery.city and cemetery.village %}
+                            <span aria-hidden="true">•</span>
+                        {% endif %}
+
+                        {% if cemetery.village %}
+                            {{ cemetery.village }}
+                        {% endif %}
+                    </p>
+                {% endif %}
+
+                {% if cemetery.description %}
+                    <p class="cemetery-detail-description">
+                        {{ cemetery.description }}
+                    </p>
+                {% else %}
+                    <p class="text-muted mb-0">
+                        Za ovo groblje još nije unesen opis.
+                    </p>
+                {% endif %}
+
+            </div>
         </div>
+
     </div>
-{% empty %}
-    <p>Nema unesenih grobova za ovo groblje.</p>
-{% endfor %}
+</section>
 
-{% endblock %}
 
-{% block extra_js %}
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<!-- =====================================================
+     Cemetery Map
+===================================================== -->
 
-<script>
-    var map = L.map('map');
+<section class="card content-card">
+    <div class="card-body">
 
-    var osm = L.tileLayer(
-        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        {
-            maxZoom: 22,
-            attribution: '© OpenStreetMap'
-        }
-    );
+        <h2 class="section-title">
+            <i class="bi bi-map"></i>
+            Lokacija groblja
+        </h2>
 
-    var satellite = L.tileLayer(
-        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        {
-            maxZoom: 22,
-            attribution: 'Tiles © Esri'
-        }
-    );
+        <p class="section-intro">
+            Na karti su prikazane granice groblja i evidentirani grobovi
+            koji imaju unesenu lokaciju.
+        </p>
 
-    map.addLayer(osm);
+        <div id="map" aria-label="Karta groblja"></div>
 
-    L.control.layers({
-        "Mapa": osm,
-        "Satelit": satellite
-    }).addTo(map);
+    </div>
+</section>
 
-    {% if cemetery.location %}
-        var center = [{{ cemetery.location.y }}, {{ cemetery.location.x }}];
 
-        map.setView(center, 18);
+<!-- =====================================================
+     Grave Search
+===================================================== -->
 
-        L.marker(center)
-            .addTo(map)
-            .bindPopup("{{ cemetery.name }}");
-    {% else %}
-        map.setView([43.9889, 18.1781], 15);
-    {% endif %}
+<section class="card content-card">
+    <div class="card-body">
 
-    {% if cemetery.boundary %}
-        var boundary = {{ cemetery.boundary.geojson|safe }};
+        <h2 class="section-title">
+            <i class="bi bi-search"></i>
+            Pretraži grobove
+        </h2>
 
-        var boundaryLayer = L.geoJSON(boundary, {
-            color: 'red',
-            weight: 3,
-            fillOpacity: 0.08
-        }).addTo(map);
+        <div class="input-group input-group-lg">
 
-        map.fitBounds(boundaryLayer.getBounds(), {
-            padding: [30, 30]
-        });
-    {% endif %}
+            <span class="input-group-text">
+                <i class="bi bi-search"></i>
+            </span>
 
-    {% for grave in graves %}
-        {% if grave.location %}
-            var marker{{ grave.id }} = L.marker([
-                {{ grave.location.y }},
-                {{ grave.location.x }}
-            ]).addTo(map);
+            <input
+                type="search"
+                id="graveSearch"
+                class="form-control"
+                placeholder="Unesite naziv groba, osobu ili dio natpisa..."
+                autocomplete="off"
+                aria-label="Pretraži grobove u ovom groblju"
+            >
 
-            marker{{ grave.id }}.bindPopup(`
-                <div style="width:180px;">
+            <button
+                type="button"
+                id="clearGraveSearch"
+                class="btn btn-outline-secondary"
+            >
+                Očisti
+            </button>
+
+        </div>
+
+        <p id="graveSearchStatus"
+           class="small text-muted mt-2 mb-0"
+           aria-live="polite">
+        </p>
+
+    </div>
+</section>
+
+
+<!-- =====================================================
+     Graves
+===================================================== -->
+
+<section class="cemetery-graves-section">
+
+    <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+        <h2 class="section-title mb-0">
+            <i class="bi bi-pin-map-fill"></i>
+            Grobovi
+        </h2>
+
+        <span class="badge rounded-pill text-bg-dark grave-count-badge">
+            {{ graves|length }}
+        </span>
+    </div>
+
+    <div
+        id="graveGrid"
+        class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4"
+    >
+
+        {% for grave in graves %}
+
+            <div
+                class="col grave-search-item"
+                data-title="{{ grave.title|default:''|lower }}"
+                data-inscription="{{ grave.inscription|default:''|lower }}"
+                data-persons="{% for person in grave.persons.all %}{{ person.first_name|lower }} {{ person.last_name|lower }} {% endfor %}"
+            >
+
+                <article class="card grave-card h-100">
+
                     {% with first_photo=grave.photos.first %}
                         {% if first_photo %}
-                            <img src="{{ first_photo.image.url }}"
-                                 style="width:100%; max-height:120px; object-fit:cover; border-radius:6px; margin-bottom:6px;">
+                            <a href="{% url 'graves:grave_detail' grave.id %}"
+                               class="grave-card-image-link">
+
+                                <img
+                                    src="{{ first_photo.image.url }}"
+                                    class="grave-card-image"
+                                    alt="Fotografija groba {{ grave.title|default:'bez naziva' }}"
+                                    loading="lazy"
+                                >
+
+                            </a>
+                        {% else %}
+                            <div class="grave-card-placeholder">
+                                <i class="bi bi-image" aria-hidden="true"></i>
+                                <span>Nema fotografije</span>
+                            </div>
                         {% endif %}
                     {% endwith %}
 
-                    <b>
-                        <a href="{% url 'graves:grave_detail' grave.id %}">
-                            {{ grave.title|default:"Grob" }}
-                        </a>
-                    </b>
+                    <div class="card-body d-flex flex-column">
 
-                    <br>
+                        <h3 class="grave-card-title">
+                            {{ grave.title|default:"Neimenovan grob" }}
+                        </h3>
 
-                    {% for person in grave.persons.all %}
-                        {{ person.first_name }} {{ person.last_name }}<br>
-                    {% empty %}
-                        <small>Nema osoba</small><br>
-                    {% endfor %}
+                        {% if grave.persons.all %}
+                            <div class="grave-card-persons">
 
-                    <small>{{ grave.inscription|truncatechars:80 }}</small>
+                                {% for person in grave.persons.all %}
+                                    <span>
+                                        <i class="bi bi-person me-1"></i>
+                                        {{ person.first_name }}
+                                        {{ person.last_name }}
+                                    </span>
+                                {% empty %}
+                                {% endfor %}
+
+                            </div>
+                        {% endif %}
+
+                        {% if grave.inscription %}
+                            <p class="grave-card-text">
+                                {{ grave.inscription|truncatechars:150 }}
+                            </p>
+                        {% else %}
+                            <p class="grave-card-text text-muted">
+                                Natpis nije unesen.
+                            </p>
+                        {% endif %}
+
+                        <div class="mt-auto pt-3">
+                            <a
+                                href="{% url 'graves:grave_detail' grave.id %}"
+                                class="btn btn-outline-dark w-100"
+                            >
+                                Otvori detalje
+                            </a>
+                        </div>
+
+                    </div>
+                </article>
+
+            </div>
+
+        {% empty %}
+
+            <div class="col-12">
+                <div class="empty-state">
+                    <i class="bi bi-pin-map"></i>
+
+                    <h3>Nema unesenih grobova</h3>
+
+                    <p>
+                        Za ovo groblje još nije evidentiran nijedan grob.
+                    </p>
+
+                    <a
+                        href="{% url 'graves:add_grave' %}"
+                        class="btn btn-dark"
+                    >
+                        Dodaj prvi grob
+                    </a>
                 </div>
-            `);
-        {% endif %}
-    {% endfor %}
+            </div>
 
-    setTimeout(function () {
-        map.invalidateSize();
-    }, 400);
+        {% endfor %}
 
-    const searchInput = document.getElementById("graveSearch");
+    </div>
 
-    if (searchInput) {
-        searchInput.addEventListener("keyup", function () {
-            const query = this.value.toLowerCase().trim();
-            const cards = document.querySelectorAll(".grave-card");
+    <div id="noGraveResults"
+         class="empty-state d-none mt-4">
 
-            cards.forEach(function (card) {
-                const title = card.dataset.title || "";
-                const inscription = card.dataset.inscription || "";
+        <i class="bi bi-search"></i>
 
-                const text = title + " " + inscription;
+        <h3>Nema rezultata</h3>
 
-                if (text.includes(query)) {
-                    card.style.display = "";
-                } else {
-                    card.style.display = "none";
+        <p>
+            Nijedan grob ne odgovara unesenom pojmu.
+        </p>
+
+    </div>
+
+</section>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        /* =================================================
+           Leaflet map
+        ================================================= */
+
+        const mapElement = document.getElementById("map");
+
+        if (mapElement) {
+            const map = L.map("map");
+
+            const osm = L.tileLayer(
+                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+                    maxZoom: 22,
+                    attribution: "© OpenStreetMap"
+                }
+            );
+
+            const satellite = L.tileLayer(
+                "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                {
+                    maxZoom: 22,
+                    attribution: "Tiles © Esri"
+                }
+            );
+
+            osm.addTo(map);
+
+            L.control.layers({
+                "Mapa": osm,
+                "Satelit": satellite
+            }).addTo(map);
+
+            {% if cemetery.location %}
+                const cemeteryCenter = [
+                    {{ cemetery.location.y }},
+                    {{ cemetery.location.x }}
+                ];
+
+                map.setView(cemeteryCenter, 18);
+
+                L.marker(cemeteryCenter)
+                    .addTo(map)
+                    .bindPopup("{{ cemetery.name|escapejs }}");
+            {% else %}
+                map.setView([43.9889, 18.1781], 15);
+            {% endif %}
+
+            {% if cemetery.boundary %}
+                const cemeteryBoundary =
+                    {{ cemetery.boundary.geojson|safe }};
+
+                const boundaryLayer = L.geoJSON(
+                    cemeteryBoundary,
+                    {
+                        color: "#b02a37",
+                        weight: 3,
+                        fillOpacity: 0.08
+                    }
+                ).addTo(map);
+
+                map.fitBounds(
+                    boundaryLayer.getBounds(),
+                    {
+                        padding: [30, 30]
+                    }
+                );
+            {% endif %}
+
+            {% for grave in graves %}
+                {% if grave.location %}
+
+                    const graveMarker{{ grave.id }} = L.marker([
+                        {{ grave.location.y }},
+                        {{ grave.location.x }}
+                    ]).addTo(map);
+
+                    graveMarker{{ grave.id }}.bindPopup(`
+                        <div class="map-popup">
+
+                            {% with first_photo=grave.photos.first %}
+                                {% if first_photo %}
+                                    <img
+                                        src="{{ first_photo.image.url }}"
+                                        alt=""
+                                        class="map-popup-image"
+                                    >
+                                {% endif %}
+                            {% endwith %}
+
+                            <strong class="map-popup-title">
+                                {{ grave.title|default:"Grob"|escapejs }}
+                            </strong>
+
+                            <div class="map-popup-persons">
+                                {% for person in grave.persons.all %}
+                                    {{ person.first_name|escapejs }}
+                                    {{ person.last_name|escapejs }}<br>
+                                {% empty %}
+                                    <span>Nema evidentiranih osoba</span><br>
+                                {% endfor %}
+                            </div>
+
+                            {% if grave.inscription %}
+                                <small>
+                                    {{ grave.inscription|truncatechars:80|escapejs }}
+                                </small>
+                            {% endif %}
+
+                            <a
+                                href="{% url 'graves:grave_detail' grave.id %}"
+                                class="map-popup-link"
+                            >
+                                Otvori detalje
+                            </a>
+
+                        </div>
+                    `);
+
+                {% endif %}
+            {% endfor %}
+
+            window.setTimeout(function () {
+                map.invalidateSize();
+            }, 300);
+        }
+
+
+        /* =================================================
+           Local grave search
+        ================================================= */
+
+        const searchInput =
+            document.getElementById("graveSearch");
+
+        const clearButton =
+            document.getElementById("clearGraveSearch");
+
+        const searchStatus =
+            document.getElementById("graveSearchStatus");
+
+        const noResults =
+            document.getElementById("noGraveResults");
+
+        const graveItems = Array.from(
+            document.querySelectorAll(".grave-search-item")
+        );
+
+        function filterGraves() {
+            const query = searchInput.value
+                .toLocaleLowerCase("bs")
+                .trim();
+
+            let visibleCount = 0;
+
+            graveItems.forEach(function (item) {
+                const searchableText = [
+                    item.dataset.title || "",
+                    item.dataset.inscription || "",
+                    item.dataset.persons || ""
+                ].join(" ");
+
+                const isVisible =
+                    searchableText.includes(query);
+
+                item.classList.toggle("d-none", !isVisible);
+
+                if (isVisible) {
+                    visibleCount += 1;
                 }
             });
-        });
-    }
-    
+
+            if (query) {
+                searchStatus.textContent =
+                    "Prikazano rezultata: " + visibleCount;
+            } else {
+                searchStatus.textContent = "";
+            }
+
+            if (noResults) {
+                noResults.classList.toggle(
+                    "d-none",
+                    visibleCount > 0 || graveItems.length === 0
+                );
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener(
+                "input",
+                filterGraves
+            );
+        }
+
+        if (clearButton && searchInput) {
+            clearButton.addEventListener(
+                "click",
+                function () {
+                    searchInput.value = "";
+                    filterGraves();
+                    searchInput.focus();
+                }
+            );
+        }
+    });
 </script>
+
 {% endblock %}

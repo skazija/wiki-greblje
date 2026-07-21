@@ -6,13 +6,6 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 
 <style>
-    #map {
-        height: 420px;
-        width: 100%;
-        border-radius: 12px;
-        border: 1px solid #ccc;
-        margin-bottom: 25px;
-    }
 
     .grave-photo {
         width: 100%;
@@ -25,266 +18,1064 @@
 
 {% block content %}
 
-<a href="{% url 'graves:cemetery_detail' grave.cemetery.id %}" class="btn btn-sm btn-outline-dark mb-3">
-    ← Nazad na {{ grave.cemetery.name }}
-</a>
+<!-- =====================================================
+     Breadcrumb
+===================================================== -->
 
-<div class="card shadow-sm mb-4">
+<nav aria-label="breadcrumb" class="mb-3">
+
+    <ol class="breadcrumb mb-0">
+
+        <li class="breadcrumb-item">
+            <a href="{% url 'graves:cemetery_list' %}">
+                Groblja
+            </a>
+        </li>
+
+        <li class="breadcrumb-item">
+            <a href="{% url 'graves:cemetery_detail' grave.cemetery.id %}">
+                {{ grave.cemetery.name }}
+            </a>
+        </li>
+
+        <li class="breadcrumb-item active" aria-current="page">
+            {{ grave.title|default:"Neimenovan grob" }}
+        </li>
+
+    </ol>
+
+</nav>
+
+
+<!-- =====================================================
+     Grave Hero
+===================================================== -->
+
+<section class="card content-card grave-header">
+
     <div class="card-body">
-        <h1>{{ grave.title|default:"Neimenovan grob" }}</h1>
 
-        <p class="text-muted mb-1">
-            {{ grave.cemetery.name }}
-        </p>
+        <div class="d-flex align-items-start gap-3">
 
-        <p><strong>Stanje:</strong> {{ grave.condition|default:"Nije uneseno" }}</p>
-        <p><strong>Natpis:</strong> {{ grave.inscription|default:"Nije uneseno" }}</p>
-        <p><strong>Bilješke:</strong> {{ grave.notes|default:"Nema bilješki" }}</p>
+            <div class="detail-icon">
 
-        {% if grave.location %}
-            <p>
-                <strong>Koordinate:</strong>
-                {{ grave.location.y }}, {{ grave.location.x }}
-            </p>
-        {% endif %}
+                <i class="bi bi-person-badge-fill"></i>
+
+            </div>
+
+            <div class="flex-grow-1">
+
+                <h1 class="grave-title">
+
+                    {{ grave.title|default:"Neimenovan grob" }}
+
+                </h1>
+
+                <p class="grave-location">
+
+                    <i class="bi bi-geo-alt-fill me-1"></i>
+
+                    {{ grave.cemetery.name }}
+
+                </p>
+
+                {% if grave.inscription %}
+
+                <p class="grave-intro">
+
+                    {{ grave.inscription|truncatechars:220 }}
+
+                </p>
+
+                {% else %}
+
+                <p class="text-muted">
+
+                    Za ovaj grob još nije unesen natpis.
+
+                </p>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- ==========================================
+             Information chips
+        =========================================== -->
+
+        <div class="grave-meta mt-4">
+
+            <div class="grave-chip">
+
+                <i class="bi bi-person"></i>
+
+                {{ grave.persons.count }} osoba
+
+            </div>
+
+            <div class="grave-chip">
+
+                <i class="bi bi-image"></i>
+
+                {{ grave.photos.count }} fotografija
+
+            </div>
+
+            {% if grave.location %}
+
+            <div class="grave-chip">
+
+                <i class="bi bi-geo"></i>
+
+                GPS evidentiran
+
+            </div>
+
+            {% endif %}
+
+            {% if grave.condition %}
+
+            <div class="grave-chip">
+
+                <i class="bi bi-shield-check"></i>
+
+                {{ grave.condition }}
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
 
         {% if user.is_authenticated %}
-            <a href="{% url 'graves:suggest_grave_edit' grave.id %}" class="btn btn-outline-primary mb-3">Predloži izmjenu</a>
-        {% endif %}    
-    </div>
-</div>
 
-<div id="map"></div>
+        <div class="mt-4">
 
-<hr class="my-5">
+            <a
 
-<h2 class="mb-3">Ostali grobovi u blizini</h2>
+                href="{% url 'graves:suggest_grave_edit' grave.id %}"
 
-{% for nearby in nearby_graves %}
-    <div class="card shadow-sm mb-2">
-        <div class="card-body">
-            <h5>
-                {{ nearby.title|default:"Neimenovan grob" }}
-            </h5>
+                class="btn btn-dark"
 
-            <p class="text-muted mb-2">
-                Udaljenost:
-                {{ nearby.distance.m|floatformat:1 }} m
-            </p>
+            >
 
-            <a href="{% url 'graves:grave_detail' nearby.id %}"
-               class="btn btn-sm btn-outline-dark">
-                Otvori grob
+                <i class="bi bi-pencil-square me-2"></i>
+
+                Predloži izmjenu
+
             </a>
+
         </div>
+
+        {% endif %}
+
     </div>
-{% empty %}
-    <p class="text-muted">
-        Nema drugih grobova u blizini.
-    </p>
-{% endfor %}
 
-<div class="row">
-    <div class="col-md-5">
-        <h2 class="mb-3">Osobe</h2>
+</section>
 
-        {% for person in grave.persons.all %}
-            <div class="card shadow-sm mb-3">
-                <div class="card-body">
-                    <h5>{{ person.first_name }} {{ person.last_name }}</h5>
+<!-- =====================================================
+     Grave Gallery
+===================================================== -->
 
-                    <p class="mb-1">
-                        {{ person.birth_year|default:"?" }} -
-                        {{ person.death_year|default:"?" }}
-                    </p>
+<section class="card content-card grave-gallery-section">
 
-                    {% if person.birth_date_text or person.death_date_text %}
-                        <p class="text-muted mb-1">
-                            {{ person.birth_date_text }} -
-                            {{ person.death_date_text }}
-                        </p>
-                    {% endif %}
+    <div class="card-body">
 
-                    {% if person.notes %}
-                        <p>{{ person.notes }}</p>
-                    {% endif %}
-                </div>
-            </div>
-        {% empty %}
-            <p>Nema unesenih osoba.</p>
-        {% endfor %}
-    </div>
-    <hr class="my-5">
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
 
-    <h2 class="mb-3">Povezane osobe</h2>
+            <h2 class="section-title mb-0">
+                <i class="bi bi-camera"></i>
+                Fotografije
+            </h2>
 
-    {% for person in related_persons %}
-        <div class="card shadow-sm mb-2">
-            <div class="card-body">
-                <h5>
-                    {{ person.first_name }} {{ person.last_name }}
-                </h5>
+            <span class="badge rounded-pill text-bg-dark">
+                {{ grave.photos.count }}
+            </span>
 
-                <p class="mb-1">
-                    {{ person.birth_year|default:"?" }} -
-                    {{ person.death_year|default:"?" }}
-                </p>
-
-                <p class="text-muted mb-2">
-                    {{ person.grave.cemetery.name }}
-                </p>
-
-                <a href="{% url 'graves:grave_detail' person.grave.id %}"
-                class="btn btn-sm btn-outline-dark">
-                    Otvori grob
-                </a>
-            </div>
         </div>
-    {% empty %}
-        <p class="text-muted">
-            Nema pronađenih povezanih osoba sa istim prezimenom.
-        </p>
-    {% endfor %}
-    
-    <div class="col-md-7">
-        <h2 class="mb-3">Fotografije</h2>
 
-        <div class="row">
-            {% for photo in grave.photos.all %}
-                <div class="col-md-6 mb-3">
-                    <div class="card shadow-sm">
-                        <a href="{{ photo.image.url }}" target="_blank">
-                            <img src="{{ photo.image.url }}"
-                                class="grave-photo"
-                                alt="{{ photo.caption }}"
-                                style="cursor: zoom-in;">
-                        </a>
+        {% if grave.photos.all %}
 
-                        <div class="card-body">
-                            <p class="mb-1">{{ photo.caption|default:"Bez opisa" }}</p>
+            <div class="row row-cols-1 row-cols-md-2 g-4">
 
-                            {% if photo.gps_location %}
-                                <small class="text-muted">
-                                    GPS: {{ photo.gps_location.y }}, {{ photo.gps_location.x }}
-                                </small>
-                            {% endif %}
-                        </div>
+                {% for photo in grave.photos.all %}
 
-                        {% if user.is_staff %}
-                        {#
-                            <a href="{% url 'graves:photo_ocr' photo.id %}"
-                                class="btn btn-sm btn-outline-primary mt-2">Pokušaj OCR</a> #}
-                        {% endif %}
-                    </div>
-                </div>
-            {% empty %}
-                <p>Nema fotografija.</p>
-            {% endfor %}
-        </div>
-    </div>
-    
-    <hr class="my-5">
+                    <div class="col">
 
-    <h2 class="mb-3">Komentari i dodatne informacije</h2>
+                        <figure class="grave-gallery-item mb-0">
 
-    {% for comment in comments %}
-        <div class="card shadow-sm mb-3">
-            <div class="card-body">
-                <p>{{ comment.text }}</p>
+                            <a
+                                href="{{ photo.image.url }}"
+                                target="_blank"
+                                rel="noopener"
+                                class="grave-gallery-link"
+                            >
 
-                <p class="text-muted small mb-0">
-                    {% if comment.photo %}
-                        <div class="mt-3">
+                                <img
+                                    src="{{ photo.image.url }}"
+                                    class="grave-gallery-image"
+                                    alt="{{ photo.caption|default:'Fotografija groba' }}"
+                                    loading="lazy"
+                                >
 
-                            <a href="{{ comment.photo.url }}" target="_blank">
-
-                                <img  src="{{ comment.photo.url }}"  class="img-fluid rounded" style="max-height:250px;">
+                                <span class="grave-gallery-zoom">
+                                    <i class="bi bi-zoom-in"></i>
+                                    Uvećaj
+                                </span>
 
                             </a>
 
-                        </div>
-                    {% endif %}
-                    {{ comment.author|default:"Nepoznat korisnik" }}
-                    —
-                    {{ comment.created_at }}
-                </p>
-            </div>
-        </div>
-    {% empty %}
-        <p class="text-muted">Još nema odobrenih komentara.</p>
-    {% endfor %}
-    
-    {% if user.is_authenticated %}
-        <a href="{% url 'graves:report_problem' grave.id %}" class="btn btn-outline-danger mb-3">Prijavi problem</a>
-    {% endif %}
-    
-    {% if user.is_authenticated %}
-        <div class="card shadow-sm mt-4">
-            <div class="card-body">
-                <h5>Dodaj komentar</h5>
+                            {% if photo.caption or photo.gps_location %}
 
-                <form method="post" enctype="multipart/form-data" action="{% url 'graves:add_comment' grave.id %}">
-                    {% csrf_token %}
+                                <figcaption class="grave-gallery-caption">
 
-                    {{ comment_form.text }}
-                    <div class="mt-3"> {{ comment_form.photo }}</div>
-                    <button type="submit" class="btn btn-dark mt-3">Pošalji komentar</button>
-                </form>
+                                    {% if photo.caption %}
+                                        <p class="mb-1">
+                                            {{ photo.caption }}
+                                        </p>
+                                    {% endif %}
 
-                <p class="text-muted small mt-2">
-                    Komentar će biti vidljiv nakon odobrenja administratora.
-                </p>
-            </div>
-        </div>
-    {% else %}
-        <p>
-            <a href="{% url 'login' %}">Prijavite se</a>
-            da biste dodali komentar.
-        </p>
-    {% endif %}
-    
-    <hr class="my-5">
-    <h2 class="mb-3">Historija izmjena</h2>
+                                    {% if photo.gps_location %}
+                                        <small class="text-muted">
+                                            <i class="bi bi-geo-alt me-1"></i>
+                                            GPS lokacija evidentirana
+                                        </small>
+                                    {% endif %}
 
-    {% for edit in edit_history %}
-        <div class="card shadow-sm mb-3">
-            <div class="card-body">
+                                </figcaption>
 
-                <p class="mb-1">
-                    <strong>Polje:</strong>
-                    {{ edit.field_name }}
-                </p>
+                            {% endif %}
 
-                <p class="mb-1">
-                    <strong>Izmijenio:</strong>
-                    {{ edit.edited_by|default:"Nepoznato" }}
-                </p>
+                        </figure>
 
-                <p class="text-muted small">
-                    {{ edit.edited_at }}
-                </p>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <strong>Stara vrijednost:</strong>
-                        <div class="border rounded p-2 bg-light">
-                            {{ edit.old_value|default:"-" }}
-                        </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <strong>Nova vrijednost:</strong>
-                        <div class="border rounded p-2 bg-light">
-                            {{ edit.new_value|default:"-" }}
-                        </div>
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <i class="bi bi-camera"></i>
+
+                <h3>Nema fotografija</h3>
+
+                <p class="mb-0">
+                    Za ovaj grob još nije dodana nijedna fotografija.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     Persons
+===================================================== -->
+
+<section class="card content-card grave-persons-section">
+
+    <div class="card-body">
+
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+
+            <h2 class="section-title mb-0">
+                <i class="bi bi-people"></i>
+                Evidentirane osobe
+            </h2>
+
+            <span class="badge rounded-pill text-bg-dark">
+                {{ grave.persons.count }}
+            </span>
+
+        </div>
+
+        {% if grave.persons.all %}
+
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+
+                {% for person in grave.persons.all %}
+
+                    <div class="col">
+
+                        <article class="person-card h-100">
+
+                            <div class="person-card-icon" aria-hidden="true">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+
+                            <div class="person-card-content">
+
+                                <h3 class="person-card-name">
+                                    {{ person.first_name }}
+                                    {{ person.last_name }}
+                                </h3>
+
+                                <div class="person-card-dates">
+
+                                    <i class="bi bi-calendar3 me-1"></i>
+
+                                    <span>
+                                        {{ person.birth_year|default:"?" }}
+                                        –
+                                        {{ person.death_year|default:"?" }}
+                                    </span>
+
+                                </div>
+
+                                {% if person.birth_date_text or person.death_date_text %}
+
+                                    <p class="person-card-date-text">
+
+                                        {% if person.birth_date_text %}
+                                            {{ person.birth_date_text }}
+                                        {% else %}
+                                            Datum rođenja nije poznat
+                                        {% endif %}
+
+                                        <span aria-hidden="true">–</span>
+
+                                        {% if person.death_date_text %}
+                                            {{ person.death_date_text }}
+                                        {% else %}
+                                            Datum smrti nije poznat
+                                        {% endif %}
+
+                                    </p>
+
+                                {% endif %}
+
+                                {% if person.notes %}
+
+                                    <p class="person-card-notes">
+                                        {{ person.notes }}
+                                    </p>
+
+                                {% endif %}
+
+                            </div>
+
+                        </article>
+
                     </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <i class="bi bi-person"></i>
+
+                <h3>Nema evidentiranih osoba</h3>
+
+                <p class="mb-0">
+                    Za ovaj grob još nije unesena nijedna osoba.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     Inscription and Notes
+===================================================== -->
+
+<section class="card content-card memorial-section">
+
+    <div class="card-body">
+
+        <h2 class="section-title">
+            <i class="bi bi-journal-text"></i>
+            Natpis i bilješke
+        </h2>
+
+        <!-- Natpis -->
+
+        <article class="record-block record-block-inscription">
+
+            <header class="record-header">
+
+                <div class="record-icon" aria-hidden="true">
+                    <i class="bi bi-file-earmark-text"></i>
                 </div>
 
+                <div>
+                    <h3 class="record-title">
+                        Natpis
+                    </h3>
+
+                    <p class="record-subtitle">
+                        Evidentirani tekst sa nadgrobnog spomenika
+                    </p>
+                </div>
+
+            </header>
+
+            <div class="record-content inscription-content">
+
+                {% if grave.inscription %}
+                    {{ grave.inscription|linebreaksbr }}
+                {% else %}
+                    <p class="record-empty mb-0">
+                        Natpis još nije evidentiran.
+                    </p>
+                {% endif %}
+
             </div>
+
+        </article>
+
+
+        <!-- Bilješke -->
+
+        <article class="record-block">
+
+            <header class="record-header">
+
+                <div class="record-icon" aria-hidden="true">
+                    <i class="bi bi-pencil-square"></i>
+                </div>
+
+                <div>
+                    <h3 class="record-title">
+                        Bilješke
+                    </h3>
+
+                    <p class="record-subtitle">
+                        Dodatne informacije o grobu i njegovom stanju
+                    </p>
+                </div>
+
+            </header>
+
+            <div class="record-content">
+
+                {% if grave.notes %}
+                    {{ grave.notes|linebreaksbr }}
+                {% else %}
+                    <p class="record-empty mb-0">
+                        Za ovaj grob nema dodatnih bilješki.
+                    </p>
+                {% endif %}
+
+            </div>
+
+        </article>
+
     </div>
-{% empty %}
-    <p class="text-muted">Nema evidentiranih izmjena.</p>
-{% endfor %}
+
+</section>
+
+<!-- =====================================================
+     Grave Location
+===================================================== -->
+
+<section class="card content-card grave-location-section">
+
+    <div class="card-body">
+
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+
+            <h2 class="section-title mb-0">
+                <i class="bi bi-map"></i>
+                Lokacija groba
+            </h2>
+
+            {% if grave.location %}
+                <span class="badge rounded-pill text-bg-success">
+                    GPS evidentiran
+                </span>
+            {% endif %}
+
+        </div>
+
+        {% if grave.location %}
+
+            <p class="section-intro">
+                Na karti je prikazana evidentirana lokacija ovog groba.
+            </p>
+
+        {% else %}
+
+            <p class="section-intro">
+                Za ovaj grob još nije unesena precizna lokacija.
+            </p>
+
+        {% endif %}
+
+        <div id="graveMap" aria-label="Karta lokacije groba"></div>
+
+        {% if grave.location %}
+
+            <div class="grave-location-meta">
+
+                <div>
+                    <i class="bi bi-geo-alt-fill"></i>
+
+                    <span>
+                        {{ grave.cemetery.name }}
+                    </span>
+                </div>
+
+                <a
+                    href="https://www.google.com/maps?q={{ grave.location.y }},{{ grave.location.x }}"
+                    target="_blank"
+                    rel="noopener"
+                    class="btn btn-outline-dark btn-sm"
+                >
+                    <i class="bi bi-box-arrow-up-right me-1"></i>
+                    Otvori u mapi
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     Nearby Graves
+===================================================== -->
+
+<section class="card content-card nearby-graves-section">
+
+    <div class="card-body">
+
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+
+            <div>
+                <h2 class="section-title mb-1">
+                    <i class="bi bi-signpost-split"></i>
+                    Najbliži evidentirani grobovi
+                </h2>
+
+                <p class="section-intro mb-0">
+                    Grobovi evidentirani u neposrednoj blizini ove lokacije.
+                </p>
+            </div>
+
+            {% if nearby_graves %}
+                <span class="badge rounded-pill text-bg-dark">
+                    do 6
+                </span>
+            {% endif %}
+
+        </div>
+
+        {% if nearby_graves %}
+
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+
+                {% for nearby in nearby_graves|slice:":6" %}
+
+                    <div class="col">
+
+                        <article class="nearby-grave-card h-100">
+
+                            <div class="nearby-grave-icon" aria-hidden="true">
+                                <i class="bi bi-geo-alt-fill"></i>
+                            </div>
+
+                            <div class="nearby-grave-content">
+
+                                <h3 class="nearby-grave-title">
+                                    {{ nearby.title|default:"Neimenovan grob" }}
+                                </h3>
+
+                                <p class="nearby-grave-distance">
+                                    <i class="bi bi-arrows-move me-1"></i>
+
+                                    {% if nearby.distance %}
+                                        {{ nearby.distance.m|floatformat:1 }} m udaljen
+                                    {% else %}
+                                        Udaljenost nije dostupna
+                                    {% endif %}
+                                </p>
+
+                                {% if nearby.cemetery %}
+                                    <p class="nearby-grave-cemetery">
+                                        <i class="bi bi-pin-map me-1"></i>
+                                        {{ nearby.cemetery.name }}
+                                    </p>
+                                {% endif %}
+
+                                <div class="mt-auto pt-3">
+
+                                    <a
+                                        href="{% url 'graves:grave_detail' nearby.id %}"
+                                        class="btn btn-outline-dark w-100"
+                                    >
+                                        Otvori grob
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+            <p class="nearby-graves-note">
+                Prikazuje se najviše šest najbližih evidentiranih grobova.
+            </p>
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <i class="bi bi-geo-alt"></i>
+
+                <h3>Nema drugih grobova u blizini</h3>
+
+                <p class="mb-0">
+                    U odabranom radijusu nisu pronađeni drugi evidentirani grobovi.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     Related Persons
+===================================================== -->
+
+<section class="card content-card related-persons-section">
+
+    <div class="card-body">
+
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+
+            <div>
+                <h2 class="section-title mb-1">
+                    <i class="bi bi-people-fill"></i>
+                    Povezane osobe
+                </h2>
+
+                <p class="section-intro mb-0">
+                    Osobe pronađene na osnovu zajedničkog prezimena.
+                </p>
+            </div>
+
+            {% if related_persons %}
+                <span class="badge rounded-pill text-bg-dark">
+                    {{ related_persons|length }}
+                </span>
+            {% endif %}
+
+        </div>
+
+        {% if related_persons %}
+
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+
+                {% for person in related_persons %}
+
+                    <div class="col">
+
+                        <article class="related-person-card h-100">
+
+                            <div class="related-person-icon" aria-hidden="true">
+                                <i class="bi bi-person-lines-fill"></i>
+                            </div>
+
+                            <div class="related-person-content">
+
+                                <h3 class="related-person-name">
+                                    {{ person.first_name }}
+                                    {{ person.last_name }}
+                                </h3>
+
+                                <p class="related-person-dates">
+                                    <i class="bi bi-calendar3 me-1"></i>
+
+                                    {{ person.birth_year|default:"?" }}
+                                    –
+                                    {{ person.death_year|default:"?" }}
+                                </p>
+
+                                {% if person.grave and person.grave.cemetery %}
+                                    <p class="related-person-location">
+                                        <i class="bi bi-geo-alt me-1"></i>
+                                        {{ person.grave.cemetery.name }}
+                                    </p>
+                                {% endif %}
+
+                                <div class="mt-auto pt-3">
+
+                                    <a
+                                        href="{% url 'graves:grave_detail' person.grave.id %}"
+                                        class="btn btn-outline-dark w-100"
+                                    >
+                                        Otvori grob
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <i class="bi bi-people"></i>
+
+                <h3>Nema pronađenih povezanih osoba</h3>
+
+                <p class="mb-0">
+                    Nisu pronađene druge osobe sa istim prezimenom.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     Comments and Additional Information
+===================================================== -->
+
+<section class="card content-card comments-section">
+
+    <div class="card-body">
+
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+
+            <div>
+                <h2 class="section-title mb-1">
+                    <i class="bi bi-chat-left-text"></i>
+                    Komentari i dodatne informacije
+                </h2>
+
+                <p class="section-intro mb-0">
+                    Doprinosi korisnika koji su odobreni od administratora.
+                </p>
+            </div>
+
+            {% if comments %}
+                <span class="badge rounded-pill text-bg-dark">
+                    {{ comments|length }}
+                </span>
+            {% endif %}
+
+        </div>
+
+        {% if comments %}
+
+            <div class="comments-list">
+
+                {% for comment in comments %}
+
+                    <article class="comment-card">
+
+                        <header class="comment-header">
+
+                            <div class="comment-avatar" aria-hidden="true">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+
+                            <div>
+                                <h3 class="comment-author">
+                                    {{ comment.author|default:"Nepoznat korisnik" }}
+                                </h3>
+
+                                <p class="comment-date">
+                                    <i class="bi bi-clock me-1"></i>
+                                    {{ comment.created_at }}
+                                </p>
+                            </div>
+
+                        </header>
+
+                        <div class="comment-text">
+                            {{ comment.text|linebreaksbr }}
+                        </div>
+
+                        {% if comment.photo %}
+
+                            <a
+                                href="{{ comment.photo.url }}"
+                                target="_blank"
+                                rel="noopener"
+                                class="comment-photo-link"
+                            >
+                                <img
+                                    src="{{ comment.photo.url }}"
+                                    class="comment-photo"
+                                    alt="Fotografija uz komentar"
+                                    loading="lazy"
+                                >
+                            </a>
+
+                        {% endif %}
+
+                    </article>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <i class="bi bi-chat"></i>
+
+                <h3>Još nema komentara</h3>
+
+                <p class="mb-0">
+                    Za ovaj grob još nema odobrenih komentara ni dodatnih informacija.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+
+        <!-- Comment actions -->
+
+        <div class="comment-actions">
+
+            {% if user.is_authenticated %}
+
+                <a
+                    href="{% url 'graves:report_problem' grave.id %}"
+                    class="btn btn-outline-danger"
+                >
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    Prijavi problem
+                </a>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- Add comment -->
+
+        {% if user.is_authenticated %}
+
+            <div class="add-comment-card">
+
+                <h3 class="add-comment-title">
+                    <i class="bi bi-chat-square-dots me-1"></i>
+                    Dodaj komentar
+                </h3>
+
+                <form
+                    method="post"
+                    enctype="multipart/form-data"
+                    action="{% url 'graves:add_comment' grave.id %}"
+                >
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        {{ comment_form.text }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ comment_form.photo }}
+                    </div>
+
+                    <button type="submit" class="btn btn-dark">
+                        <i class="bi bi-send me-1"></i>
+                        Pošalji komentar
+                    </button>
+
+                </form>
+
+                <p class="text-muted small mt-3 mb-0">
+                    Komentar će biti vidljiv nakon odobrenja administratora.
+                </p>
+
+            </div>
+
+        {% else %}
+
+            <div class="login-message">
+
+                <i class="bi bi-lock"></i>
+
+                <p class="mb-0">
+                    <a href="{% url 'login' %}">Prijavite se</a>
+                    da biste dodali komentar ili dodatnu informaciju.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     Edit History
+===================================================== -->
+
+<section class="card content-card edit-history-section">
+
+    <div class="card-body">
+
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+
+            <div>
+                <h2 class="section-title mb-1">
+                    <i class="bi bi-clock-history"></i>
+                    Historija izmjena
+                </h2>
+
+                <p class="section-intro mb-0">
+                    Pregled evidentiranih promjena ovog zapisa.
+                </p>
+            </div>
+
+            {% if edit_history %}
+                <span class="badge rounded-pill text-bg-dark">
+                    {{ edit_history|length }}
+                </span>
+            {% endif %}
+
+        </div>
+
+        {% if edit_history %}
+
+            <div class="edit-history-list">
+
+                {% for edit in edit_history %}
+
+                    <article class="edit-history-card">
+
+                        <header class="edit-history-header">
+
+                            <div class="edit-history-icon" aria-hidden="true">
+                                <i class="bi bi-pencil-square"></i>
+                            </div>
+
+                            <div class="flex-grow-1">
+
+                                <h3 class="edit-history-field">
+                                    {{ edit.field_name }}
+                                </h3>
+
+                                <p class="edit-history-meta">
+                                    Izmijenio:
+                                    <strong>
+                                        {{ edit.edited_by|default:"Nepoznato" }}
+                                    </strong>
+
+                                    <span aria-hidden="true">•</span>
+
+                                    {{ edit.edited_at }}
+                                </p>
+
+                            </div>
+
+                        </header>
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+
+                                <div class="history-value history-value-old">
+
+                                    <span class="history-value-label">
+                                        Stara vrijednost
+                                    </span>
+
+                                    <div class="history-value-content">
+                                        {{ edit.old_value|default:"-" }}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <div class="history-value history-value-new">
+
+                                    <span class="history-value-label">
+                                        Nova vrijednost
+                                    </span>
+
+                                    <div class="history-value-content">
+                                        {{ edit.new_value|default:"-" }}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <i class="bi bi-clock-history"></i>
+
+                <h3>Nema evidentiranih izmjena</h3>
+
+                <p class="mb-0">
+                    Ovaj zapis još nema zabilježenu historiju promjena.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
 
 </div>
 
@@ -294,7 +1085,7 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
-    var map = L.map('map');
+    var map = L.map('graveMap');
 
     var osm = L.tileLayer(
         'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',

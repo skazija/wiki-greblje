@@ -3,6 +3,12 @@
    Version: 1.1
    ====================================================== */
 
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+
 :root {
 /* Typography */
 
@@ -34,8 +40,21 @@
 
 
 /* =====================================================
-   HOME
+   BASE
 ===================================================== */
+
+/* =====================================================
+   LAYOUT
+===================================================== */
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+/* =====================================================
+   HERO
+===================================================== */
+
 
 .hero {
     position: relative;
@@ -132,41 +151,11 @@
     font-weight: 600;
 }
 
-.footer {
-
-    margin-top: 5rem;
-
-    padding: 3rem 0;
-
-    background: #212529;
-
-    color: rgba(255,255,255,.85);
-
-}
-
-.footer h5 {
-
-    font-weight:700;
-
-    margin-bottom:1rem;
-
-}
-
-.footer p {
-
-    color:rgba(255,255,255,.75);
-
-    margin-bottom:.5rem;
-
-}
-
-.footer small{
-
-    color:rgba(255,255,255,.55);
-
-}
 
 
+/* =====================================================
+   BUTTONS
+===================================================== */
 
 
 
@@ -207,6 +196,23 @@
         margin-right: auto !important;
     }
 }
+
+
+/* =====================================================
+   FORMS
+===================================================== */
+
+/* =====================================================
+   STATISTICS
+===================================================== */
+
+/* =====================================================
+   SHARED COMPONENTS
+===================================================== */
+
+/* =====================================================
+   GRAVE CARD
+===================================================== */
 
 /* Grave card */
 
@@ -256,10 +262,10 @@
     }
 }
 
-
 /* =====================================================
-   Photo Card
+   PHOTO CARD
 ===================================================== */
+
 
 .photo-card{
     overflow:hidden;
@@ -307,6 +313,990 @@
 
 }
 
+
+
+/* =====================================================
+   CEMETERY CARD
+===================================================== */
+/* =====================================================
+   Cemetery Card v1
+   Sprint 2 - Discovery
+===================================================== */
+
+.cemetery-card {
+    border: 1px solid rgba(44, 62, 80, 0.14);
+    border-left: 5px solid var(--primary);
+    border-radius: var(--card-radius);
+    background: #fff;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.cemetery-card .card-body {
+    padding: 1.4rem 1.5rem;
+}
+
+.cemetery-card:hover {
+    transform: translateY(-3px);
+    border-left-color: var(--success);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+.cemetery-title {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    color: var(--primary);
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: .65rem;
+}
+
+.cemetery-title i {
+    font-size: 1.15rem;
+}
+
+.cemetery-description {
+    color: #5f6871;
+    font-size: 1.02rem;
+    line-height: 1.6;
+    margin: .8rem 0 0;
+}
+
+.cemetery-card .btn {
+    min-width: 145px;
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   CONTENT CARD
+===================================================== */
+
+/* =====================================================
+   Content Card
+   Shared Component
+===================================================== */
+
+.content-card {
+    border: 1px solid rgba(44, 62, 80, 0.1);
+    border-radius: var(--card-radius);
+    background: #fff;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+}
+
+.content-card .card-body {
+    padding: 1.75rem;
+}
+
+
+/* =====================================================
+   CEMETERY DETAIL
+===================================================== */
+
+
+/* =====================================================
+   Cemetery Detail v1
+   Sprint 2 - Discovery
+===================================================== */
+
+.breadcrumb a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.cemetery-detail-header {
+    border-left: 5px solid var(--primary);
+}
+
+.detail-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 52px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(44, 62, 80, 0.08);
+    color: var(--primary);
+    font-size: 1.5rem;
+}
+
+.cemetery-detail-title {
+    color: var(--primary);
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.cemetery-detail-location {
+    color: #6c757d;
+    font-size: 1.05rem;
+    margin-bottom: 1rem;
+}
+
+.cemetery-detail-description {
+    max-width: 900px;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 0;
+}
+
+#map {
+    width: 100%;
+    height: 520px;
+    border: 1px solid rgba(44, 62, 80, 0.16);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+}
+
+.grave-count-badge {
+    min-width: 48px;
+    padding: 0.55rem 0.8rem;
+    font-size: 1rem;
+}
+
+.grave-card-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    height: 230px;
+    background: #e9ecef;
+    color: #6c757d;
+}
+
+.grave-card-placeholder i {
+    font-size: 2rem;
+}
+
+.grave-card-image-link {
+    display: block;
+    overflow: hidden;
+}
+
+.grave-card-image-link .grave-card-image {
+    transition: transform var(--transition);
+}
+
+.grave-card:hover .grave-card-image {
+    transform: scale(1.03);
+}
+
+.grave-card-persons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    color: #6c757d;
+    font-size: 0.95rem;
+    margin-bottom: 0.8rem;
+}
+
+.empty-state {
+    padding: 3rem 1.25rem;
+    border: 1px dashed rgba(44, 62, 80, 0.25);
+    border-radius: var(--card-radius);
+    background: #fff;
+    text-align: center;
+}
+
+.empty-state i {
+    display: block;
+    color: var(--primary);
+    font-size: 2.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.empty-state h3 {
+    color: var(--primary);
+    font-size: 1.35rem;
+    font-weight: 700;
+}
+
+.empty-state p {
+    color: #6c757d;
+}
+
+.map-popup {
+    width: 190px;
+}
+
+.map-popup-image {
+    width: 100%;
+    max-height: 125px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+}
+
+.map-popup-title {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.map-popup-persons {
+    margin-bottom: 0.35rem;
+}
+
+.map-popup-link {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   Grave Detail Hero
+===================================================== */
+
+.grave-header{
+
+    border-left:5px solid var(--primary);
+
+}
+
+.grave-header .card-body{
+    padding:2rem;
+}
+
+.grave-title{
+
+    font-size:clamp(2rem,4vw,2.7rem);
+
+    color:var(--primary);
+
+    font-weight:700;
+
+    margin-bottom:.4rem;
+
+}
+
+.grave-location{
+
+    color:#6c757d;
+
+    font-size:1.05rem;
+
+    margin-bottom:1rem;
+
+}
+
+.grave-intro{
+
+    font-size:1.05rem;
+
+    line-height:1.7;
+
+    margin-bottom:0;
+
+    max-width:900px;
+
+}
+
+.grave-meta{
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:.8rem;
+
+}
+
+.grave-chip{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:.45rem;
+
+    background:#f8f9fa;
+
+    border:1px solid rgba(44,62,80,.12);
+
+    border-radius:999px;
+
+    padding:.65rem 1rem;
+
+    font-size:.95rem;
+
+    color:#495057;
+
+}
+
+.grave-chip i{
+
+    color:var(--primary);
+
+}
+
+
+/* =====================================================
+   Grave Gallery v1
+   Sprint 2 - Discovery
+===================================================== */
+
+.grave-gallery-item {
+    overflow: hidden;
+    border: 1px solid rgba(44, 62, 80, 0.12);
+    border-radius: var(--card-radius);
+    background: #fff;
+}
+
+.grave-gallery-link {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: #e9ecef;
+}
+
+.grave-gallery-image {
+    display: block;
+    width: 100%;
+    height: 360px;
+    object-fit: cover;
+    transition: transform 0.35s ease;
+}
+
+.grave-gallery-link:hover .grave-gallery-image {
+    transform: scale(1.035);
+}
+
+.grave-gallery-zoom {
+    position: absolute;
+    right: 0.8rem;
+    bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(18, 18, 18, 0.78);
+    color: #fff;
+    font-size: 0.88rem;
+    opacity: 0;
+    transform: translateY(5px);
+    transition: var(--transition);
+}
+
+.grave-gallery-link:hover .grave-gallery-zoom,
+.grave-gallery-link:focus-visible .grave-gallery-zoom {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.grave-gallery-caption {
+    padding: 1rem 1.1rem;
+    line-height: 1.55;
+}
+
+/* =====================================================
+   Person Card v1
+   Sprint 2 - Discovery
+===================================================== */
+
+.person-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.35rem;
+    border: 1px solid rgba(44, 62, 80, 0.12);
+    border-radius: var(--card-radius);
+    background: #fff;
+    transition: var(--transition);
+}
+
+.person-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.09);
+}
+
+.person-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(44, 62, 80, 0.08);
+    color: var(--primary);
+    font-size: 1.3rem;
+}
+
+.person-card-content {
+    min-width: 0;
+    flex-grow: 1;
+}
+
+.person-card-name {
+    color: var(--primary);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.45rem;
+}
+
+.person-card-dates {
+    display: flex;
+    align-items: center;
+    color: #495057;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.45rem;
+}
+
+.person-card-date-text {
+    color: #6c757d;
+    font-size: 0.95rem;
+    margin-bottom: 0.65rem;
+}
+
+.person-card-notes {
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+/* =====================================================
+   Memorial Record v1
+   Sprint 2 - Discovery
+===================================================== */
+
+.memorial-section .section-title {
+    margin-bottom: 1.75rem;
+}
+
+.record-block {
+    padding: 1.4rem;
+    margin-bottom: 1.4rem;
+    border: 1px solid rgba(44, 62, 80, 0.12);
+    border-left: 5px solid var(--primary);
+    border-radius: var(--card-radius);
+    background: #fafafa;
+    transition: var(--transition);
+}
+
+.record-block:last-child {
+    margin-bottom: 0;
+}
+
+.record-block:hover {
+    background: #fff;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+}
+
+.record-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1.1rem;
+    border-bottom: 1px solid rgba(44, 62, 80, 0.1);
+}
+
+.record-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(44, 62, 80, 0.08);
+    color: var(--primary);
+    font-size: 1.15rem;
+}
+
+.record-title {
+    color: var(--primary);
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0 0 0.2rem;
+}
+
+.record-subtitle {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.record-content {
+    color: #343a40;
+    font-size: 1.05rem;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+
+.inscription-content {
+    font-size: 1.12rem;
+    letter-spacing: 0.01em;
+}
+
+.record-empty {
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* =====================================================
+   Grave Location v1
+   Sprint 2 - Discovery
+===================================================== */
+
+#graveMap {
+    width: 100%;
+    height: 440px;
+    border: 1px solid rgba(44, 62, 80, 0.16);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+}
+
+.grave-location-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(44, 62, 80, 0.1);
+}
+
+.grave-location-meta > div {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6c757d;
+}
+
+.grave-location-meta i {
+    color: var(--primary);
+}
+
+/* =====================================================
+   Nearby Graves Card v1
+   Sprint 2 - Discovery
+===================================================== */
+
+.nearby-grave-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.3rem;
+    border: 1px solid rgba(44, 62, 80, 0.12);
+    border-radius: var(--card-radius);
+    background: #fff;
+    transition: var(--transition);
+}
+
+.nearby-grave-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(44, 62, 80, 0.25);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.09);
+}
+
+.nearby-grave-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: rgba(44, 62, 80, 0.08);
+    color: var(--primary);
+    font-size: 1.2rem;
+}
+
+.nearby-grave-content {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex-grow: 1;
+}
+
+.nearby-grave-title {
+    color: var(--primary);
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.45rem;
+}
+
+.nearby-grave-distance {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+}
+
+.nearby-grave-cemetery {
+    color: #6c757d;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 0;
+}
+
+.nearby-grave-card .btn {
+    font-weight: 600;
+}
+
+.nearby-graves-note {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin: 1.25rem 0 0;
+    text-align: center;
+}
+
+/* =====================================================
+   Related Person Card v1
+   Sprint 2 - Discovery
+===================================================== */
+
+.related-person-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.3rem;
+    border: 1px solid rgba(44, 62, 80, 0.12);
+    border-radius: var(--card-radius);
+    background: #fff;
+    transition: var(--transition);
+}
+
+.related-person-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.09);
+}
+
+.related-person-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: rgba(44, 62, 80, 0.08);
+    color: var(--primary);
+    font-size: 1.2rem;
+}
+
+.related-person-content {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex-grow: 1;
+}
+
+.related-person-name {
+    color: var(--primary);
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+}
+
+.related-person-dates {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+}
+
+.related-person-location {
+    color: #6c757d;
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}
+
+/* =====================================================
+   Comments v1
+   Sprint 2 - Discovery
+===================================================== */
+
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.comment-card {
+    padding: 1.35rem;
+    border: 1px solid rgba(44, 62, 80, 0.12);
+    border-radius: var(--card-radius);
+    background: #fafafa;
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding-bottom: 0.9rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgba(44, 62, 80, 0.1);
+}
+
+.comment-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(44, 62, 80, 0.08);
+    color: var(--primary);
+}
+
+.comment-author {
+    color: var(--primary);
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0 0 0.15rem;
+}
+
+.comment-date {
+    color: #6c757d;
+    font-size: 0.88rem;
+    margin: 0;
+}
+
+.comment-text {
+    color: #343a40;
+    line-height: 1.7;
+}
+
+.comment-photo-link {
+    display: inline-block;
+    margin-top: 1rem;
+}
+
+.comment-photo {
+    width: auto;
+    max-width: 100%;
+    max-height: 320px;
+    object-fit: cover;
+    border-radius: var(--card-radius);
+}
+
+.comment-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.25rem;
+}
+
+.add-comment-card {
+    padding: 1.4rem;
+    margin-top: 1.5rem;
+    border: 1px solid rgba(44, 62, 80, 0.12);
+    border-radius: var(--card-radius);
+    background: #f8f9fa;
+}
+
+.add-comment-title {
+    color: var(--primary);
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.login-message {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.1rem;
+    margin-top: 1.5rem;
+    border-radius: var(--card-radius);
+    background: #f8f9fa;
+    color: #6c757d;
+}
+
+.login-message i {
+    color: var(--primary);
+    font-size: 1.2rem;
+}
+
+/* =====================================================
+   Edit History v1
+   Sprint 2 - Discovery
+===================================================== */
+
+.edit-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.edit-history-card {
+    padding: 1.35rem;
+    border: 1px solid rgba(44, 62, 80, 0.12);
+    border-radius: var(--card-radius);
+    background: #fff;
+}
+
+.edit-history-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgba(44, 62, 80, 0.1);
+}
+
+.edit-history-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(44, 62, 80, 0.08);
+    color: var(--primary);
+}
+
+.edit-history-field {
+    color: var(--primary);
+    font-size: 1.12rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem;
+}
+
+.edit-history-meta {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.history-value {
+    height: 100%;
+    padding: 1rem;
+    border-radius: 10px;
+}
+
+.history-value-old {
+    background: rgba(220, 53, 69, 0.06);
+    border: 1px solid rgba(220, 53, 69, 0.16);
+}
+
+.history-value-new {
+    background: rgba(25, 135, 84, 0.06);
+    border: 1px solid rgba(25, 135, 84, 0.16);
+}
+
+.history-value-label {
+    display: block;
+    color: #6c757d;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.45rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.history-value-content {
+    color: #343a40;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.footer {
+
+    margin-top: 5rem;
+
+    padding: 3rem 0;
+
+    background: #212529;
+
+    color: rgba(255,255,255,.85);
+
+}
+
+.footer h5 {
+
+    font-weight:700;
+
+    margin-bottom:1rem;
+
+}
+
+.footer p {
+
+    color:rgba(255,255,255,.75);
+
+    margin-bottom:.5rem;
+
+}
+
+.footer small{
+
+    color:rgba(255,255,255,.55);
+
+}
+
+
+/* =====================================================
+   HOME
+===================================================== */
+
+
+/* =====================================================
+   Section Heading
+   Shared Component
+===================================================== */
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: var(--primary);
+    font-size: 1.45rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+}
+
+.section-title i {
+    font-size: 1.25rem;
+}
+
+.section-intro {
+    color: #6c757d;
+    line-height: 1.6;
+    margin-top: -0.65rem;
+    margin-bottom: 1.25rem;
+}
+
+
+
+/* =====================================================
+   Section Heading
+===================================================== */
+
+.section-title{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:.6rem;
+
+    font-size:1.45rem;
+
+    font-weight:700;
+
+    margin-bottom:1.25rem;
+
+    color:var(--primary);
+
+}
 
 /* Navbar */
 
@@ -383,6 +1373,12 @@
 
 }
 
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
 /* Mobile navbar */
 
 @media (max-width: 991.98px) {
@@ -426,4 +1422,169 @@ body{
 img{
     max-width:100%;
     height:auto;
+}
+
+@media (max-width: 768px) {
+    .content-card .card-body {
+        padding: 1.25rem;
+    }
+
+    .detail-icon {
+        flex-basis: 44px;
+        width: 44px;
+        height: 44px;
+        font-size: 1.25rem;
+    }
+
+    #map {
+        height: 390px;
+    }
+}
+
+@media (max-width: 576px) {
+    .cemetery-detail-header .d-flex {
+        flex-direction: column;
+    }
+
+    .cemetery-detail-title {
+        font-size: 1.85rem;
+    }
+
+    #map {
+        height: 340px;
+    }
+
+    #clearGraveSearch {
+        padding-left: 0.8rem;
+        padding-right: 0.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .grave-gallery-image {
+        height: 320px;
+    }
+
+    .grave-gallery-zoom {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .grave-gallery-image {
+        height: 280px;
+    }
+}
+
+@media (max-width: 576px) {
+    .person-card {
+        padding: 1.15rem;
+    }
+
+    .person-card-icon {
+        flex-basis: 42px;
+        width: 42px;
+        height: 42px;
+        font-size: 1.15rem;
+    }
+
+    .person-card-name {
+        font-size: 1.2rem;
+    }
+}
+
+@media(max-width:768px){
+
+.record-block{
+
+padding:1.1rem;
+
+}
+
+.record-title{
+
+font-size:1rem;
+
+}
+
+}
+
+@media (max-width: 576px) {
+    .record-block {
+        padding: 1.15rem;
+    }
+
+    .record-icon {
+        flex-basis: 38px;
+        width: 38px;
+        height: 38px;
+        font-size: 1rem;
+    }
+
+    .record-content {
+        font-size: 1rem;
+        line-height: 1.7;
+    }
+}
+
+@media (max-width: 768px) {
+    #graveMap {
+        height: 360px;
+    }
+}
+
+@media (max-width: 576px) {
+    #graveMap {
+        height: 310px;
+    }
+
+    .grave-location-meta {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .grave-location-meta .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .nearby-grave-card {
+        padding: 1.1rem;
+    }
+
+    .nearby-grave-icon {
+        flex-basis: 42px;
+        width: 42px;
+        height: 42px;
+        font-size: 1.05rem;
+    }
+
+    .nearby-grave-title {
+        font-size: 1.12rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .related-person-card,
+    .comment-card,
+    .edit-history-card,
+    .add-comment-card {
+        padding: 1.1rem;
+    }
+
+    .related-person-icon {
+        flex-basis: 42px;
+        width: 42px;
+        height: 42px;
+    }
+
+    .comment-actions {
+        justify-content: stretch;
+    }
+
+    .comment-actions .btn {
+        width: 100%;
+    }
 }
