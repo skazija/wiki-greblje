@@ -98,10 +98,20 @@ class Grave(models.Model):
         return order.get(self.status, 99)
         
 class Person(models.Model):
+    GENDER_UNKNOWN = ""
+    GENDER_MALE = "male"
+    GENDER_FEMALE = "female"
+
+    GENDER_CHOICES = [
+        (GENDER_UNKNOWN, "Nije poznato"),
+        (GENDER_MALE, "Muško"),
+        (GENDER_FEMALE, "Žensko"),
+    ]
+
     grave = models.ForeignKey(
         Grave,
         on_delete=models.CASCADE,
-        related_name="persons"
+        related_name="persons",
     )
 
     first_name = models.CharField(max_length=100)
@@ -113,13 +123,28 @@ class Person(models.Model):
     birth_date_text = models.CharField(
         max_length=100,
         blank=True,
-        help_text="Use if exact date is unclear"
+        help_text="Use if exact date is unclear",
     )
 
     death_date_text = models.CharField(
         max_length=100,
         blank=True,
-        help_text="Use if exact date is unclear"
+        help_text="Use if exact date is unclear",
+    )
+
+    gender = models.CharField(
+        max_length=10,
+        choices=GENDER_CHOICES,
+        blank=True,
+        default=GENDER_UNKNOWN,
+        verbose_name="Spol",
+    )
+
+    photo = models.ImageField(
+        upload_to="persons/%Y/%m/",
+        blank=True,
+        null=True,
+        verbose_name="Fotografija osobe",
     )
 
     notes = models.TextField(blank=True)

@@ -49,6 +49,27 @@ class PublicGraveForm(forms.ModelForm):
         label="Godina smrti"
     )
 
+    person_gender = forms.ChoiceField(
+        required=False,
+        label="Spol",
+        choices=Person.GENDER_CHOICES,
+        widget=forms.Select(
+            attrs={
+                "class": "person-gender-select",
+            }
+        ),
+    )
+
+    person_photo = forms.ImageField(
+        required=False,
+        label="Fotografija osobe",
+        widget=forms.ClearableFileInput(
+            attrs={
+                "accept": "image/*",
+            }
+        ),
+    )
+    
     person_notes = forms.CharField(
         required=False,
         label="Napomena o osobi",
@@ -108,6 +129,8 @@ class PublicGraveForm(forms.ModelForm):
                     last_name=last_name or "",
                     birth_year=self.cleaned_data.get("birth_year"),
                     death_year=self.cleaned_data.get("death_year"),
+                    gender=self.cleaned_data.get("person_gender", ""),
+                    photo=self.cleaned_data.get("person_photo"),
                     notes=self.cleaned_data.get("person_notes", ""),
                 )
 

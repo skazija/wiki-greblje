@@ -162,6 +162,36 @@ class CemeteryAdmin(admin.ModelAdmin):
     list_display = ("name", "city", "village", "created_at")
     search_fields = ("name", "city", "village")
 
+class PersonInline(admin.StackedInline):
+    model = Person
+    extra = 0
+
+    fields = (
+        "first_name",
+        "last_name",
+        "birth_year",
+        "death_year",
+        "gender",
+        "photo",
+        "notes",
+    )
+
+    
+    @admin.display(boolean=True, description="Fotografija")
+    def has_photo(self, obj):
+        return bool(obj.photo)
+
+    @admin.display(description="Pregled fotografije")
+    def photo_preview(self, obj):
+        if obj and obj.photo:
+            return format_html(
+                '<img src="{}" style="max-width:180px; '
+                'max-height:240px; object-fit:cover; border-radius:8px;" />',
+                obj.photo.url,
+            )
+
+        return "Fotografija nije dodana"
+
 @admin.register(Grave)
 class GraveAdmin(GISModelAdmin):
     form = GraveAdminForm
@@ -403,8 +433,36 @@ class GraveAdmin(GISModelAdmin):
 
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ("first_name", "last_name", "birth_year", "death_year", "grave")
-    search_fields = ("first_name", "last_name")
+    list_display = (
+        "first_name",
+        "last_name",
+        "grave",
+        "gender",
+        "birth_year",
+        "death_year",
+        
+    )
+
+    list_filter = ("gender",)
+    search_fields = (
+        "first_name",
+        "last_name",
+        "grave__title",
+    )
+
+   
+    fields = (
+        "grave",
+        "first_name",
+        "last_name",
+        "birth_year",
+        "death_year",
+        "birth_date_text",
+        "death_date_text",
+        "gender",
+        "photo",
+        "notes",
+    )
 
 
 @admin.register(Photo)

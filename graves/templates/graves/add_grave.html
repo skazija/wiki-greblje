@@ -1,116 +1,628 @@
 {% extends "graves/base.html" %}
 
-{% block title %}Dodaj grob{% endblock %}
+{% block title %}Digitalizacija novog groba{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 
-<style>
-    #map {
-        height: 450px;
-        border-radius: 12px;
-        margin-bottom: 20px;
-    }
-</style>
 {% endblock %}
 
 {% block content %}
 
-<h1 class="mb-4">Dodaj grob</h1>
+<a href="{% url 'graves:cemetery_list' %}" class="grave-entry-back">
+    <span aria-hidden="true">←</span>
+    <span>Nazad na groblja</span>
+</a>
 
-<div class="card shadow-sm">
-    <div class="card-body">
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.latitude }}
+    {{ form.longitude }}
 
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
 
-            <div class="mb-3">
-                {{ form.cemetery.label_tag }}
-                {{ form.cemetery }}
+    <section class="grave-entry-hero" aria-labelledby="grave-entry-title">
+        <div class="grave-entry-hero__body">
+           
+            <h1 id="grave-entry-title">Digitalizacija novog groba</h1>
+
+            <p class="grave-entry-hero__intro">
+                Svaki evidentirani grob čuva dio kulturne i porodične historije
+                za buduće generacije.
+            </p>
+
+            <div class="row g-3 align-items-stretch">
+                <div class="col-lg-7">
+                    <div class="grave-entry-hero__panel h-100">
+                        <label
+                            for="{{ form.cemetery.id_for_label }}"
+                            class="grave-entry-hero__label"
+                        >
+                            {{ form.cemetery.label }}
+                        </label>
+
+                        {{ form.cemetery }}
+
+                        {% if form.cemetery.help_text %}
+                            <div class="small mt-2 text-white-50">
+                                {{ form.cemetery.help_text }}
+                            </div>
+                        {% endif %}
+
+                        {% for error in form.cemetery.errors %}
+                            <div class="small mt-2 text-warning">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="grave-entry-hero__summary">
+                        <div class="grave-entry-summary-item">
+                            <span class="grave-entry-summary-item__label">
+                                Status
+                            </span>
+                            <span class="grave-entry-summary-item__value">
+                                Novi zapis
+                            </span>
+                        </div>
+
+                        <div class="grave-entry-summary-item">
+                            <span class="grave-entry-summary-item__label">
+                                Lokacija
+                            </span>
+                            <span
+                                id="hero-location-status"
+                                class="grave-entry-summary-item__value"
+                            >
+                                Još nije određena
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="mb-3">
-                {{ form.title.label_tag }}
-                {{ form.title }}
+            <div class="grave-entry-hero__actions">
+                <a
+                    href="{% url 'graves:cemetery_list' %}"
+                    class="grave-entry-cancel"
+                >
+                    Odustani
+                </a>
             </div>
+        </div>
+    </section>
+<!-- ==========================================
+     Location Card
+========================================== -->
 
-            <div class="mb-3">
-                {{ form.inscription.label_tag }}
-                {{ form.inscription }}
-            </div>
+<section class="content-card location-card">
+    <div class="content-card__header">
+        <h2>
+            <i class="bi bi-geo-alt"></i>
+            Lokacija groba
+        </h2>
 
-            <div class="mb-3">
-                {{ form.condition.label_tag }}
-                {{ form.condition }}
-            </div>
+        <p>
+            Označite tačnu lokaciju groba klikom na kartu.
+            Ukoliko fotografije sadrže GPS podatke, lokacija će se moći automatski popuniti.
+        </p>
+    </div>
 
-            <div class="mb-3">
-                {{ form.notes.label_tag }}
-                {{ form.notes }}
-            </div>
+    <div class="location-card__body">
 
-            <hr>
-
-            <h4>Osoba</h4>
-
-            <div class="mb-3">
-                {{ form.first_name.label_tag }}
-                {{ form.first_name }}
-            </div>
-
-            <div class="mb-3">
-                {{ form.last_name.label_tag }}
-                {{ form.last_name }}
-            </div>
-
-            <div class="mb-3">
-                {{ form.birth_year.label_tag }}
-                {{ form.birth_year }}
-            </div>
-
-            <div class="mb-3">
-                {{ form.death_year.label_tag }}
-                {{ form.death_year }}
-            </div>
-
-            <div class="mb-3">
-                {{ form.person_notes.label_tag }}
-                {{ form.person_notes }}
-            </div>
-
-            <hr>
-
-            <div class="mb-3">
-                <label>Fotografije</label>
-                {{ form.photos }}
-            </div>
-
-            {{ form.latitude }}
-            {{ form.longitude }}
-            
+        <div class="location-card__map">
+            <!-- postojeći Leaflet container -->
             <div id="map"></div>
+        </div>
 
-            <button type="submit" class="btn btn-dark">
-                Sačuvaj
+        <div class="location-card__info">
+
+            <div class="status-box">
+                <span class="status-box__label">
+                    Status lokacije
+                </span>
+
+                <span id="LocationStatus" class="status waiting">
+                    ○ Lokacija nije određena
+                </span>
+            </div>
+
+            <div class="coordinate-box">
+                <label>Latitude</label>
+                <input
+                    type="text"
+                    id="latitude_display"
+                    readonly
+                    placeholder="—"
+                >
+            </div>
+
+            <div class="coordinate-box">
+                <label>Longitude</label>
+                <input
+                    type="text"
+                    id="longitude_display"
+                    readonly
+                    placeholder="—"
+                >
+            </div>
+
+            <button
+                type="button"
+                id="useCurrentLocation"
+                class="btn btn-outline-success w-100"
+            >
+                <i class="bi bi-crosshair"></i>
+                Preuzmi trenutnu GPS lokaciju
             </button>
-        </form>
+
+        </div>
 
     </div>
+</section>
+
+
+    <!-- Privremeno zadržavamo postojeći sadržaj forme.
+         U narednim koracima svaka cjelina postaje zasebna Content Card. -->
+
+<!-- ==========================================
+     Gallery Card
+========================================== -->
+<section class="content-card gallery-card">
+
+    <div class="content-card__header">
+        <h2>
+            <i class="bi bi-images"></i>
+            Fotografije groba
+        </h2>
+
+        <p>
+            Dodajte jasne fotografije groba, natpisa i važnih detalja.
+            Ako fotografija sadrži GPS podatke, sistem će ih pokušati
+            koristiti za određivanje lokacije.
+        </p>
+    </div>
+
+    <div class="gallery-card__body">
+
+        <label
+            for="{{ form.photos.id_for_label }}"
+            class="gallery-upload"
+        >
+            <span class="gallery-upload__icon">
+                <i class="bi bi-camera"></i>
+            </span>
+
+            <span class="gallery-upload__content">
+                <strong>Odaberite fotografije</strong>
+
+                <span>
+                    Možete odabrati više fotografija odjednom.
+                </span>
+            </span>
+
+            <span class="gallery-upload__action">
+                Pregledaj uređaj
+            </span>
+
+            <span class="gallery-upload__input">
+                {{ form.photos }}
+            </span>
+        </label>
+
+        {% if form.photos.errors %}
+            <div class="gallery-card__errors">
+                {{ form.photos.errors }}
+            </div>
+        {% endif %}
+
+        <div
+            id="gallery-preview"
+            class="gallery-preview"
+            aria-live="polite"
+        >
+            <div
+                id="gallery-empty-state"
+                class="gallery-empty-state"
+            >
+                <i class="bi bi-image"></i>
+
+                <div>
+                    <strong>Fotografije još nisu odabrane</strong>
+
+                    <span>
+                        Pregledi odabranih fotografija pojavit će se ovdje.
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="gallery-card__helper">
+            <i class="bi bi-info-circle"></i>
+
+            <span>
+                Originalne fotografije čuvaju više korisnih podataka,
+                uključujući vrijeme snimanja i moguću GPS lokaciju.
+            </span>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ==========================================
+     Person Card
+========================================== -->
+<section class="content-card person-card">
+
+    <div class="content-card__header">
+        <h2>
+            <i class="bi bi-person"></i>
+            Osoba povezana s grobom
+        </h2>
+
+        <p>
+            Unesite dostupne podatke o osobi koja počiva u ovom grobu.
+            Nepoznate podatke možete ostaviti praznim.
+        </p>
+    </div>
+
+    <div class="person-card__body">
+
+        <div class="person-card__layout">
+
+    <div class="person-card__visual">
+
+        <div
+            id="person-photo-preview"
+            class="person-photo-preview"
+            data-gender="unknown"
+        >
+            <div
+                id="person-photo-fallback"
+                class="person-photo-fallback"
+                aria-hidden="true"
+            >
+                <i class="bi bi-person"></i>
+            </div>
+
+            <img
+                id="person-photo-image"
+                class="person-photo-image"
+                alt="Pregled fotografije osobe"
+                hidden
+            >
+        </div>
+
+        <label
+            for="{{ form.person_photo.id_for_label }}"
+            class="person-photo-upload"
+        >
+            <i class="bi bi-camera"></i>
+            <span>Dodaj fotografiju osobe</span>
+
+            <span class="person-photo-input">
+                {{ form.person_photo }}
+            </span>
+        </label>
+
+        {% if form.person_photo.errors %}
+            <div class="person-field__errors">
+                {{ form.person_photo.errors }}
+            </div>
+        {% endif %}
+
+        <div class="person-field person-gender-field">
+            <label for="{{ form.person_gender.id_for_label }}">
+                Spol
+            </label>
+
+            {{ form.person_gender }}
+
+            {% if form.person_gender.errors %}
+                <div class="person-field__errors">
+                    {{ form.person_gender.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div class="person-card__details">
+
+        <div class="person-card__identity">
+
+            <div class="person-card__avatar" aria-hidden="true">
+                <i class="bi bi-person"></i>
+            </div>
+
+            <div class="person-card__identity-text">
+                <span class="person-card__eyebrow">
+                    Evidencija osobe
+                </span>
+
+                <strong id="person-preview-name">
+                    Ime još nije uneseno
+                </strong>
+
+                <span id="person-preview-years">
+                    Godine života nisu poznate
+                </span>
+            </div>
+
+        </div>
+
+        <div class="person-form-grid">
+
+            <div class="person-field">
+                <label for="{{ form.first_name.id_for_label }}">
+                    Ime
+                </label>
+
+                {{ form.first_name }}
+
+                {% if form.first_name.errors %}
+                    <div class="person-field__errors">
+                        {{ form.first_name.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="person-field">
+                <label for="{{ form.last_name.id_for_label }}">
+                    Prezime
+                </label>
+
+                {{ form.last_name }}
+
+                {% if form.last_name.errors %}
+                    <div class="person-field__errors">
+                        {{ form.last_name.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="person-field">
+                <label for="{{ form.birth_year.id_for_label }}">
+                    Godina rođenja
+                </label>
+
+                {{ form.birth_year }}
+
+                {% if form.birth_year.errors %}
+                    <div class="person-field__errors">
+                        {{ form.birth_year.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="person-field">
+                <label for="{{ form.death_year.id_for_label }}">
+                    Godina smrti
+                </label>
+
+                {{ form.death_year }}
+
+                {% if form.death_year.errors %}
+                    <div class="person-field__errors">
+                        {{ form.death_year.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="person-field person-field--full">
+                <label for="{{ form.person_notes.id_for_label }}">
+                    Bilješke o osobi
+                </label>
+
+                {{ form.person_notes }}
+
+                <span class="person-field__helper">
+                    Možete navesti zanimanje, porodičnu vezu, titulu ili
+                    druge potvrđene podatke.
+                </span>
+
+                {% if form.person_notes.errors %}
+                    <div class="person-field__errors">
+                        {{ form.person_notes.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <div class="person-card__helper">
+            <i class="bi bi-info-circle"></i>
+
+            <span>
+                Podatke unosite samo kada su čitljivi sa spomenika ili
+                potvrđeni pouzdanim izvorom.
+            </span>
+        </div>
+
+    </div>
+
 </div>
+</div>
+</section>
+ <!-- ==========================================
+     Record Card
+========================================== -->
+
+<section class="content-card person-card">
+
+    <div class="content-card__header">
+
+        <h2>
+            <i class="bi bi-journal-check"></i>
+            Evidencija groba
+        </h2>
+
+        <p>
+            Zabilježite stanje spomenika i sve informacije
+            koje mogu pomoći budućim istraživačima.
+        </p>
+
+    </div>
+
+    <div class="record-card__body">
+
+        <div class="record-summary">
+
+            <i class="bi bi-clipboard-check"></i>
+
+            <strong>
+                Evidencija još nije završena
+            </strong>
+
+            <span>
+                Pregled stanja i bilješki prikazivaće se ovdje.
+            </span>
+
+        </div>
+
+        <div class="person-field">
+
+            <label for="{{ form.condition.id_for_label }}">
+                Stanje spomenika
+            </label>
+
+            {{ form.condition }}
+
+            {% if form.condition.errors %}
+                <div class="person-field__errors">
+                    {{ form.condition.errors }}
+                </div>
+            {% endif %}
+
+        </div>
+
+        <div class="person-field person-field--full">
+
+            <label for="{{ form.notes.id_for_label }}">
+                Bilješke
+            </label>
+
+            {{ form.notes }}
+
+            <span class="person-field__helper">
+
+                Zabilježite sve što može biti korisno:
+                stanje spomenika, ogradu, vegetaciju,
+                simbole, natpise koji nisu čitljivi,
+                porodične informacije ili druge napomene.
+
+            </span>
+
+            {% if form.notes.errors %}
+                <div class="person-field__errors">
+                    {{ form.notes.errors }}
+                </div>
+            {% endif %}
+
+        </div>
+
+        <div class="record-card__helper">
+
+            <i class="bi bi-info-circle"></i>
+
+            <span>
+
+                Bilješke nisu obavezne, ali mogu biti
+                od velike vrijednosti budućim istraživačima.
+
+            </span>
+
+        </div>
+
+    </div>
+
+</section>
+ <!-- ==========================================
+     Submit card
+========================================== -->
+<section class="content-card submit-card">
+
+    <div class="submit-card__header">
+
+        <div class="submit-card__icon">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+
+        <h2>Digitalizacija završena</h2>
+
+        <p>
+            Pregledajte unesene podatke prije slanja.
+            Nakon slanja zapis će biti dostupan
+            administratorima na pregled i odobravanje.
+        </p>
+
+    </div>
+
+    <div class="submit-card__checklist">
+
+        <div class="check-item">
+            <i class="bi bi-geo-alt-fill"></i>
+            <span>Lokacija</span>
+            <i class="bi bi-check-circle-fill text-success"></i>
+        </div>
+
+        <div class="check-item">
+            <i class="bi bi-images"></i>
+            <span>Fotografije</span>
+            <i class="bi bi-check-circle-fill text-success"></i>
+        </div>
+
+        <div class="check-item">
+            <i class="bi bi-person"></i>
+            <span>Osoba</span>
+            <i class="bi bi-check-circle-fill text-success"></i>
+        </div>
+
+        <div class="check-item">
+            <i class="bi bi-pencil"></i>
+            <span>Natpis</span>
+            <i class="bi bi-check-circle-fill text-success"></i>
+        </div>
+
+        <div class="check-item">
+            <i class="bi bi-journal-text"></i>
+            <span>Evidencija</span>
+            <i class="bi bi-check-circle-fill text-success"></i>
+        </div>
+
+    </div>
+
+    <button type="submit" class="submit-button">
+        <i class="bi bi-send-check"></i>
+        Pošalji na pregled
+    </button>
+
+</section>
+
+</form>
 
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
 <p class="text-muted">
     Ako ne kliknete lokaciju na mapi, sistem će pokušati preuzeti GPS lokaciju iz fotografije.
 </p>
+
 <script>
     var map = L.map('map').setView([44.2, 17.9], 8);
+    var locationStatus = document.getElementById("hero-location-status");
 
     L.tileLayer(
         'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        { maxZoom: 22 }
+        {
+            maxNativeZoom: 19,
+            maxZoom: 22,
+            attribution: "&copy; OpenStreetMap contributors"
+        }
     ).addTo(map);
 
     var marker = null;
@@ -124,6 +636,28 @@
 
         document.getElementById("id_latitude").value = lat;
         document.getElementById("id_longitude").value = lng;
+        const latitudeDisplay = document.getElementById("latitude_display");
+        const longitudeDisplay = document.getElementById("longitude_display");
+
+        if (latitudeDisplay) {
+            latitudeDisplay.value = Number(lat).toFixed(6);
+        }
+
+        if (longitudeDisplay) {
+            longitudeDisplay.value = Number(lng).toFixed(6);
+        }
+
+        if (locationStatus) {
+            locationStatus.textContent = "GPS evidentiran";
+        }
+
+        const cardStatus = document.getElementById("locationStatus");
+
+        if (cardStatus) {
+            cardStatus.textContent = "✔ GPS evidentiran";
+            cardStatus.classList.remove("waiting");
+            cardStatus.classList.add("completed");
+        }
     }
 
     map.on('click', function(e) {
@@ -153,5 +687,223 @@
     setTimeout(function () {
         map.invalidateSize();
     }, 400);
+
+    /* ==========================================
+   Gallery preview
+========================================== */
+
+const photoInput = document.getElementById("{{ form.photos.id_for_label }}");
+const galleryPreview = document.getElementById("gallery-preview");
+
+function formatFileSize(bytes) {
+    if (!Number.isFinite(bytes) || bytes <= 0) {
+        return "0 KB";
+    }
+
+    const kilobytes = bytes / 1024;
+
+    if (kilobytes < 1024) {
+        return `${Math.round(kilobytes)} KB`;
+    }
+
+    return `${(kilobytes / 1024).toFixed(1)} MB`;
+}
+
+function renderGalleryPreview(files) {
+    if (!galleryPreview) {
+        return;
+    }
+
+    galleryPreview.innerHTML = "";
+
+    if (!files.length) {
+        galleryPreview.innerHTML = `
+            <div class="gallery-empty-state">
+                <i class="bi bi-image"></i>
+
+                <div>
+                    <strong>Fotografije još nisu odabrane</strong>
+                    <span>
+                        Pregledi odabranih fotografija pojavit će se ovdje.
+                    </span>
+                </div>
+            </div>
+        `;
+
+        return;
+    }
+
+    const grid = document.createElement("div");
+    grid.className = "gallery-preview__grid";
+
+    Array.from(files).forEach((file, index) => {
+        if (!file.type.startsWith("image/")) {
+            return;
+        }
+
+        const item = document.createElement("div");
+        item.className = "gallery-preview__item";
+
+        const image = document.createElement("img");
+        image.alt = `Pregled fotografije ${index + 1}`;
+
+        const number = document.createElement("span");
+        number.className = "gallery-preview__number";
+        number.textContent = index + 1;
+
+        const name = document.createElement("span");
+        name.className = "gallery-preview__name";
+        name.textContent = file.name;
+        name.title = file.name;
+
+        const objectUrl = URL.createObjectURL(file);
+
+        image.src = objectUrl;
+
+        image.addEventListener(
+            "load",
+            function () {
+                URL.revokeObjectURL(objectUrl);
+            },
+            { once: true }
+        );
+
+        item.appendChild(image);
+        item.appendChild(number);
+        item.appendChild(name);
+        grid.appendChild(item);
+    });
+
+    const totalSize = Array.from(files).reduce(
+        (sum, file) => sum + file.size,
+        0
+    );
+
+    const status = document.createElement("div");
+    status.className = "gallery-selection-status";
+    status.innerHTML = `
+        <span>
+            Odabrano:
+            <strong>${files.length}</strong>
+            ${files.length === 1 ? "fotografija" : "fotografije"}
+        </span>
+
+        <span>
+            Ukupna veličina:
+            <strong>${formatFileSize(totalSize)}</strong>
+        </span>
+    `;
+
+    galleryPreview.appendChild(grid);
+    galleryPreview.appendChild(status);
+}
+
+if (photoInput) {
+    photoInput.addEventListener("change", function () {
+        renderGalleryPreview(this.files);
+    });
+
+    if (photoInput.files && photoInput.files.length) {
+        renderGalleryPreview(photoInput.files);
+    }
+}
+
+/* ==========================================
+   Person photo preview
+========================================== */
+
+const personPhotoInput = document.getElementById(
+    "{{ form.person_photo.id_for_label }}"
+);
+
+const personGenderSelect = document.getElementById(
+    "{{ form.person_gender.id_for_label }}"
+);
+
+const personPhotoImage = document.getElementById(
+    "person-photo-image"
+);
+
+const personPhotoFallback = document.getElementById(
+    "person-photo-fallback"
+);
+
+const personPhotoPreview = document.getElementById(
+    "person-photo-preview"
+);
+
+let personPhotoObjectUrl = null;
+
+function updatePersonFallback(gender) {
+    if (
+        !personPhotoFallback ||
+        !personPhotoPreview ||
+        !personPhotoImage
+    ) {
+        return;
+    }
+
+    personPhotoPreview.dataset.gender = gender || "unknown";
+
+    const icon = personPhotoFallback.querySelector("i");
+
+    if (!icon) {
+        return;
+    }
+
+    icon.className = "bi";
+
+    if (gender === "male") {
+        icon.classList.add("bi-gender-male");
+    } else if (gender === "female") {
+        icon.classList.add("bi-gender-female");
+    } else {
+        icon.classList.add("bi-person");
+    }
+}
+
+function showPersonPhoto(file) {
+    if (
+        !personPhotoImage ||
+        !personPhotoFallback
+    ) {
+        return;
+    }
+
+    if (personPhotoObjectUrl) {
+        URL.revokeObjectURL(personPhotoObjectUrl);
+        personPhotoObjectUrl = null;
+    }
+
+    if (!file || !file.type.startsWith("image/")) {
+        personPhotoImage.removeAttribute("src");
+        personPhotoImage.hidden = true;
+        personPhotoFallback.hidden = false;
+        return;
+    }
+
+    personPhotoObjectUrl = URL.createObjectURL(file);
+
+    personPhotoImage.src = personPhotoObjectUrl;
+    personPhotoImage.hidden = false;
+    personPhotoFallback.hidden = true;
+}
+
+if (personPhotoInput) {
+    personPhotoInput.addEventListener("change", function () {
+        const selectedFile = this.files?.[0];
+
+        showPersonPhoto(selectedFile);
+    });
+}
+
+if (personGenderSelect) {
+    updatePersonFallback(personGenderSelect.value);
+
+    personGenderSelect.addEventListener("change", function () {
+        updatePersonFallback(this.value);
+    });
+}
+
 </script>
 {% endblock %}
