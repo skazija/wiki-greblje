@@ -1,0 +1,1 @@
+Heritage ilustracije ne predstavljaju pojedince niti stereotipe. One predstavljaju kulturno-historijski kontekst i period kojem grob pripada.

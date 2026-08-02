@@ -1,0 +1,244 @@
+/* ==========================================================
+   WG-LOGIN-001
+   Wiki Greblje Login Panel
+
+   Part of:
+   Wiki Greblje Design System
+
+   Version:
+   1.0
+========================================================== */
+
+.wg-login {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: clamp(2rem, 6vw, 5rem) 1rem;
+}
+
+.wg-login__card {
+    width: min(100%, 560px);
+}
+
+.wg-login__header {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+.wg-login__symbol {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    color: #39785a;
+    background: #e9f1ec;
+    border: 1px solid rgba(31, 75, 57, 0.12);
+    border-radius: 50%;
+    font-size: 1.45rem;
+}
+
+.wg-login__eyebrow {
+    margin: 0 0 0.2rem;
+    color: #718078;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.wg-login__title {
+    margin-bottom: 0.25rem;
+}
+
+.wg-login__form {
+    display: grid;
+    gap: 1.15rem;
+}
+
+.wg-login__field {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.wg-login__field label {
+    color: #43534a;
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+
+.wg-login__control {
+    position: relative;
+}
+
+.wg-login__control > i {
+    position: absolute;
+    top: 50%;
+    left: 0.9rem;
+    z-index: 1;
+    color: #738078;
+    font-size: 1rem;
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+.wg-login__control input {
+    display: block;
+    width: 100%;
+    min-height: 48px;
+    padding: 0.75rem 0.9rem 0.75rem 2.65rem;
+    color: #263c31;
+    background: #fff;
+    border: 1px solid rgba(44, 79, 61, 0.2);
+    border-radius: 11px;
+    outline: none;
+    font: inherit;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.wg-login__control input:hover {
+    border-color: rgba(44, 79, 61, 0.34);
+}
+
+.wg-login__control input:focus {
+    background: #fff;
+    border-color: #39785a;
+    box-shadow: 0 0 0 3px rgba(57, 120, 90, 0.13);
+}
+
+.wg-login__field-error {
+    color: #9a3835;
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+.wg-login__alert,
+.wg-login__notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    border-radius: 11px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+.wg-login__alert {
+    margin-bottom: 1rem;
+    color: #813330;
+    background: #fff3f2;
+    border: 1px solid rgba(154, 56, 53, 0.18);
+}
+
+.wg-login__alert > i {
+    margin-top: 0.1rem;
+    color: #9a3835;
+    font-size: 1.05rem;
+}
+
+.wg-login__alert div {
+    display: grid;
+    gap: 0.15rem;
+}
+
+.wg-login__notice {
+    margin-bottom: 1rem;
+    color: #4e6156;
+    background: #f2f7f4;
+    border: 1px solid rgba(57, 120, 90, 0.14);
+}
+
+.wg-login__notice > i {
+    margin-top: 0.1rem;
+    color: #39785a;
+}
+
+.wg-login__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    width: 100%;
+    min-height: 48px;
+    margin-top: 0.25rem;
+    padding: 0.75rem 1rem;
+    color: #fff;
+    background: #39785a;
+    border: 1px solid #39785a;
+    border-radius: 11px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.wg-login__submit:hover {
+    background: #2f684d;
+    border-color: #2f684d;
+    box-shadow: 0 8px 18px rgba(47, 104, 77, 0.17);
+    transform: translateY(-1px);
+}
+
+.wg-login__submit:focus-visible {
+    outline: 3px solid rgba(57, 120, 90, 0.24);
+    outline-offset: 3px;
+}
+
+.wg-login__footer {
+    justify-content: center;
+}
+
+.wg-login__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #596a60;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.wg-login__back:hover {
+    color: #2f684d;
+    text-decoration: underline;
+}
+
+@media (max-width: 576px) {
+    .wg-login {
+        padding: 1.25rem 0.35rem 2rem;
+    }
+
+    .wg-login__header {
+        grid-template-columns: 48px minmax(0, 1fr);
+        gap: 0.8rem;
+    }
+
+    .wg-login__symbol {
+        width: 48px;
+        height: 48px;
+        font-size: 1.2rem;
+    }
+
+    .wg-login__footer {
+        align-items: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wg-login__control input,
+    .wg-login__submit {
+        transition: none;
+    }
+
+    .wg-login__submit:hover {
+        transform: none;
+    }
+}

@@ -10,6 +10,7 @@ urlpatterns = [
     path("grobovi/<int:pk>/", views.grave_detail, name="grave_detail"),
     path("pretraga/", views.search, name="search"),
     path("dodaj-grob/", views.add_grave, name="add_grave"),
+    path("grobovi/<int:pk>/dodaj-osobu/", views.add_person, name="add_person",),
     path("moji-grobovi/", views.my_graves, name="my_graves"),
     path("api/cemetery-location/<int:pk>/", views.cemetery_location_api, name="cemetery_location_api",),
     path("moj-profil/", views.profile, name="profile"),

@@ -136,6 +136,88 @@ class PublicGraveForm(forms.ModelForm):
 
         return grave
 
+class PersonForm(forms.ModelForm):
+    class Meta:
+        model = Person
+        fields = [
+            "first_name",
+            "last_name",
+            "birth_year",
+            "death_year",
+            "gender",
+            "photo",
+            "notes",
+        ]
+
+        widgets = {
+            "first_name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Ime",
+                }
+            ),
+            "last_name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Prezime",
+                }
+            ),
+            "birth_year": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Godina rođenja",
+                }
+            ),
+            "death_year": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Godina smrti",
+                }
+            ),
+            "gender": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "photo": forms.ClearableFileInput(
+                attrs={
+                    "class": "form-control",
+                    "accept": "image/*",
+                }
+            ),
+            "notes": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4,
+                    "placeholder": "Dodatne potvrđene informacije o osobi",
+                }
+            ),
+        }
+
+        labels = {
+            "first_name": "Ime",
+            "last_name": "Prezime",
+            "birth_year": "Godina rođenja",
+            "death_year": "Godina smrti",
+            "gender": "Spol",
+            "photo": "Fotografija osobe",
+            "notes": "Bilješke o osobi",
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        first_name = cleaned_data.get("first_name")
+        last_name = cleaned_data.get("last_name")
+
+        if not first_name and not last_name:
+            raise forms.ValidationError(
+                "Unesite barem ime ili prezime osobe."
+            )
+
+        return cleaned_data
+
+
 class EditSuggestionForm(forms.ModelForm):
     class Meta:
         model = EditSuggestion

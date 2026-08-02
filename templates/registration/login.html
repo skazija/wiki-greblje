@@ -1,39 +1,157 @@
 {% extends "graves/base.html" %}
 
-{% block title %}Prijava{% endblock %}
+{% block title %}Prijava | Wiki Greblje{% endblock %}
 
 {% block content %}
 
-<div class="row justify-content-center">
-    <div class="col-md-5">
+<div class="wg-login">
 
-        <div class="card shadow-sm">
-            <div class="card-body">
+    <section
+        class="wg-card wg-login__card"
+        aria-labelledby="wg-login-title"
+    >
 
-                <h2 class="mb-4">Prijava</h2>
+        <header class="wg-card__header wg-login__header">
 
-                <form method="post">
-                    {% csrf_token %}
+            <div class="wg-login__symbol" aria-hidden="true">
+                <i class="bi bi-shield-lock"></i>
+            </div>
 
-                    <div class="mb-3">
-                        <label>Korisničko ime</label>
+            <div>
+                <p class="wg-login__eyebrow">
+                    Wiki Greblje
+                </p>
+
+                <h1
+                    id="wg-login-title"
+                    class="wg-card__title wg-login__title"
+                >
+                    Prijava
+                </h1>
+
+                <p class="wg-card__description">
+                    Prijavite se kako biste mogli dodavati grobove,
+                    uređivati vlastite zapise i doprinositi digitalnom
+                    arhivu memorijalne baštine.
+                </p>
+            </div>
+
+        </header>
+
+        <div class="wg-card__body">
+
+            {% if form.non_field_errors %}
+                <div
+                    class="wg-login__alert"
+                    role="alert"
+                >
+                    <i class="bi bi-exclamation-circle"></i>
+
+                    <div>
+                        <strong>Prijava nije uspjela.</strong>
+
+                        <span>
+                            Provjerite korisničko ime i lozinku,
+                            pa pokušajte ponovo.
+                        </span>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if next %}
+                <div class="wg-login__notice">
+                    <i class="bi bi-info-circle"></i>
+
+                    <span>
+                        Za nastavak na traženu stranicu potrebno je
+                        da se prvo prijavite.
+                    </span>
+                </div>
+            {% endif %}
+
+            <form method="post" class="wg-login__form">
+                {% csrf_token %}
+
+                {% if next %}
+                    <input
+                        type="hidden"
+                        name="next"
+                        value="{{ next }}"
+                    >
+                {% endif %}
+
+                <div class="wg-login__field">
+
+                    <label for="{{ form.username.id_for_label }}">
+                        Korisničko ime
+                    </label>
+
+                    <div class="wg-login__control">
+                        <i
+                            class="bi bi-person"
+                            aria-hidden="true"
+                        ></i>
+
                         {{ form.username }}
                     </div>
 
-                    <div class="mb-3">
-                        <label>Lozinka</label>
+                    {% for error in form.username.errors %}
+                        <span class="wg-login__field-error">
+                            {{ error }}
+                        </span>
+                    {% endfor %}
+
+                </div>
+
+                <div class="wg-login__field">
+
+                    <label for="{{ form.password.id_for_label }}">
+                        Lozinka
+                    </label>
+
+                    <div class="wg-login__control">
+                        <i
+                            class="bi bi-key"
+                            aria-hidden="true"
+                        ></i>
+
                         {{ form.password }}
                     </div>
 
-                    <button type="submit" class="btn btn-dark">
-                        Prijavi se
-                    </button>
-                </form>
+                    {% for error in form.password.errors %}
+                        <span class="wg-login__field-error">
+                            {{ error }}
+                        </span>
+                    {% endfor %}
 
-            </div>
+                </div>
+
+                <button
+                    type="submit"
+                    class="wg-login__submit"
+                >
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Prijavi se</span>
+                </button>
+
+            </form>
+
         </div>
 
-    </div>
+        <footer class="wg-card__footer wg-login__footer">
+
+            <a
+                href="{% url 'graves:home' %}"
+                class="wg-login__back"
+            >
+                <i class="bi bi-arrow-left"></i>
+                Povratak na početnu
+            </a>
+
+        </footer>
+
+    </section>
+
 </div>
 
 {% endblock %}

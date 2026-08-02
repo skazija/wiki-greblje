@@ -27,10 +27,31 @@
                     Ovaj unos još nije javno dostupan.
                 </p>
 
-                <a href="{% url 'graves:my_graves' %}"
-                   class="btn btn-dark mt-3">
-                    Nazad na moje grobove
-                </a>
+                <p class="text-muted">
+                    Trenutno evidentirano osoba:
+                    <strong>{{ grave.persons.count }}</strong>
+                </p>
+
+                <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+
+                    <a
+                        href="{% url 'graves:add_person' grave.pk %}"
+                        class="btn btn-success"
+                    >
+                        <i class="bi bi-person-plus me-1"></i>
+                        Dodaj još jednu osobu
+                    </a>
+
+                    <a
+                        href="{% url 'graves:my_graves' %}"
+                        class="btn btn-outline-dark"
+                    >
+                        Nazad na moje grobove
+                    </a>
+
+                </div>
+
+                
 
             </div>
 

@@ -1,8 +1,16 @@
+<!-- ============================================================
+     WG-PERSON-001
+     Heritage Person Panel
+     WGDS v1.0
+============================================================ -->
+
 {% extends "graves/base.html" %}
 
 {% block title %}{{ grave.title|default:"Grob" }} - Wiki Greblje{% endblock %}
 
 {% block extra_head %}
+
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 
 <style>
@@ -301,66 +309,85 @@
 
         {% if grave.persons.all %}
 
-            <div class="row row-cols-1 row-cols-md-2 g-4">
+            <div class="row g-4">
+                
 
                 {% for person in grave.persons.all %}
 
-                    <div class="col">
+                    {% if grave.persons.count == 1 %}
+                        <div class="col-12">
+                    {% else %}
+                        <div class="col-12 col-lg-6">
+                    {% endif %}
 
-                        <article class="person-card h-100">
+                        <!-- ==========================================================
+                            WG-PERSON-001
+                            Heritage Person Panel
+                            WGDS v1.0
+                        ========================================================== -->
 
-                            <div class="person-card-icon" aria-hidden="true">
-                                <i class="bi bi-person-fill"></i>
+                        <article class="wg-card wg-person">
+
+                            <!-- Heritage Photo -->
+
+                            <div class="wg-person__frame">
+
+                                {% if person.photo %}
+
+                                    <img
+                                        src="{{ person.photo.url }}"
+                                        alt="{{ person.first_name }} {{ person.last_name }}"
+                                        class="wg-person__photo"
+                                        loading="lazy">
+
+                                {% else %}
+
+                                    <div class="wg-person__placeholder">
+
+                                        <i class="bi bi-person"></i>
+
+                                    </div>
+
+                                {% endif %}
+
                             </div>
 
-                            <div class="person-card-content">
+                            <!-- Content -->
 
-                                <h3 class="person-card-name">
-                                    {{ person.first_name }}
-                                    {{ person.last_name }}
-                                </h3>
+                            <div class="wg-person__content">
 
-                                <div class="person-card-dates">
+                                <header class="wg-person__header">
 
-                                    <i class="bi bi-calendar3 me-1"></i>
+                                    <h3 class="wg-person__name">
 
-                                    <span>
+                                        {{ person.first_name }}
+                                        {{ person.last_name }}
+
+                                    </h3>
+
+                                    <p class="wg-person__years">
+
                                         {{ person.birth_year|default:"?" }}
-                                        –
+                                        —
                                         {{ person.death_year|default:"?" }}
-                                    </span>
-
-                                </div>
-
-                                {% if person.birth_date_text or person.death_date_text %}
-
-                                    <p class="person-card-date-text">
-
-                                        {% if person.birth_date_text %}
-                                            {{ person.birth_date_text }}
-                                        {% else %}
-                                            Datum rođenja nije poznat
-                                        {% endif %}
-
-                                        <span aria-hidden="true">–</span>
-
-                                        {% if person.death_date_text %}
-                                            {{ person.death_date_text }}
-                                        {% else %}
-                                            Datum smrti nije poznat
-                                        {% endif %}
 
                                     </p>
 
-                                {% endif %}
+                                </header>
 
-                                {% if person.notes %}
+                                <section class="wg-person__notes">
 
-                                    <p class="person-card-notes">
+                                    {% if person.notes %}
+
                                         {{ person.notes }}
-                                    </p>
 
-                                {% endif %}
+                                    {% else %}
+
+                                        Nema dodatnih informacija.
+
+                                    {% endif %}
+
+                                </section>
 
                             </div>
 

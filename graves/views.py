@@ -14,7 +14,7 @@ from .models import Cemetery, Grave, Person, Photo, EditSuggestion, Comment, Pro
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 
-from .forms import PublicGraveForm, EditSuggestionForm, CommentForm, ProblemReportForm
+from .forms import PublicGraveForm, PersonForm, EditSuggestionForm, CommentForm, ProblemReportForm
 from django.http import JsonResponse
 
 from django.db.models import Count
@@ -202,13 +202,45 @@ def add_grave(request):
         if form.is_valid():
             grave = form.save(user=request.user)
 
-            return redirect("graves:my_graves")
+            return redirect("graves:grave_detail",pk=grave.pk,)
     else:
         form = PublicGraveForm()
 
     return render(request, "graves/add_grave.html", {
         "form": form,
     })
+
+@login_required
+def add_person(request, pk):
+    grave = get_object_or_404(Grave, pk=pk)
+
+    if request.user != grave.created_by and not request.user.is_staff:
+        raise Http404()
+
+    if request.method == "POST":
+        form = PersonForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            person = form.save(commit=False)
+            person.grave = grave
+            person.save()
+
+            return redirect(
+                "graves:grave_detail",
+                pk=grave.pk,
+            )
+    else:
+        form = PersonForm()
+
+    return render(
+        request,
+        "graves/add_person.html",
+        {
+            "form": form,
+            "grave": grave,
+        },
+    )
+
 
 @login_required
 def my_graves(request):

@@ -2,6 +2,8 @@
 
 **Svaki nadgrobni spomenik nosi priču jednog života.**
 
+
+
 Wiki Greblje postoji kako bi te priče bile sačuvane.
 
 Ne zbog tehnologije.
@@ -25,3 +27,6 @@ Jedna priča.
 Korak po korak.
 
 Za buduće generacije.
+
+
+"Svaki nadgrobni spomenik predstavlja trag jednog ljudskog života. Naš zadatak nije samo da ga evidentiramo, nego da ga sačuvamo od zaborava."

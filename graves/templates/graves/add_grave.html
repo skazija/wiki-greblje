@@ -97,17 +97,17 @@
 ========================================== -->
 
 <section class="content-card location-card">
-    <div class="content-card__header">
-        <h2>
+    <header class="wg-card__header">
+        <h2 class="wg-card__title">
             <i class="bi bi-geo-alt"></i>
             Lokacija groba
         </h2>
 
-        <p>
+        <p class="wg-card__description">
             Označite tačnu lokaciju groba klikom na kartu.
             Ukoliko fotografije sadrže GPS podatke, lokacija će se moći automatski popuniti.
         </p>
-    </div>
+    </header>
 
     <div class="location-card__body">
 
@@ -171,18 +171,18 @@
 ========================================== -->
 <section class="content-card gallery-card">
 
-    <div class="content-card__header">
-        <h2>
+    <header class="wg-card__header">
+        <h2 class="wg-card__title">
             <i class="bi bi-images"></i>
             Fotografije groba
         </h2>
 
-        <p>
+        <p class="wg-card__description">
             Dodajte jasne fotografije groba, natpisa i važnih detalja.
             Ako fotografija sadrži GPS podatke, sistem će ih pokušati
             koristiti za određivanje lokacije.
         </p>
-    </div>
+    </header>
 
     <div class="gallery-card__body">
 
@@ -254,25 +254,25 @@
 <!-- ==========================================
      Person Card
 ========================================== -->
-<section class="content-card person-card">
+<section class="wg-card wg-card--spaced person-entry">
 
-    <div class="content-card__header">
-        <h2>
+    <header class="wg-card__header">
+        <h2 class="wg-card__title">
             <i class="bi bi-person"></i>
             Osoba povezana s grobom
         </h2>
 
-        <p>
+        <p class="wg-card__description">
             Unesite dostupne podatke o osobi koja počiva u ovom grobu.
             Nepoznate podatke možete ostaviti praznim.
         </p>
-    </div>
+    </header>
 
-    <div class="person-card__body">
+    <div class="wg-card__body person-entry__body">
 
-        <div class="person-card__layout">
+        <div class="person-entry__layout">
 
-    <div class="person-card__visual">
+    <div class="person-entry__visual">
 
         <div
             id="person-photo-preview"
@@ -329,16 +329,16 @@
 
     </div>
 
-    <div class="person-card__details">
+    <div class="person-entry__details">
 
-        <div class="person-card__identity">
+        <div class="person-entry__identity">
 
-            <div class="person-card__avatar" aria-hidden="true">
+            <div class="person-entry__avatar" aria-hidden="true">
                 <i class="bi bi-person"></i>
             </div>
 
-            <div class="person-card__identity-text">
-                <span class="person-card__eyebrow">
+            <div class="person-entry__identity-text">
+                <span class="person-entry__eyebrow">
                     Evidencija osobe
                 </span>
 
@@ -432,7 +432,7 @@
 
         </div>
 
-        <div class="person-card__helper">
+        <div class="person-entry__helper">
             <i class="bi bi-info-circle"></i>
 
             <span>
@@ -446,25 +446,69 @@
 </div>
 </div>
 </section>
+
+<!-- ==========================================
+     Inscription Card
+========================================== -->
+
+<section class="wg-card wg-card--spaced inscription-entry">
+
+    <header class="wg-card__header">
+        <h2 class="wg-card__title">
+            <i class="bi bi-pencil-square"></i>
+            Natpis sa spomenika
+        </h2>
+
+        <p class="wg-card__description">
+            Prepišite natpis onako kako je sačuvan na spomeniku.
+            Nečitljive ili oštećene dijelove možete označiti u uglastim zagradama.
+        </p>
+    </header>
+
+    <div class="wg-card__body">
+
+        <div class="person-field person-field--full">
+            <label for="{{ form.inscription.id_for_label }}">
+                Doslovni prijepis natpisa
+            </label>
+
+            {{ form.inscription }}
+
+            <span class="person-field__helper">
+                Ovo polje je odvojeno od naslova groba i imena evidentirane osobe.
+                Ako natpis nije poznat ili nije čitljiv, ostavite ga praznim.
+            </span>
+
+            {% if form.inscription.errors %}
+                <div class="person-field__errors">
+                    {{ form.inscription.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+</section>
+
+
  <!-- ==========================================
      Record Card
 ========================================== -->
 
-<section class="content-card person-card">
+<section class="wg-card wg-card--spaced record-card">
 
-    <div class="content-card__header">
-
-        <h2>
+    <header class="wg-card__header">
+        <h2 class="wg-card__title">
             <i class="bi bi-journal-check"></i>
             Evidencija groba
         </h2>
 
-        <p>
+        <p class="wg-card__description">
             Zabilježite stanje spomenika i sve informacije
             koje mogu pomoći budućim istraživačima.
         </p>
 
-    </div>
+    </header>
 
     <div class="record-card__body">
 
@@ -550,7 +594,9 @@
             <i class="bi bi-check-circle-fill"></i>
         </div>
 
-        <h2>Digitalizacija završena</h2>
+        <h2 id="digitalization-status-title">
+            Digitalizacija je u toku
+        </h2>
 
         <p>
             Pregledajte unesene podatke prije slanja.
@@ -562,37 +608,37 @@
 
     <div class="submit-card__checklist">
 
-        <div class="check-item">
+        <div class="check-item" id="check-location">
             <i class="bi bi-geo-alt-fill"></i>
             <span>Lokacija</span>
-            <i class="bi bi-check-circle-fill text-success"></i>
+            <i class="bi bi-circle check-item__status"></i>
         </div>
 
-        <div class="check-item">
+        <div class="check-item" id="check-photos">
             <i class="bi bi-images"></i>
             <span>Fotografije</span>
-            <i class="bi bi-check-circle-fill text-success"></i>
+            <i class="bi bi-circle check-item__status"></i>
         </div>
 
-        <div class="check-item">
+        <div class="check-item" id="check-person">
             <i class="bi bi-person"></i>
             <span>Osoba</span>
-            <i class="bi bi-check-circle-fill text-success"></i>
+            <i class="bi bi-circle check-item__status"></i>
         </div>
 
-        <div class="check-item">
+        <div class="check-item" id="check-inscription">
             <i class="bi bi-pencil"></i>
             <span>Natpis</span>
-            <i class="bi bi-check-circle-fill text-success"></i>
-        </div>
-
-        <div class="check-item">
-            <i class="bi bi-journal-text"></i>
-            <span>Evidencija</span>
-            <i class="bi bi-check-circle-fill text-success"></i>
-        </div>
-
+            <i class="bi bi-circle check-item__status"></i>
     </div>
+
+    <div class="check-item" id="check-record">
+        <i class="bi bi-journal-text"></i>
+        <span>Evidencija</span>
+        <i class="bi bi-circle check-item__status"></i>
+    </div>
+
+</div>
 
     <button type="submit" class="submit-button">
         <i class="bi bi-send-check"></i>
@@ -636,6 +682,7 @@
 
         document.getElementById("id_latitude").value = lat;
         document.getElementById("id_longitude").value = lng;
+        updateDigitalizationChecklist();
         const latitudeDisplay = document.getElementById("latitude_display");
         const longitudeDisplay = document.getElementById("longitude_display");
 
@@ -904,6 +951,213 @@ if (personGenderSelect) {
         updatePersonFallback(this.value);
     });
 }
+
+/* ==========================================
+   Digitalization checklist
+========================================== */
+
+const checklistFields = {
+    latitude: document.getElementById("id_latitude"),
+    longitude: document.getElementById("id_longitude"),
+    photos: document.getElementById("{{ form.photos.id_for_label }}"),
+    firstName: document.getElementById("{{ form.first_name.id_for_label }}"),
+    lastName: document.getElementById("{{ form.last_name.id_for_label }}"),
+    birthYear: document.getElementById("{{ form.birth_year.id_for_label }}"),
+    deathYear: document.getElementById("{{ form.death_year.id_for_label }}"),
+    personGender: document.getElementById(
+        "{{ form.person_gender.id_for_label }}"
+    ),
+    personPhoto: document.getElementById(
+        "{{ form.person_photo.id_for_label }}"
+    ),
+    personNotes: document.getElementById(
+        "{{ form.person_notes.id_for_label }}"
+    ),
+    inscription: document.getElementById(
+        "{{ form.inscription.id_for_label }}"
+    ),
+    condition: document.getElementById(
+        "{{ form.condition.id_for_label }}"
+    ),
+    notes: document.getElementById("{{ form.notes.id_for_label }}"),
+};
+
+function hasValue(element) {
+    return Boolean(element && String(element.value || "").trim());
+}
+
+function setChecklistState(itemId, completed) {
+    const item = document.getElementById(itemId);
+
+    if (!item) {
+        return;
+    }
+
+    const statusIcon = item.querySelector(".check-item__status");
+
+    item.classList.toggle("is-complete", completed);
+
+    if (!statusIcon) {
+        return;
+    }
+
+    statusIcon.className = completed
+        ? "bi bi-check-circle-fill text-success check-item__status"
+        : "bi bi-circle text-muted check-item__status";
+}
+
+function updateDigitalizationChecklist() {
+    const locationComplete =
+        hasValue(checklistFields.latitude) &&
+        hasValue(checklistFields.longitude);
+
+    const photosComplete =
+        Boolean(
+            checklistFields.photos &&
+            checklistFields.photos.files &&
+            checklistFields.photos.files.length
+        );
+
+    const personComplete = [
+        checklistFields.firstName,
+        checklistFields.lastName,
+        checklistFields.birthYear,
+        checklistFields.deathYear,
+        checklistFields.personGender,
+        checklistFields.personNotes,
+    ].some(hasValue) || Boolean(
+        checklistFields.personPhoto &&
+        checklistFields.personPhoto.files &&
+        checklistFields.personPhoto.files.length
+    );
+
+    const inscriptionComplete =
+        hasValue(checklistFields.inscription);
+
+    const recordComplete =
+        hasValue(checklistFields.condition) ||
+        hasValue(checklistFields.notes);
+
+    setChecklistState("check-location", locationComplete);
+    setChecklistState("check-photos", photosComplete);
+    setChecklistState("check-person", personComplete);
+    setChecklistState("check-inscription", inscriptionComplete);
+    setChecklistState("check-record", recordComplete);
+
+    const completedCount = [
+        locationComplete,
+        photosComplete,
+        personComplete,
+        inscriptionComplete,
+        recordComplete,
+    ].filter(Boolean).length;
+
+    const title = document.getElementById(
+        "digitalization-status-title"
+    );
+
+    if (title) {
+        title.textContent = completedCount === 5
+            ? "Digitalizacija završena"
+            : `Digitalizacija je u toku (${completedCount}/5)`;
+    }
+}
+
+Object.values(checklistFields).forEach((element) => {
+    if (!element) {
+        return;
+    }
+
+    element.addEventListener(
+        element.type === "file" || element.tagName === "SELECT"
+            ? "change"
+            : "input",
+        updateDigitalizationChecklist
+    );
+
+    if (element.type !== "file") {
+        element.addEventListener(
+            "change",
+            updateDigitalizationChecklist
+        );
+    }
+});
+
+updateDigitalizationChecklist();
+
+/* ==========================================
+   Current GPS location
+========================================== */
+
+const useCurrentLocationButton = document.getElementById(
+    "useCurrentLocation"
+);
+
+if (useCurrentLocationButton) {
+    useCurrentLocationButton.addEventListener("click", function () {
+        if (!navigator.geolocation) {
+            alert(
+                "Vaš preglednik ne podržava određivanje trenutne lokacije."
+            );
+            return;
+        }
+
+        useCurrentLocationButton.disabled = true;
+        useCurrentLocationButton.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2"
+                  aria-hidden="true"></span>
+            Preuzimam lokaciju...
+        `;
+
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+
+                setMarker(latitude, longitude);
+                map.setView([latitude, longitude], 19);
+
+                useCurrentLocationButton.disabled = false;
+                useCurrentLocationButton.innerHTML = `
+                    <i class="bi bi-check-circle"></i>
+                    Trenutna lokacija preuzeta
+                `;
+            },
+
+            function (error) {
+                let message =
+                    "Nije bilo moguće preuzeti trenutnu lokaciju.";
+
+                if (error.code === error.PERMISSION_DENIED) {
+                    message =
+                        "Pristup lokaciji nije dozvoljen. " +
+                        "Omogućite lokaciju u postavkama preglednika.";
+                } else if (error.code === error.POSITION_UNAVAILABLE) {
+                    message =
+                        "Trenutna lokacija nije dostupna.";
+                } else if (error.code === error.TIMEOUT) {
+                    message =
+                        "Zahtjev za lokaciju je istekao. Pokušajte ponovo.";
+                }
+
+                alert(message);
+
+                useCurrentLocationButton.disabled = false;
+                useCurrentLocationButton.innerHTML = `
+                    <i class="bi bi-crosshair"></i>
+                    Preuzmi trenutnu GPS lokaciju
+                `;
+            },
+
+            {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 0,
+            }
+        );
+    });
+}
+
 
 </script>
 {% endblock %}
