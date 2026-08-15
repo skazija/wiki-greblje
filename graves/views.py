@@ -31,7 +31,11 @@ from .models import Photo
 
 
 def cemetery_list(request):
-    cemeteries = Cemetery.objects.all().order_by("name")
+    cemeteries = (
+        Cemetery.objects
+        .prefetch_related("photos")
+        .order_by("name")
+    )
 
     return render(request, "graves/cemetery_list.html", {
         "cemeteries": cemeteries,
@@ -40,11 +44,28 @@ def cemetery_list(request):
 
 def cemetery_detail(request, pk):
     cemetery = get_object_or_404(Cemetery, pk=pk)
-    graves = cemetery.graves.filter(status=Grave.STATUS_APPROVED).prefetch_related("persons", "photos")
+
+    graves = cemetery.graves.filter(
+        status=Grave.STATUS_APPROVED
+    ).prefetch_related("persons", "photos")
+
+    cemetery_photos = cemetery.photos.all().order_by(
+        "-is_primary",
+        "id"
+    )
+
+    primary_photo = cemetery_photos.filter(
+        is_primary=True
+    ).first()
+
+    if not primary_photo:
+        primary_photo = cemetery_photos.first()
 
     return render(request, "graves/cemetery_detail.html", {
         "cemetery": cemetery,
         "graves": graves,
+        "cemetery_photos": cemetery_photos,
+        "primary_photo": primary_photo,
     })
 
 

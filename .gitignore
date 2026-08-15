@@ -1,2 +1,23 @@
-graves/static/graves/css/style - Copy.css
-graves/templates/graves/cemetery_detail_old1.html
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+.venv/
+
+# Django uploaded media
+media/
+
+# Environment / secrets
+.env
+.env.*
+
+# Local database (ako se ikada koristi SQLite)
+*.sqlite3
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

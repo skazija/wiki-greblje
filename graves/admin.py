@@ -4,7 +4,7 @@ from django import forms
 from django.contrib import admin
 from django.contrib.gis.admin import GISModelAdmin
 from django.contrib.gis.geos import Point
-from .models import Cemetery, Grave, Person, Photo, EditHistory, LocationSuggestion, EditSuggestion, Comment, ProblemReport
+from .models import Cemetery, Grave, Person, Photo, EditHistory, LocationSuggestion, EditSuggestion, Comment, ProblemReport, CemeteryPhoto
 from django.db.models import Case, When, Value, IntegerField
 import json
 from django.contrib.gis.geos import Polygon
@@ -141,14 +141,48 @@ class PhotoInline(admin.TabularInline):
 
     gps_text.short_description = "GPS"
 
+class CemeteryPhotoInline(admin.TabularInline):
+    model = CemeteryPhoto
+    extra = 1
+
+    fields = (
+        "image_preview",
+        "image",
+        "caption",
+        "is_primary",
+    )
+
+    readonly_fields = (
+        "image_preview",
+    )
+
+    def image_preview(self, obj):
+        if obj and obj.image:
+            return format_html(
+                '<a href="{}" target="_blank">'
+                '<img src="{}" '
+                'style="height:90px; width:120px; '
+                'object-fit:cover; border-radius:6px;" />'
+                '</a>',
+                obj.image.url,
+                obj.image.url,
+            )
+
+        return "-"
+
+    image_preview.short_description = "Pregled"
+
+
 @admin.register(Cemetery)
 class CemeteryAdmin(admin.ModelAdmin):
     form = CemeteryAdminForm
- 
+    inlines = [CemeteryPhotoInline]
+    
     fieldsets = (
         ("Osnovni podaci", {
             "fields": (
                 "name",
+                "cemetery_type",
                 "city",
                 "village",
                 "description",
@@ -159,9 +193,10 @@ class CemeteryAdmin(admin.ModelAdmin):
         }),
 
     )
-    list_display = ("name", "city", "village", "created_at")
+    list_display = ("name", "cemetery_type", "city", "village", "created_at")
     search_fields = ("name", "city", "village")
-
+    list_filter = ("cemetery_type",)
+    
 class PersonInline(admin.StackedInline):
     model = Person
     extra = 0

@@ -67,6 +67,11 @@
                     </p>
                 {% endif %}
 
+                <div class="cemetery-type-badge">
+                    <i class="bi bi-bookmark-fill"></i>
+                    <span>{{ cemetery.get_cemetery_type_display }}</span>
+                </div>   
+
                 {% if cemetery.description %}
                     <p class="cemetery-detail-description">
                         {{ cemetery.description }}
@@ -83,6 +88,70 @@
     </div>
 </section>
 
+
+<!-- =====================================================
+     Cemetery Gallery
+===================================================== -->
+
+{% if primary_photo %}
+
+<section class="card content-card cemetery-gallery">
+    <div class="card-body">
+
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+
+            <h2 class="section-title mb-0">
+                <i class="bi bi-images"></i>
+                Fotografije groblja
+            </h2>
+
+            {% if cemetery_photos|length > 1 %}
+                <span class="badge rounded-pill text-bg-dark">
+                    {{ cemetery_photos|length }} fotografije
+                </span>
+            {% endif %}
+
+        </div>
+
+
+        <button
+            type="button"
+            class="cemetery-gallery-open"
+            id="openCemeteryGallery"
+        >
+
+            <img
+                src="{{ primary_photo.image.url }}"
+                alt="{% if primary_photo.caption %}{{ primary_photo.caption }}{% else %}{{ cemetery.name }}{% endif %}"
+                class="cemetery-gallery-primary-image"
+            >
+
+            {% if cemetery_photos|length > 1 %}
+
+                <span class="cemetery-gallery-overlay">
+
+                    <span>
+                        <i class="bi bi-images"></i>
+                        Pogledaj sve fotografije
+                    </span>
+
+                </span>
+
+            {% endif %}
+
+        </button>
+
+
+        {% if primary_photo.caption %}
+            <p class="cemetery-gallery-caption mb-0">
+                {{ primary_photo.caption }}
+            </p>
+        {% endif %}
+
+    </div>
+</section>
+
+{% endif %}
 
 <!-- =====================================================
      Cemetery Map
@@ -291,6 +360,75 @@
     </div>
 
 </section>
+{% if cemetery_photos %}
+
+<div
+    class="cemetery-lightbox"
+    id="cemeteryLightbox"
+    aria-hidden="true"
+>
+
+    <button
+        type="button"
+        class="cemetery-lightbox-close"
+        id="closeCemeteryGallery"
+        aria-label="Zatvori galeriju"
+    >
+        <i class="bi bi-x-lg"></i>
+    </button>
+
+
+    {% if cemetery_photos|length > 1 %}
+
+        <button
+            type="button"
+            class="cemetery-lightbox-nav cemetery-lightbox-prev"
+            id="cemeteryGalleryPrev"
+            aria-label="Prethodna fotografija"
+        >
+            <i class="bi bi-chevron-left"></i>
+        </button>
+
+        <button
+            type="button"
+            class="cemetery-lightbox-nav cemetery-lightbox-next"
+            id="cemeteryGalleryNext"
+            aria-label="Sljedeća fotografija"
+        >
+            <i class="bi bi-chevron-right"></i>
+        </button>
+
+    {% endif %}
+
+
+    <div class="cemetery-lightbox-content">
+
+        <img
+            id="cemeteryLightboxImage"
+            class="cemetery-lightbox-image"
+            src=""
+            alt=""
+        >
+
+        <div class="cemetery-lightbox-footer">
+
+            <div
+                id="cemeteryLightboxCaption"
+                class="cemetery-lightbox-caption"
+            ></div>
+
+            <div
+                id="cemeteryLightboxCounter"
+                class="cemetery-lightbox-counter"
+            ></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}
 
 {% endblock %}
 
@@ -505,6 +643,250 @@
                 }
             );
         }
+
+
+    /* =================================================
+    Cemetery gallery
+    ================================================= */
+
+    const cemeteryGalleryPhotos = [
+        {% for photo in cemetery_photos %}
+        {
+            src: "{{ photo.image.url|escapejs }}",
+            caption: "{{ photo.caption|default:''|escapejs }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    const galleryOpen =
+        document.getElementById("openCemeteryGallery");
+
+    const galleryLightbox =
+        document.getElementById("cemeteryLightbox");
+
+    const galleryClose =
+        document.getElementById("closeCemeteryGallery");
+
+    const galleryPrev =
+        document.getElementById("cemeteryGalleryPrev");
+
+    const galleryNext =
+        document.getElementById("cemeteryGalleryNext");
+
+    const galleryImage =
+        document.getElementById("cemeteryLightboxImage");
+
+    const galleryCaption =
+        document.getElementById("cemeteryLightboxCaption");
+
+    const galleryCounter =
+        document.getElementById("cemeteryLightboxCounter");
+
+    let cemeteryGalleryIndex = 0;
+    
+    let cemeteryTouchStartX = 0;
+    let cemeteryTouchEndX = 0;
+
+    function handleCemeteryGallerySwipe() {
+
+        const swipeDistance =
+            cemeteryTouchEndX - cemeteryTouchStartX;
+
+        const minimumSwipeDistance = 50;
+
+        if (Math.abs(swipeDistance) < minimumSwipeDistance) {
+            return;
+        }
+
+        if (swipeDistance < 0) {
+            // Swipe lijevo → sljedeća fotografija
+            showCemeteryGalleryPhoto(
+                cemeteryGalleryIndex + 1
+            );
+        } else {
+            // Swipe desno → prethodna fotografija
+            showCemeteryGalleryPhoto(
+                cemeteryGalleryIndex - 1
+            );
+        }
+    }
+
+    function showCemeteryGalleryPhoto(index) {
+
+        if (!cemeteryGalleryPhotos.length) {
+            return;
+        }
+
+        if (index < 0) {
+            index = cemeteryGalleryPhotos.length - 1;
+        }
+
+        if (index >= cemeteryGalleryPhotos.length) {
+            index = 0;
+        }
+
+        cemeteryGalleryIndex = index;
+
+        const photo =
+            cemeteryGalleryPhotos[cemeteryGalleryIndex];
+
+        galleryImage.src = photo.src;
+        galleryImage.alt = photo.caption || "{{ cemetery.name|escapejs }}";
+
+        galleryCaption.textContent =
+            photo.caption || "";
+
+        galleryCounter.textContent =
+            (cemeteryGalleryIndex + 1) +
+            " / " +
+            cemeteryGalleryPhotos.length;
+    }
+
+
+    function openCemeteryGallery() {
+
+        if (!galleryLightbox) {
+            return;
+        }
+
+        showCemeteryGalleryPhoto(0);
+
+        galleryLightbox.classList.add("is-open");
+        galleryLightbox.setAttribute("aria-hidden", "false");
+
+        document.body.style.overflow = "hidden";
+    }
+
+
+    function closeCemeteryGallery() {
+
+        if (!galleryLightbox) {
+            return;
+        }
+
+        galleryLightbox.classList.remove("is-open");
+        galleryLightbox.setAttribute("aria-hidden", "true");
+
+        document.body.style.overflow = "";
+    }
+
+
+    if (galleryOpen) {
+        galleryOpen.addEventListener(
+            "click",
+            openCemeteryGallery
+        );
+    }
+
+
+    if (galleryClose) {
+        galleryClose.addEventListener(
+            "click",
+            closeCemeteryGallery
+        );
+    }
+
+
+    if (galleryPrev) {
+        galleryPrev.addEventListener(
+            "click",
+            function () {
+                showCemeteryGalleryPhoto(
+                    cemeteryGalleryIndex - 1
+                );
+            }
+        );
+    }
+
+
+    if (galleryNext) {
+        galleryNext.addEventListener(
+            "click",
+            function () {
+                showCemeteryGalleryPhoto(
+                    cemeteryGalleryIndex + 1
+                );
+            }
+        );
+    }
+
+
+    if (galleryLightbox) {
+
+        galleryLightbox.addEventListener(
+            "click",
+            function (event) {
+
+                if (event.target === galleryLightbox) {
+                    closeCemeteryGallery();
+                }
+
+            }
+        );
+    }
+
+    if (galleryLightbox) {
+
+        galleryLightbox.addEventListener(
+            "touchstart",
+            function (event) {
+
+                cemeteryTouchStartX =
+                    event.changedTouches[0].screenX;
+
+            },
+            {
+                passive: true
+            }
+        );
+
+
+        galleryLightbox.addEventListener(
+            "touchend",
+            function (event) {
+
+                cemeteryTouchEndX =
+                    event.changedTouches[0].screenX;
+
+                handleCemeteryGallerySwipe();
+
+            },
+            {
+                passive: true
+            }
+        );
+
+    }
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                !galleryLightbox ||
+                !galleryLightbox.classList.contains("is-open")
+            ) {
+                return;
+            }
+
+            if (event.key === "Escape") {
+                closeCemeteryGallery();
+            }
+
+            if (event.key === "ArrowLeft") {
+                showCemeteryGalleryPhoto(
+                    cemeteryGalleryIndex - 1
+                );
+            }
+
+            if (event.key === "ArrowRight") {
+                showCemeteryGalleryPhoto(
+                    cemeteryGalleryIndex + 1
+                );
+            }
+
+        }
+    );    
     });
 </script>
 

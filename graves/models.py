@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, ImageOps
 from io import BytesIO
 from django.core.files.base import ContentFile
 import exifread
@@ -14,6 +14,47 @@ class Cemetery(models.Model):
     village = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)
 
+    CEMETERY_TYPE_MUSLIM = "muslimansko"
+    CEMETERY_TYPE_CATHOLIC = "katolicko"
+    CEMETERY_TYPE_ORTHODOX = "pravoslavno"
+    CEMETERY_TYPE_JEWISH = "hebrejsko"
+    CEMETERY_TYPE_PARTISAN = "partizansko"
+    CEMETERY_TYPE_STECCI = "stecci"
+    CEMETERY_TYPE_MILITARY = "vojno"
+    CEMETERY_TYPE_CITY = "gradsko"
+    CEMETERY_TYPE_VILLAGE = "seosko"
+    CEMETERY_TYPE_FAMILY = "porodicno"
+    CEMETERY_TYPE_NATURAL = "prirodno"
+    CEMETERY_TYPE_MASS_GRAVE = "masovna_grobnica"
+    CEMETERY_TYPE_MEMORIAL = "spomen_groblje"
+    CEMETERY_TYPE_UNKNOWN = "nepoznato"
+    CEMETERY_TYPE_OTHER = "ostalo"
+
+    CEMETERY_TYPE_CHOICES = [
+        (CEMETERY_TYPE_MUSLIM, "Muslimansko"),
+        (CEMETERY_TYPE_CATHOLIC, "Katoličko"),
+        (CEMETERY_TYPE_ORTHODOX, "Pravoslavno"),
+        (CEMETERY_TYPE_JEWISH, "Hebrejsko"),
+        (CEMETERY_TYPE_PARTISAN, "Partizansko"),
+        (CEMETERY_TYPE_STECCI, "Stećci"),
+        (CEMETERY_TYPE_MILITARY, "Vojno"),
+        (CEMETERY_TYPE_CITY, "Gradsko"),
+        (CEMETERY_TYPE_VILLAGE, "Seosko"),
+        (CEMETERY_TYPE_FAMILY, "Porodično"),
+        (CEMETERY_TYPE_NATURAL, "Prirodno"),
+        (CEMETERY_TYPE_MASS_GRAVE, "Masovna grobnica"),
+        (CEMETERY_TYPE_MEMORIAL, "Spomen-groblje"),
+        (CEMETERY_TYPE_UNKNOWN, "Nepoznato"),
+        (CEMETERY_TYPE_OTHER, "Ostalo"),
+    ]
+
+    cemetery_type = models.CharField(
+        max_length=30,
+        choices=CEMETERY_TYPE_CHOICES,
+        default=CEMETERY_TYPE_UNKNOWN,
+        verbose_name="Vrsta groblja",
+    )
+    
     location = gis_models.PointField(null=True, blank=True)
     boundary = gis_models.PolygonField(null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
@@ -36,6 +77,130 @@ class Cemetery(models.Model):
             )
         super().save(*args, **kwargs)
     
+    @property
+    def primary_photo(self):
+        primary = self.photos.filter(
+            is_primary=True
+        ).first()
+
+        if primary:
+            return primary
+
+        return self.photos.first()
+    
+    @property
+    def fallback_icon(self):
+        return f"heritage-icons/cemetery/{self.cemetery_type}.png"
+    
+class CemeteryPhoto(models.Model):
+    cemetery = models.ForeignKey(
+        Cemetery,
+        on_delete=models.CASCADE,
+        related_name="photos"
+    )
+
+    image = models.ImageField(
+        upload_to="cemetery_photos/"
+    )
+
+    image_original = models.ImageField(
+        upload_to="cemetery_photos/originals/%Y/%m/",
+        blank=True,
+        null=True,
+    )
+
+    caption = models.CharField(
+        max_length=255,
+        blank=True
+    )
+
+    is_primary = models.BooleanField(
+        default=False,
+        verbose_name="Glavna fotografija"
+    )
+
+    uploaded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    uploaded_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def save(self, *args, **kwargs):
+        if self.image:
+            try:
+                # 1. Sačuvaj original netaknut
+                if not self.image_original:
+                    self.image.seek(0)
+
+                    original_content = ContentFile(
+                        self.image.read()
+                    )
+
+                    self.image_original.save(
+                        self.image.name,
+                        original_content,
+                        save=False
+                    )
+
+                    self.image.seek(0)
+
+                # 2. Napravi optimizovanu web verziju
+                img = Image.open(self.image)
+
+                try:
+                    img = ImageOps.exif_transpose(img)
+                except Exception:
+                    pass
+
+                max_size = (2000, 2000)
+
+                if img.width > 2000 or img.height > 2000:
+                    img.thumbnail(
+                        max_size,
+                        Image.LANCZOS
+                    )
+
+                if img.mode in ("RGBA", "P"):
+                    img = img.convert("RGB")
+
+                buffer = BytesIO()
+
+                img.save(
+                    buffer,
+                    format="JPEG",
+                    quality=90,
+                    optimize=True
+                )
+
+                buffer.seek(0)
+
+                self.image.save(
+                    self.image.name,
+                    ContentFile(buffer.read()),
+                    save=False
+                )
+
+            except Exception as e:
+                print(
+                    f"Cemetery image processing error: {e}"
+                )
+        # Samo jedna fotografija groblja može biti glavna
+        if self.is_primary:
+            CemeteryPhoto.objects.filter(
+                cemetery=self.cemetery,
+                is_primary=True
+            ).exclude(pk=self.pk).update(is_primary=False)
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"Photo for {self.cemetery}"
+
+
 
 class Grave(models.Model):
     cemetery = models.ForeignKey(
@@ -210,6 +375,7 @@ class Photo(models.Model):
     )
 
     image = models.ImageField(upload_to="grave_photos/")
+    image_original = models.ImageField(upload_to="grave_photos/originals/%Y/%m/", blank=True, null=True,)
     caption = models.CharField(max_length=255, blank=True)
 
     gps_location = gis_models.PointField(srid=4326, null=True, blank=True)
@@ -264,49 +430,64 @@ class Photo(models.Model):
             if gps_point:
                 self.gps_location = gps_point
 
-        # Resize slike prije spremanja
         if self.image:
             try:
+                # Ako original još nije sačuvan, sačuvaj upload netaknut
+                if not self.image_original:
+                    self.image.seek(0)
+
+                    original_content = ContentFile(
+                        self.image.read()
+                    )
+
+                    self.image_original.save(
+                        self.image.name,
+                        original_content,
+                        save=False
+                    )
+
+                    self.image.seek(0)
+
+                # Web verzija
                 img = Image.open(self.image)
 
-                # ispravi rotaciju sa telefona
                 try:
                     from PIL import ImageOps
                     img = ImageOps.exif_transpose(img)
                 except Exception:
                     pass
 
-                MAX_SIZE = (1600, 1600)
+                MAX_SIZE = (2000, 2000)
 
-                if img.width > 1600 or img.height > 1600:
-
-                    img.thumbnail(MAX_SIZE, Image.LANCZOS)
-
-                    buffer = BytesIO()
-
-                    if img.mode in ("RGBA", "P"):
-                        img = img.convert("RGB")
-
-                    img.save(
-                        buffer,
-                        format="JPEG",
-                        quality=85,
-                        optimize=True
+                if img.width > 2000 or img.height > 2000:
+                    img.thumbnail(
+                        MAX_SIZE,
+                        Image.LANCZOS
                     )
 
-                    buffer.seek(0)
+                if img.mode in ("RGBA", "P"):
+                    img = img.convert("RGB")
 
-                    self.image.save(
-                        self.image.name,
-                        ContentFile(buffer.read()),
-                        save=False
-                    )
+                buffer = BytesIO()
+
+                img.save(
+                    buffer,
+                    format="JPEG",
+                    quality=90,
+                    optimize=True
+                )
+
+                buffer.seek(0)
+
+                self.image.save(
+                    self.image.name,
+                    ContentFile(buffer.read()),
+                    save=False
+                )
 
             except Exception as e:
-                print(f"Image resize error: {e}")
-
+                print(f"Image processing error: {e}")
         super().save(*args, **kwargs)
-
     def __str__(self):
         return f"Photo for {self.grave}"
 

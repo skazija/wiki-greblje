@@ -1,5 +1,5 @@
 {% extends "graves/base.html" %}
-
+{% load static %}
 {% block title %}Groblja - Wiki Greblje{% endblock %}
 
 {% block content %}
@@ -40,46 +40,77 @@
 
     <div class="card cemetery-card mb-4">
 
-        <div class="card-body">
+        <div class="row g-0 cemetery-card-row">
 
-            <h3 class="cemetery-title">
+            <!-- PODACI -->
+            <div class="col-md-7">
+                <div class="card-body cemetery-card-content">
 
-                <i class="bi bi-geo-alt-fill me-2"></i>
+                    <h3 class="cemetery-title">
+                        <i class="bi bi-geo-alt-fill me-2"></i>
+                        {{ cemetery.name }}
+                    </h3>
 
-                {{ cemetery.name }}
+                    <p class="text-muted mb-2">
+                        <i class="bi bi-pin-map me-1"></i>
 
-            </h3>
+                        {{ cemetery.city }}
 
-            <p class="text-muted mb-2">
+                        {% if cemetery.village %}
+                            • {{ cemetery.village }}
+                        {% endif %}
+                    </p>
 
-                <i class="bi bi-pin-map me-1"></i>
+                    {% if cemetery.description %}
+                        <p class="cemetery-description">
+                            {{ cemetery.description }}
+                        </p>
+                    {% endif %}
 
-                {{ cemetery.city }}
+                    <div class="mt-auto pt-3">
+                        <a
+                            href="{% url 'graves:cemetery_detail' cemetery.id %}"
+                            class="btn btn-outline-dark"
+                        >
+                            Otvori groblje
+                        </a>
+                    </div>
 
-                {% if cemetery.village %}
-                    • {{ cemetery.village }}
-                {% endif %}
+                </div>
+            </div>
 
-            </p>
 
-            {% if cemetery.description %}
-
-            <p class="cemetery-description">
-
-                {{ cemetery.description }}
-
-            </p>
-
-            {% endif %}
-
-            <div class="d-flex justify-content-end mt-3">
+            <!-- FOTOGRAFIJA -->
+            <div class="col-md-5">
 
                 <a
                     href="{% url 'graves:cemetery_detail' cemetery.id %}"
-                    class="btn btn-outline-dark"
+                    class="cemetery-card-media"
                 >
 
-                    Otvori groblje
+                    {% if cemetery.primary_photo %}
+
+                        <img
+                            src="{{ cemetery.primary_photo.image.url }}"
+                            alt="{{ cemetery.name }}"
+                            class="cemetery-card-image"
+                            loading="lazy"
+                        >
+
+                    {% else %}
+
+                        <div class="cemetery-card-icon-wrapper">
+
+                            <img
+                                src="{% static cemetery.fallback_icon %}"
+                                alt="{{ cemetery.get_cemetery_type_display }}"
+                                class="cemetery-card-image cemetery-card-fallback-image"
+                                loading="lazy"
+                            >
+
+                        </div>
+
+                    {% endif %}
 
                 </a>
 
