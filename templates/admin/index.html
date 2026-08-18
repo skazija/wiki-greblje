@@ -1,0 +1,79 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block content %}
+
+<div class="wg-dashboard">
+
+    <div class="wg-dashboard-heading">
+        <div>
+            <h1>Administracija</h1>
+            <p>
+                Pregled sadržaja, moderacije i upravljanja Wiki Greblje.
+            </p>
+        </div>
+
+        <a href="/" class="wg-dashboard-public-link">
+            Otvori javnu stranicu
+        </a>
+    </div>
+
+    <section class="wg-dashboard-section">
+
+        <div class="wg-section-heading">
+            <h2>Upravljanje sadržajem</h2>
+            <p>Brzi pristup glavnim dijelovima sistema.</p>
+        </div>
+
+        <div class="wg-admin-grid">
+
+            {% if app_list %}
+                {% for app in app_list %}
+                    {% for model in app.models %}
+
+                        <div class="wg-admin-card">
+
+                            <div class="wg-admin-card-content">
+
+                                <div class="wg-admin-card-title">
+                                    {{ model.name }}
+                                </div>
+
+                                <div class="wg-admin-card-app">
+                                    {{ app.name }}
+                                </div>
+
+                            </div>
+
+                            <div class="wg-admin-card-actions">
+
+                                {% if model.admin_url %}
+                                    <a href="{{ model.admin_url }}">
+                                        Pregled
+                                    </a>
+                                {% endif %}
+
+                                {% if model.add_url %}
+                                    <a href="{{ model.add_url }}">
+                                        + Dodaj
+                                    </a>
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+                {% endfor %}
+            {% endif %}
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}
+
+{% block sidebar %}
+{% endblock %}

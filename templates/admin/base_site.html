@@ -1,0 +1,38 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}
+    {% if subtitle %}{{ subtitle }} | {% endif %}
+    {{ title }} | Wiki Greblje
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <link
+        rel="stylesheet"
+        href="{% static 'graves/css/admin.css' %}"
+    >
+{% endblock %}
+
+{% block branding %}
+    <div class="wg-admin-brand">
+
+        <div class="wg-admin-brand-icon">
+            WG
+        </div>
+
+        <div>
+            <div class="wg-admin-brand-title">
+                Wiki Greblje
+            </div>
+
+            <div class="wg-admin-brand-subtitle">
+                Administracija i moderacija
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block nav-global %}
+{% endblock %}
