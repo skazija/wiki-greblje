@@ -13,15 +13,6 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 
-<style>
-
-    .grave-photo {
-        width: 100%;
-        height: 260px;
-        object-fit: cover;
-        border-radius: 10px;
-    }
-</style>
 {% endblock %}
 
 {% block content %}
@@ -120,7 +111,7 @@
 
                 <i class="bi bi-person"></i>
 
-                {{ grave.persons.count }} osoba
+                {{ approved_persons|length }} osoba
 
             </div>
 
@@ -128,7 +119,7 @@
 
                 <i class="bi bi-image"></i>
 
-                {{ grave.photos.count }} fotografija
+                {{ grave_photos|length }} fotografija
 
             </div>
 
@@ -201,41 +192,65 @@
             </h2>
 
             <span class="badge rounded-pill text-bg-dark">
-                {{ grave.photos.count }}
+                {{ grave_photos|length }}
             </span>
 
         </div>
 
-        {% if grave.photos.all %}
 
-            <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% if grave_photos %}
 
-                {% for photo in grave.photos.all %}
+            <div class="grave-gallery-preview
+                        {% if grave_photos|length == 1 %}
+                            grave-gallery-preview-single
+                        {% endif %}">
 
-                    <div class="col">
+                {% for photo in grave_photos %}
 
-                        <figure class="grave-gallery-item mb-0">
+                    {% if forloop.counter <= 2 %}
 
-                            <a
-                                href="{{ photo.image.url }}"
-                                target="_blank"
-                                rel="noopener"
-                                class="grave-gallery-link"
+                        <figure class="grave-gallery-preview-item">
+
+                            <button
+                                type="button"
+                                class="grave-gallery-preview-button"
+                                data-photo-index="{{ forloop.counter0 }}"
                             >
 
                                 <img
                                     src="{{ photo.image.url }}"
-                                    class="grave-gallery-image"
+                                    class="grave-gallery-preview-image"
                                     alt="{{ photo.caption|default:'Fotografija groba' }}"
                                     loading="lazy"
                                 >
 
-                                <span class="grave-gallery-zoom">
-                                    <i class="bi bi-zoom-in"></i>
-                                    Uvećaj
-                                </span>
+                                {% if grave_photos|length > 2 and forloop.counter == 2 %}
 
-                            </a>
+                                    <span class="grave-gallery-more">
+
+                                        <span>
+                                            <i class="bi bi-images"></i>
+                                            Pogledaj sve
+                                        </span>
+
+                                        <strong>
+                                            {{ grave_photos|length }}
+                                            fotografija
+                                        </strong>
+
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="grave-gallery-zoom">
+                                        <i class="bi bi-zoom-in"></i>
+                                        Uvećaj
+                                    </span>
+
+                                {% endif %}
+
+                            </button>
+
 
                             {% if photo.caption or photo.gps_location %}
 
@@ -260,11 +275,22 @@
 
                         </figure>
 
-                    </div>
+                    {% endif %}
 
                 {% endfor %}
 
             </div>
+
+
+            {% if grave_photos|length > 2 %}
+
+                <p class="grave-gallery-preview-note">
+                    Prikazane su prve dvije fotografije.
+                    Kliknite za pregled kompletne galerije.
+                </p>
+
+            {% endif %}
+
 
         {% else %}
 
@@ -294,25 +320,49 @@
 
     <div class="card-body">
 
-        <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-4 flex-wrap">
 
             <h2 class="section-title mb-0">
                 <i class="bi bi-people"></i>
                 Evidentirane osobe
             </h2>
 
-            <span class="badge rounded-pill text-bg-dark">
-                {{ grave.persons.count }}
-            </span>
+            <div class="d-flex align-items-center gap-2">
+
+                <span class="badge rounded-pill text-bg-dark">
+                    {{ approved_persons|length }}
+                </span>
+
+                {% if user.is_authenticated and pending_persons_count %}
+                    <span class="badge rounded-pill text-bg-warning">
+                        {{ pending_persons_count }} čeka odobrenje
+                    </span>
+                {% endif %}
+
+                {% if user.is_authenticated %}
+                    {% if user == grave.created_by or user.is_staff %}
+
+                        <a
+                            href="{% url 'graves:add_person' grave.id %}"
+                            class="btn btn-outline-dark btn-sm"
+                        >
+                            <i class="bi bi-person-plus me-1"></i>
+                            Dodaj osobu
+                        </a>
+
+                    {% endif %}
+                {% endif %}
+
+            </div>
 
         </div>
 
-        {% if grave.persons.all %}
+        {% if approved_persons %}
 
             <div class="row g-4">
                 
 
-                {% for person in grave.persons.all %}
+                {% for person in approved_persons %}
 
                     {% if grave.persons.count == 1 %}
                         <div class="col-12">
@@ -336,7 +386,7 @@
 
                                     <img
                                         src="{{ person.photo.url }}"
-                                        alt="{{ person.first_name }} {{ person.last_name }}"
+                                        alt="{{ person }}"
                                         class="wg-person__photo"
                                         loading="lazy">
 
@@ -360,8 +410,7 @@
 
                                     <h3 class="wg-person__name">
 
-                                        {{ person.first_name }}
-                                        {{ person.last_name }}
+                                        {{ person }}
 
                                     </h3>
 
@@ -737,8 +786,7 @@
                             <div class="related-person-content">
 
                                 <h3 class="related-person-name">
-                                    {{ person.first_name }}
-                                    {{ person.last_name }}
+                                    {{ person }}
                                 </h3>
 
                                 <p class="related-person-dates">
@@ -1106,6 +1154,74 @@
 
 </div>
 
+{% if grave_photos %}
+
+<div
+    class="grave-lightbox"
+    id="graveLightbox"
+    aria-hidden="true"
+>
+
+    <button
+        type="button"
+        class="grave-lightbox-close"
+        id="closeGraveGallery"
+        aria-label="Zatvori galeriju"
+    >
+        <i class="bi bi-x-lg"></i>
+    </button>
+
+    {% if grave_photos|length > 1 %}
+
+        <button
+            type="button"
+            class="grave-lightbox-nav grave-lightbox-prev"
+            id="graveGalleryPrev"
+            aria-label="Prethodna fotografija"
+        >
+            <i class="bi bi-chevron-left"></i>
+        </button>
+
+        <button
+            type="button"
+            class="grave-lightbox-nav grave-lightbox-next"
+            id="graveGalleryNext"
+            aria-label="Sljedeća fotografija"
+        >
+            <i class="bi bi-chevron-right"></i>
+        </button>
+
+    {% endif %}
+
+    <div class="grave-lightbox-content">
+
+        <img
+            id="graveLightboxImage"
+            class="grave-lightbox-image"
+            src=""
+            alt=""
+        >
+
+        <div class="grave-lightbox-footer">
+
+            <div
+                id="graveLightboxCaption"
+                class="grave-lightbox-caption"
+            ></div>
+
+            <div
+                id="graveLightboxCounter"
+                class="grave-lightbox-counter"
+            ></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}
+
 {% endblock %}
 
 {% block extra_js %}
@@ -1153,5 +1269,249 @@
     setTimeout(function () {
         map.invalidateSize();
     }, 400);
+
+
+    /* =================================================
+   Grave gallery
+================================================= */
+
+const graveGalleryPhotos = [
+    {% for photo in grave_photos %}
+    {
+        src: "{{ photo.image.url|escapejs }}",
+        caption: "{{ photo.caption|default:''|escapejs }}"
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
+
+const graveGalleryButtons =
+    document.querySelectorAll(".grave-gallery-preview-button");
+
+const graveLightbox =
+    document.getElementById("graveLightbox");
+
+const graveClose =
+    document.getElementById("closeGraveGallery");
+
+const gravePrev =
+    document.getElementById("graveGalleryPrev");
+
+const graveNext =
+    document.getElementById("graveGalleryNext");
+
+const graveImage =
+    document.getElementById("graveLightboxImage");
+
+const graveCaption =
+    document.getElementById("graveLightboxCaption");
+
+const graveCounter =
+    document.getElementById("graveLightboxCounter");
+
+let graveGalleryIndex = 0;
+
+let graveTouchStartX = 0;
+let graveTouchEndX = 0;
+
+
+function showGraveGalleryPhoto(index) {
+
+    if (!graveGalleryPhotos.length) {
+        return;
+    }
+
+    if (index < 0) {
+        index = graveGalleryPhotos.length - 1;
+    }
+
+    if (index >= graveGalleryPhotos.length) {
+        index = 0;
+    }
+
+    graveGalleryIndex = index;
+
+    const photo = graveGalleryPhotos[graveGalleryIndex];
+
+    graveImage.src = photo.src;
+    graveImage.alt =
+        photo.caption || "{{ grave.title|default:'Grob'|escapejs }}";
+
+    graveCaption.textContent =
+        photo.caption || "";
+
+    graveCounter.textContent =
+        (graveGalleryIndex + 1) +
+        " / " +
+        graveGalleryPhotos.length;
+}
+
+
+function openGraveGallery(index) {
+
+    if (!graveLightbox) {
+        return;
+    }
+
+    showGraveGalleryPhoto(index);
+
+    graveLightbox.classList.add("is-open");
+    graveLightbox.setAttribute("aria-hidden", "false");
+
+    document.body.style.overflow = "hidden";
+}
+
+
+function closeGraveGallery() {
+
+    if (!graveLightbox) {
+        return;
+    }
+
+    graveLightbox.classList.remove("is-open");
+    graveLightbox.setAttribute("aria-hidden", "true");
+
+    document.body.style.overflow = "";
+}
+
+
+graveGalleryButtons.forEach(function (button) {
+
+    button.addEventListener(
+        "click",
+        function () {
+
+            const index =
+                parseInt(button.dataset.photoIndex, 10);
+
+            openGraveGallery(index);
+
+        }
+    );
+
+});
+
+
+if (graveClose) {
+    graveClose.addEventListener(
+        "click",
+        closeGraveGallery
+    );
+}
+
+
+if (gravePrev) {
+    gravePrev.addEventListener(
+        "click",
+        function () {
+            showGraveGalleryPhoto(
+                graveGalleryIndex - 1
+            );
+        }
+    );
+}
+
+
+if (graveNext) {
+    graveNext.addEventListener(
+        "click",
+        function () {
+            showGraveGalleryPhoto(
+                graveGalleryIndex + 1
+            );
+        }
+    );
+}
+
+
+if (graveLightbox) {
+
+    graveLightbox.addEventListener(
+        "click",
+        function (event) {
+
+            if (event.target === graveLightbox) {
+                closeGraveGallery();
+            }
+
+        }
+    );
+
+
+    graveLightbox.addEventListener(
+        "touchstart",
+        function (event) {
+
+            graveTouchStartX =
+                event.changedTouches[0].screenX;
+
+        },
+        {
+            passive: true
+        }
+    );
+
+
+    graveLightbox.addEventListener(
+        "touchend",
+        function (event) {
+
+            graveTouchEndX =
+                event.changedTouches[0].screenX;
+
+            const swipeDistance =
+                graveTouchEndX - graveTouchStartX;
+
+            if (Math.abs(swipeDistance) < 50) {
+                return;
+            }
+
+            if (swipeDistance < 0) {
+                showGraveGalleryPhoto(
+                    graveGalleryIndex + 1
+                );
+            } else {
+                showGraveGalleryPhoto(
+                    graveGalleryIndex - 1
+                );
+            }
+
+        },
+        {
+            passive: true
+        }
+    );
+}
+
+
+document.addEventListener(
+    "keydown",
+    function (event) {
+
+        if (
+            !graveLightbox ||
+            !graveLightbox.classList.contains("is-open")
+        ) {
+            return;
+        }
+
+        if (event.key === "Escape") {
+            closeGraveGallery();
+        }
+
+        if (event.key === "ArrowLeft") {
+            showGraveGalleryPhoto(
+                graveGalleryIndex - 1
+            );
+        }
+
+        if (event.key === "ArrowRight") {
+            showGraveGalleryPhoto(
+                graveGalleryIndex + 1
+            );
+        }
+
+    }
+);
+
 </script>
 {% endblock %}

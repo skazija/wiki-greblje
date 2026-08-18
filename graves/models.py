@@ -248,6 +248,17 @@ class Grave(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    @property
+    def primary_photo(self):
+        primary = self.photos.filter(
+            is_primary=True
+        ).first()
+
+        if primary:
+            return primary
+
+        return self.photos.first()
 
     def __str__(self):
         return self.title or f"Grave #{self.id}"
@@ -273,15 +284,31 @@ class Person(models.Model):
         (GENDER_FEMALE, "Žensko"),
     ]
 
+    STATUS_PENDING = "pending"
+    STATUS_APPROVED = "approved"
+    STATUS_REJECTED = "rejected"
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, "Čeka odobrenje"),
+        (STATUS_APPROVED, "Odobreno"),
+        (STATUS_REJECTED, "Odbijeno"),
+    ]
+    
     grave = models.ForeignKey(
         Grave,
         on_delete=models.CASCADE,
         related_name="persons",
     )
 
-    first_name = models.CharField(max_length=100)
+    first_name = models.CharField(
+        max_length=100,
+        blank=True,
+    )
     last_name = models.CharField(max_length=100, blank=True)
-
+    is_unknown = models.BooleanField(
+        default=False,
+        verbose_name="Nepoznata osoba",
+    )
     birth_year = models.IntegerField(null=True, blank=True)
     death_year = models.IntegerField(null=True, blank=True)
 
@@ -305,6 +332,22 @@ class Person(models.Model):
         verbose_name="Spol",
     )
 
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_APPROVED,
+        verbose_name="Status",
+    )
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_persons",
+        verbose_name="Dodao korisnik",
+    )
+    
     photo = models.ImageField(
         upload_to="persons/%Y/%m/",
         blank=True,
@@ -315,9 +358,15 @@ class Person(models.Model):
     notes = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}".strip()
+        if self.is_unknown:
+            return "Nepoznata osoba"
 
+        full_name = f"{self.first_name or ''} {self.last_name or ''}".strip()
 
+        if full_name:
+            return full_name
+
+        return "Nepoznata osoba"
 
 class EditHistory(models.Model):
     grave = models.ForeignKey(
@@ -378,6 +427,11 @@ class Photo(models.Model):
     image_original = models.ImageField(upload_to="grave_photos/originals/%Y/%m/", blank=True, null=True,)
     caption = models.CharField(max_length=255, blank=True)
 
+    is_primary = models.BooleanField(
+        default=False,
+        verbose_name="Glavna fotografija"
+    )
+    
     gps_location = gis_models.PointField(srid=4326, null=True, blank=True)
 
     uploaded_by = models.ForeignKey(
@@ -487,6 +541,14 @@ class Photo(models.Model):
 
             except Exception as e:
                 print(f"Image processing error: {e}")
+        
+        # Samo jedna fotografija groba može biti glavna
+        if self.is_primary:
+            Photo.objects.filter(
+                grave=self.grave,
+                is_primary=True
+            ).exclude(pk=self.pk).update(is_primary=False)        
+                
         super().save(*args, **kwargs)
     def __str__(self):
         return f"Photo for {self.grave}"

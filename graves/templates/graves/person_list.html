@@ -4,83 +4,346 @@
 
 {% block content %}
 
-<h1 class="mb-4">
-    Pretraga osoba
-</h1>
+<!-- =====================================================
+     Header
+===================================================== -->
 
-<form method="get" class="mb-4">
+<div class="d-flex justify-content-between align-items-start gap-3 mb-4 flex-wrap">
 
-    <div class="input-group">
+    <div>
+        <h1 class="mb-1">
+            <i class="bi bi-people me-2"></i>
+            Osobe
+        </h1>
 
-        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Ime ili prezime">
-        <input type="number" name="birth_year" value="{{ birth_year }}"  class="form-control"  placeholder="Godina rođenja">
-        <input type="number" name="death_year" value="{{ death_year }}"  class="form-control"  placeholder="Godina smrti">    
-        <button class="btn btn-dark" type="submit">Pretraži</button>
-
+        <p class="text-muted mb-0">
+            Pretražite evidentirane osobe ili dodajte novu osobu.
+        </p>
     </div>
 
-</form>
-
-<div class="card shadow-sm">
-
-    <div class="card-body">
-
-        <h5>
-            Pronađeno:
-            {{ persons|length }}
-        </h5>
-
-    </div>
+    {% if user.is_authenticated %}
+        <a
+            href="{% url 'graves:choose_grave_for_person' %}"
+            class="btn btn-dark"
+        >
+            <i class="bi bi-person-plus me-1"></i>
+            Dodaj osobu
+        </a>
+    {% endif %}
 
 </div>
 
-<br>
 
-{% for person in persons %}
+<!-- =====================================================
+     Search
+===================================================== -->
 
-    <div class="card shadow-sm mb-3">
+<section class="card content-card mb-4">
 
-        <div class="card-body">
+    <div class="card-body">
 
-            <h5>
+        <div class="d-flex justify-content-between align-items-start gap-3 mb-3 flex-wrap">
 
-                {{ person.first_name }}
-                {{ person.last_name }}
+            <div>
+                <h2 class="section-title mb-1">
+                    <i class="bi bi-search"></i>
+                    Pretraga osoba
+                </h2>
 
-            </h5>
-
-            <p class="mb-1">
-
-                {{ person.birth_year|default:"?" }}
-                -
-                {{ person.death_year|default:"?" }}
-
-            </p>
-
-            <p class="text-muted">
-
-                {{ person.grave.cemetery.name }}
-
-            </p>
-
-            <a
-                href="{% url 'graves:grave_detail' person.grave.id %}"
-                class="btn btn-sm btn-dark">
-
-                Otvori grob
-
-            </a>
+                <p class="text-muted small mb-0">
+                    Pretražite po imenu, prezimenu, godini rođenja ili godini smrti.
+                </p>
+            </div>
 
         </div>
 
+        <form method="get">
+
+            <div class="row g-2">
+
+                <div class="col-12 col-lg-4">
+                    <label for="personQuery" class="form-label visually-hidden">
+                        Ime ili prezime
+                    </label>
+
+                    <input
+                        type="search"
+                        id="personQuery"
+                        name="q"
+                        value="{{ query }}"
+                        class="form-control"
+                        placeholder="Ime ili prezime..."
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div class="col-6 col-lg-2">
+                    <label for="birthYear" class="form-label visually-hidden">
+                        Godina rođenja
+                    </label>
+
+                    <input
+                        type="number"
+                        id="birthYear"
+                        name="birth_year"
+                        value="{{ birth_year }}"
+                        class="form-control"
+                        placeholder="Godina rođenja"
+                    >
+                </div>
+
+                <div class="col-6 col-lg-2">
+                    <label for="deathYear" class="form-label visually-hidden">
+                        Godina smrti
+                    </label>
+
+                    <input
+                        type="number"
+                        id="deathYear"
+                        name="death_year"
+                        value="{{ death_year }}"
+                        class="form-control"
+                        placeholder="Godina smrti"
+                    >
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-2 d-grid">
+                    <button
+                        class="btn btn-dark"
+                        type="submit"
+                    >
+                        <i class="bi bi-search me-1"></i>
+                        Pretraži
+                    </button>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-2 d-grid">
+                    <a
+                        href="?show_all=1"
+                        class="btn btn-outline-dark"
+                    >
+                        <i class="bi bi-people me-1"></i>
+                        Prikaži sve
+                    </a>
+                </div>
+
+            </div>
+
+        </form>
+
+        {% if not has_search %}
+            <p class="small text-muted mt-3 mb-0">
+                Unesite kriterij pretrage ili odaberite „Prikaži sve“.
+            </p>
+        {% endif %}
+
     </div>
 
-{% empty %}
+</section>
 
-    <p>
-        Nema rezultata.
-    </p>
 
-{% endfor %}
+<!-- =====================================================
+     Results
+===================================================== -->
+
+{% if has_search %}
+
+    <section>
+
+        <div class="d-flex justify-content-between align-items-center gap-3 mb-3 flex-wrap">
+
+            <div>
+                <h2 class="section-title mb-1">
+                    Rezultati
+                </h2>
+
+                {% if show_all %}
+                    <p class="small text-muted mb-0">
+                        Prikazane su sve odobrene osobe.
+                    </p>
+                {% endif %}
+            </div>
+
+            <span class="badge rounded-pill text-bg-dark">
+                {{ result_count }}
+            </span>
+
+        </div>
+
+
+        {% if persons %}
+
+            <div class="row row-cols-1 row-cols-md-2 g-3">
+
+                {% for person in persons %}
+
+                    <div class="col">
+
+                        <article class="card content-card h-100 mb-0">
+
+                            <div class="card-body d-flex flex-column">
+
+                                <div class="d-flex align-items-start gap-3">
+
+                                    <div class="fs-3 text-muted" aria-hidden="true">
+                                        <i class="bi bi-person-circle"></i>
+                                    </div>
+
+                                    <div class="flex-grow-1">
+
+                                        <h3 class="h5 mb-1">
+                                            {{ person }}
+                                        </h3>
+
+                                        <p class="mb-2 text-muted">
+                                            <i class="bi bi-calendar3 me-1"></i>
+                                            {{ person.birth_year|default:"?" }}
+                                            –
+                                            {{ person.death_year|default:"?" }}
+                                        </p>
+
+                                        {% if person.grave and person.grave.cemetery %}
+                                            <p class="small text-muted mb-0">
+                                                <i class="bi bi-geo-alt me-1"></i>
+                                                {{ person.grave.cemetery.name }}
+                                            </p>
+                                        {% endif %}
+
+                                    </div>
+
+                                </div>
+
+                                <div class="mt-auto pt-3">
+
+                                    <a
+                                        href="{% url 'graves:grave_detail' person.grave.id %}"
+                                        class="btn btn-outline-dark btn-sm"
+                                    >
+                                        <i class="bi bi-box-arrow-up-right me-1"></i>
+                                        Otvori grob
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            {% if page_obj.has_other_pages %}
+
+                <nav
+                    class="mt-4"
+                    aria-label="Stranice rezultata pretrage osoba"
+                >
+
+                    <ul class="pagination justify-content-center flex-wrap">
+
+                        {% if page_obj.has_previous %}
+
+                            <li class="page-item">
+                                <a
+                                    class="page-link"
+                                    href="?q={{ query|urlencode }}&birth_year={{ birth_year|urlencode }}&death_year={{ death_year|urlencode }}&show_all={% if show_all %}1{% endif %}&page={{ page_obj.previous_page_number }}"
+                                >
+                                    Prethodna
+                                </a>
+                            </li>
+
+                        {% else %}
+
+                            <li class="page-item disabled">
+                                <span class="page-link">
+                                    Prethodna
+                                </span>
+                            </li>
+
+                        {% endif %}
+
+
+                        {% for num in page_obj.paginator.page_range %}
+
+                            {% if num == page_obj.number %}
+
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link">
+                                        {{ num }}
+                                    </span>
+                                </li>
+
+                            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+
+                                <li class="page-item">
+                                    <a
+                                        class="page-link"
+                                        href="?q={{ query|urlencode }}&birth_year={{ birth_year|urlencode }}&death_year={{ death_year|urlencode }}&show_all={% if show_all %}1{% endif %}&page={{ num }}"
+                                    >
+                                        {{ num }}
+                                    </a>
+                                </li>
+
+                            {% endif %}
+
+                        {% endfor %}
+
+
+                        {% if page_obj.has_next %}
+
+                            <li class="page-item">
+                                <a
+                                    class="page-link"
+                                    href="?q={{ query|urlencode }}&birth_year={{ birth_year|urlencode }}&death_year={{ death_year|urlencode }}&show_all={% if show_all %}1{% endif %}&page={{ page_obj.next_page_number }}"
+                                >
+                                    Sljedeća
+                                </a>
+                            </li>
+
+                        {% else %}
+
+                            <li class="page-item disabled">
+                                <span class="page-link">
+                                    Sljedeća
+                                </span>
+                            </li>
+
+                        {% endif %}
+
+                    </ul>
+
+                </nav>
+
+            {% endif %}
+
+        {% else %}
+
+            <div class="card content-card">
+
+                <div class="card-body text-center py-5">
+
+                    <i class="bi bi-person-x fs-2 d-block mb-2 text-muted"></i>
+
+                    <h3 class="h5">
+                        Nema rezultata
+                    </h3>
+
+                    <p class="text-muted mb-0">
+                        Nije pronađena nijedna osoba koja odgovara unesenim kriterijima.
+                    </p>
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+{% endif %}
 
 {% endblock %}

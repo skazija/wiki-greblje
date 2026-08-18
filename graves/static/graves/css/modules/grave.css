@@ -1,0 +1,288 @@
+/* =====================================================
+   GRAVE GALLERY PREVIEW
+===================================================== */
+
+.grave-gallery-preview {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.grave-gallery-preview-single {
+    grid-template-columns: 1fr;
+}
+
+.grave-gallery-preview-item {
+    margin: 0;
+
+    overflow: hidden;
+
+    border: 1px solid rgba(44, 62, 80, .12);
+    border-radius: var(--card-radius);
+
+    background: #fff;
+}
+
+.grave-gallery-preview-button {
+    position: relative;
+
+    display: block;
+
+    width: 100%;
+    padding: 0;
+    border: 0;
+
+    overflow: hidden;
+
+    background: #e9ecef;
+
+    cursor: zoom-in;
+}
+
+.grave-gallery-preview-image {
+    display: block;
+
+    width: 100%;
+    height: 360px;
+
+    object-fit: cover;
+
+    transition: transform .35s ease;
+}
+
+.grave-gallery-preview-button:hover
+.grave-gallery-preview-image {
+    transform: scale(1.025);
+}
+
+
+/* jedna fotografija */
+
+.grave-gallery-preview-single
+.grave-gallery-preview-image {
+    height: 420px;
+}
+
+
+/* hover oznaka */
+
+.grave-gallery-preview-button
+.grave-gallery-zoom {
+    position: absolute;
+    right: .8rem;
+    bottom: .8rem;
+
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+
+    padding: .45rem .7rem;
+
+    border-radius: 999px;
+
+    background: rgba(18, 18, 18, .78);
+    color: #fff;
+
+    font-size: .88rem;
+}
+
+
+/* 3+ fotografija */
+
+.grave-gallery-more {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+
+    background: rgba(0, 0, 0, .45);
+    color: #fff;
+
+    font-size: 1rem;
+}
+
+.grave-gallery-more span {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+
+    font-weight: 600;
+}
+
+.grave-gallery-more strong {
+    font-size: .88rem;
+    font-weight: 500;
+}
+
+
+.grave-gallery-caption {
+    padding: .85rem 1rem;
+
+    line-height: 1.5;
+}
+
+
+.grave-gallery-preview-note {
+    margin: 1rem 0 0;
+
+    color: #6c757d;
+
+    font-size: .9rem;
+    text-align: center;
+}
+
+
+/* Mobile */
+
+@media (max-width: 767.98px) {
+
+    .grave-gallery-preview {
+        grid-template-columns: 1fr;
+    }
+
+    .grave-gallery-preview-image,
+    .grave-gallery-preview-single
+    .grave-gallery-preview-image {
+        height: 300px;
+    }
+}
+
+
+
+
+/* =====================================================
+   GRAVE LIGHTBOX
+===================================================== */
+
+.grave-lightbox {
+    position: fixed;
+    inset: 0;
+
+    z-index: 9999;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    padding: 30px;
+
+    background: rgba(0, 0, 0, .92);
+}
+
+.grave-lightbox.is-open {
+    display: flex;
+}
+
+.grave-lightbox-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    max-width: 1200px;
+    max-height: 92vh;
+}
+
+.grave-lightbox-image {
+    display: block;
+
+    max-width: 90vw;
+    max-height: 82vh;
+
+    object-fit: contain;
+
+    border-radius: 6px;
+
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.grave-lightbox-footer {
+    display: flex;
+    justify-content: space-between;
+
+    width: 100%;
+    padding-top: 12px;
+
+    color: #fff;
+}
+
+.grave-lightbox-caption {
+    padding-right: 20px;
+}
+
+.grave-lightbox-counter {
+    white-space: nowrap;
+    color: rgba(255, 255, 255, .75);
+}
+
+.grave-lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+
+    border: 0;
+    background: transparent;
+
+    color: #fff;
+    font-size: 1.8rem;
+
+    cursor: pointer;
+}
+
+.grave-lightbox-nav {
+    position: absolute;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    border: 0;
+
+    width: 52px;
+    height: 52px;
+
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, .12);
+    color: #fff;
+
+    font-size: 1.7rem;
+
+    cursor: pointer;
+}
+
+.grave-lightbox-prev {
+    left: 25px;
+}
+
+.grave-lightbox-next {
+    right: 25px;
+}
+
+@media (max-width: 767.98px) {
+
+    .grave-lightbox {
+        padding: 15px;
+    }
+
+    .grave-lightbox-image {
+        max-width: 96vw;
+        max-height: 78vh;
+    }
+
+    .grave-lightbox-nav {
+        width: 42px;
+        height: 42px;
+    }
+
+    .grave-lightbox-prev {
+        left: 8px;
+    }
+
+    .grave-lightbox-next {
+        right: 8px;
+    }
+}

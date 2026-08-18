@@ -116,22 +116,44 @@ class PublicGraveForm(forms.ModelForm):
                     uploaded_by=user if user else None,
                 )
 
-            first_name = self.cleaned_data.get("first_name")
-            last_name = self.cleaned_data.get("last_name")
+            first_name = (self.cleaned_data.get("first_name") or "").strip()
+            last_name = (self.cleaned_data.get("last_name") or "").strip()
+
+            unknown_values = {
+                "nn",
+                "n.n.",
+                "n.n",
+                "nepoznat",
+                "nepoznata",
+                "nepoznato",
+                "nije poznato",
+            }
+
+            if first_name.lower() in unknown_values:
+                first_name = ""
+
+            if last_name.lower() in unknown_values:
+                last_name = ""
+
+            is_unknown = not first_name and not last_name
 
             if not grave.title and (first_name or last_name):
-                grave.title = f"{first_name or ''} {last_name or ''}".strip()
+                grave.title = f"{first_name} {last_name}".strip()
                 grave.save(update_fields=["title"])
-            if first_name or last_name:
+
+            if first_name or last_name or is_unknown:
                 Person.objects.create(
                     grave=grave,
-                    first_name=first_name or "",
-                    last_name=last_name or "",
+                    first_name=first_name,
+                    last_name=last_name,
+                    is_unknown=is_unknown,
                     birth_year=self.cleaned_data.get("birth_year"),
                     death_year=self.cleaned_data.get("death_year"),
                     gender=self.cleaned_data.get("person_gender", ""),
                     photo=self.cleaned_data.get("person_photo"),
                     notes=self.cleaned_data.get("person_notes", ""),
+                    status=Person.STATUS_PENDING,
+                    created_by=user if user else None,
                 )
 
         return grave
@@ -140,6 +162,7 @@ class PersonForm(forms.ModelForm):
     class Meta:
         model = Person
         fields = [
+            "is_unknown",
             "first_name",
             "last_name",
             "birth_year",
@@ -207,13 +230,46 @@ class PersonForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
-        first_name = cleaned_data.get("first_name")
-        last_name = cleaned_data.get("last_name")
+        is_unknown = cleaned_data.get("is_unknown")
+        first_name = (cleaned_data.get("first_name") or "").strip()
+        last_name = (cleaned_data.get("last_name") or "").strip()
 
+        unknown_values = {
+            "nn",
+            "n.n.",
+            "n.n",
+            "nepoznat",
+            "nepoznata",
+            "nepoznato",
+            "nije poznato",
+        }
+
+        # Placeholder nije stvarno ime/prezime.
+        if first_name.lower() in unknown_values:
+            first_name = ""
+
+        if last_name.lower() in unknown_values:
+            last_name = ""
+
+        # Ako je korisnik izričito označio osobu kao nepoznatu,
+        # ne čuvamo tekst u poljima ime/prezime.
+        if is_unknown:
+            cleaned_data["first_name"] = ""
+            cleaned_data["last_name"] = ""
+            return cleaned_data
+
+        # Ako nakon čišćenja nemamo ni ime ni prezime,
+        # zapis tretiramo kao nepoznatu osobu.
         if not first_name and not last_name:
-            raise forms.ValidationError(
-                "Unesite barem ime ili prezime osobe."
-            )
+            cleaned_data["is_unknown"] = True
+            cleaned_data["first_name"] = ""
+            cleaned_data["last_name"] = ""
+            return cleaned_data
+
+        # Čuvamo svaki poznati dio identiteta.
+        cleaned_data["first_name"] = first_name
+        cleaned_data["last_name"] = last_name
+        cleaned_data["is_unknown"] = False
 
         return cleaned_data
 

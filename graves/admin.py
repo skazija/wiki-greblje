@@ -76,9 +76,7 @@ class GraveAdminForm(forms.ModelForm):
     class Meta:
         model = Grave
         fields = "__all__"
-        widgets = {
-            "location": forms.HiddenInput(),
-        },
+       
         widgets = {"location": forms.HiddenInput(),}
 
     def __init__(self, *args, **kwargs):
@@ -113,6 +111,7 @@ class PhotoInline(admin.TabularInline):
         "image_preview",
         "image",
         "caption",
+        "is_primary",
         "uploaded_by",
         "gps_text",
     )
@@ -137,6 +136,7 @@ class PhotoInline(admin.TabularInline):
     def gps_text(self, obj):
         if obj and obj.gps_location:
             return f"Lat: {obj.gps_location.y}, Lon: {obj.gps_location.x}"
+
         return "Nema GPS podataka"
 
     gps_text.short_description = "GPS"
@@ -248,7 +248,7 @@ class GraveAdmin(GISModelAdmin):
 
     search_fields = ("title", "inscription", "notes")
     list_filter = ("cemetery", "condition", "status")
-    inlines = [PhotoInline]
+    inlines = [PersonInline, PhotoInline]
 
     fieldsets = (
         (None, {
@@ -310,9 +310,9 @@ class GraveAdmin(GISModelAdmin):
     approve_link.short_description = "Akcija"
     
     def thumbnail(self, obj):
-        first_photo = obj.photos.first()
+        photo = obj.primary_photo
 
-        if first_photo and first_photo.image:
+        if photo and photo.image:
             return format_html(
                 '''
                 <a href="{}" target="_blank">
@@ -324,8 +324,8 @@ class GraveAdmin(GISModelAdmin):
                                 cursor:zoom-in;" />
                 </a>
                 ''',
-                first_photo.image.url,
-                first_photo.image.url
+                photo.image.url,
+                photo.image.url
             )
 
         return "-"
@@ -468,6 +468,9 @@ class GraveAdmin(GISModelAdmin):
 
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
+
+    actions = ["approve_persons", "reject_persons"]
+
     list_display = (
         "first_name",
         "last_name",
@@ -475,19 +478,27 @@ class PersonAdmin(admin.ModelAdmin):
         "gender",
         "birth_year",
         "death_year",
-        
+        "status_badge",
+        "created_by",
+        "approve_link",
     )
 
-    list_filter = ("gender",)
+    list_filter = (
+        "status",
+        "gender",
+        "is_unknown",
+    )
+
     search_fields = (
         "first_name",
         "last_name",
         "grave__title",
+        "created_by__username",
     )
 
-   
     fields = (
         "grave",
+        "is_unknown",
         "first_name",
         "last_name",
         "birth_year",
@@ -497,8 +508,78 @@ class PersonAdmin(admin.ModelAdmin):
         "gender",
         "photo",
         "notes",
+        "status",
+        "created_by",
     )
 
+    def status_badge(self, obj):
+        colors = {
+            Person.STATUS_APPROVED: "green",
+            Person.STATUS_PENDING: "orange",
+            Person.STATUS_REJECTED: "red",
+        }
+
+        labels = {
+            Person.STATUS_APPROVED: "ODOBRENO",
+            Person.STATUS_PENDING: "ČEKA ODOBRENJE",
+            Person.STATUS_REJECTED: "ODBIJENO",
+        }
+
+        color = colors.get(obj.status, "gray")
+        label = labels.get(obj.status, obj.status)
+
+        return format_html(
+            '<strong style="color:{};">{}</strong>',
+            color,
+            label,
+        )
+
+    status_badge.short_description = "Status"
+
+    def approve_link(self, obj):
+        if obj.status == Person.STATUS_PENDING:
+            return format_html(
+                '<a class="button" href="{}">Odobri</a>',
+                f"/admin/graves/person/{obj.id}/approve/"
+            )
+
+        return "-"
+
+    approve_link.short_description = "Akcija"
+
+    def get_urls(self):
+        urls = super().get_urls()
+
+        custom_urls = [
+            path(
+                "<int:person_id>/approve/",
+                self.admin_site.admin_view(self.approve_person),
+                name="graves_person_approve",
+            ),
+        ]
+
+        return custom_urls + urls
+
+    def approve_person(self, request, person_id):
+        person = Person.objects.get(id=person_id)
+
+        person.status = Person.STATUS_APPROVED
+        person.save(update_fields=["status"])
+
+        return redirect("/admin/graves/person/")
+
+    @admin.action(description="Odobri odabrane osobe")
+    def approve_persons(self, request, queryset):
+        queryset.update(
+            status=Person.STATUS_APPROVED
+        )
+
+    @admin.action(description="Odbij odabrane osobe")
+    def reject_persons(self, request, queryset):
+        queryset.update(
+            status=Person.STATUS_REJECTED
+        )
+    
 
 @admin.register(Photo)
 class PhotoAdmin(GISModelAdmin):

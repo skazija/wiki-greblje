@@ -250,7 +250,7 @@
                 class="col grave-search-item"
                 data-title="{{ grave.title|default:''|lower }}"
                 data-inscription="{{ grave.inscription|default:''|lower }}"
-                data-persons="{% for person in grave.persons.all %}{{ person.first_name|lower }} {{ person.last_name|lower }} {% endfor %}"
+                data-persons="{% for person in grave.approved_persons %}{{ person|lower }} {% endfor %}"
             >
 
                 <article class="card grave-card h-100">
@@ -282,19 +282,21 @@
                             {{ grave.title|default:"Neimenovan grob" }}
                         </h3>
 
-                        {% if grave.persons.all %}
+                       {% if grave.approved_persons %}
+
                             <div class="grave-card-persons">
 
-                                {% for person in grave.persons.all %}
+                                {% for person in grave.approved_persons %}
+
                                     <span>
                                         <i class="bi bi-person me-1"></i>
-                                        {{ person.first_name }}
-                                        {{ person.last_name }}
+                                        {{ person }}
                                     </span>
-                                {% empty %}
+
                                 {% endfor %}
 
                             </div>
+
                         {% endif %}
 
                         {% if grave.inscription %}

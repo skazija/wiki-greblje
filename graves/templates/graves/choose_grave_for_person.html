@@ -1,0 +1,88 @@
+{% extends "graves/base.html" %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <div class="card content-card">
+        <div class="card-body">
+
+            <h1 class="h3 mb-4">
+                <i class="bi bi-person-plus me-2"></i>
+                Dodaj osobu
+            </h1>
+
+            <form method="get">
+
+                <div class="mb-3">
+                    <label for="cemetery" class="form-label">
+                        Groblje
+                    </label>
+
+                    <select
+                        name="cemetery"
+                        id="cemetery"
+                        class="form-select"
+                        onchange="this.form.submit()"
+                    >
+                        <option value="">
+                            Odaberite groblje
+                        </option>
+
+                        {% for cemetery in cemeteries %}
+                            <option
+                                value="{{ cemetery.id }}"
+                                {% if selected_cemetery_id == cemetery.id|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ cemetery.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {% if selected_cemetery_id %}
+
+                    <div class="mb-3">
+                        <label for="grave" class="form-label">
+                            Grob
+                        </label>
+
+                        <select
+                            name="grave"
+                            id="grave"
+                            class="form-select"
+                        >
+                            <option value="">
+                                Odaberite grob
+                            </option>
+
+                            {% for grave in graves %}
+                                <option value="{{ grave.id }}">
+                                    {{ grave.title|default:"Grob" }}
+                                    {% if grave.persons.exists %}
+                                        — {{ grave.persons.first }}
+                                    {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn btn-dark"
+                    >
+                        Nastavi
+                    </button>
+
+                {% endif %}
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

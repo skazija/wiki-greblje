@@ -5,10 +5,11 @@ if os.name == "nt":
     pytesseract.pytesseract.tesseract_cmd = (
         r"C:\Program Files\Tesseract-OCR\tesseract.exe"
     )
+from django.db.models import Prefetch
 from .models import EditSuggestion    
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
-
+from django.core.paginator import Paginator
 from .models import Cemetery, Grave, Person, Photo, EditSuggestion, Comment, ProblemReport
 
 from django.contrib.auth.decorators import login_required
@@ -47,7 +48,16 @@ def cemetery_detail(request, pk):
 
     graves = cemetery.graves.filter(
         status=Grave.STATUS_APPROVED
-    ).prefetch_related("persons", "photos")
+    ).prefetch_related(
+        "photos",
+        Prefetch(
+            "persons",
+            queryset=Person.objects.filter(
+                status=Person.STATUS_APPROVED
+            ),
+            to_attr="approved_persons",
+        )
+    )
 
     cemetery_photos = cemetery.photos.all().order_by(
         "-is_primary",
@@ -88,8 +98,18 @@ def grave_detail(request, pk):
 
     related_persons = Person.objects.none()
 
-    last_names = grave.persons.exclude(
+    last_names = grave.persons.filter(
+        status=Person.STATUS_APPROVED,
+        is_unknown=False,
+    ).exclude(
         last_name=""
+    ).exclude(
+        Q(last_name__iexact="nepoznat") |
+        Q(last_name__iexact="nepoznata") |
+        Q(last_name__iexact="nepoznato") |
+        Q(last_name__iexact="nn") |
+        Q(last_name__iexact="n.n.") |
+        Q(last_name__iexact="nije poznato")
     ).values_list(
         "last_name",
         flat=True
@@ -98,7 +118,9 @@ def grave_detail(request, pk):
     if last_names:
         related_persons = Person.objects.filter(
             last_name__in=last_names,
-            grave__status=Grave.STATUS_APPROVED
+            grave__status=Grave.STATUS_APPROVED,
+            status=Person.STATUS_APPROVED,
+            is_unknown=False,
         ).exclude(
             grave=grave
         ).select_related(
@@ -129,9 +151,24 @@ def grave_detail(request, pk):
             .annotate(distance=Distance("location", grave.location))
             .order_by("distance")[:10]
         )
-
+    grave_photos = grave.photos.all().order_by(
+        "-is_primary",
+        "id"
+    )
+    
+    approved_persons = grave.persons.filter(
+        status=Person.STATUS_APPROVED
+    )
+    
+    pending_persons_count = grave.persons.filter(
+        status=Person.STATUS_PENDING
+    ).count()
+    
     return render(request, "graves/grave_detail.html", {
         "grave": grave,
+        "approved_persons": approved_persons,
+        "pending_persons_count": pending_persons_count,
+        "grave_photos": grave_photos,
         "edit_history": edit_history,
         "related_persons": related_persons,
         "comments": comments,
@@ -157,7 +194,10 @@ def search(request):
             status=Grave.STATUS_APPROVED
         ).select_related("cemetery")
 
-        persons = Person.objects.filter(grave__status=Grave.STATUS_APPROVED).filter(
+        persons = Person.objects.filter(
+            grave__status=Grave.STATUS_APPROVED,
+            status=Person.STATUS_APPROVED,
+        ).filter(
             Q(first_name__icontains=query) |
             Q(last_name__icontains=query) |
             Q(birth_date_text__icontains=query) |
@@ -233,9 +273,24 @@ def add_grave(request):
 
 @login_required
 def add_person(request, pk):
-    grave = get_object_or_404(Grave, pk=pk)
+    grave = get_object_or_404(
+        Grave,
+        pk=pk,
+    )
 
-    if request.user != grave.created_by and not request.user.is_staff:
+    if grave.status == Grave.STATUS_APPROVED:
+        pass
+
+    elif (
+        grave.status == Grave.STATUS_PENDING
+        and (
+            request.user == grave.created_by
+            or request.user.is_staff
+        )
+    ):
+        pass
+
+    else:
         raise Http404()
 
     if request.method == "POST":
@@ -244,6 +299,13 @@ def add_person(request, pk):
         if form.is_valid():
             person = form.save(commit=False)
             person.grave = grave
+            person.created_by = request.user
+
+            if request.user.is_staff:
+                person.status = Person.STATUS_APPROVED
+            else:
+                person.status = Person.STATUS_PENDING
+
             person.save()
 
             return redirect(
@@ -259,6 +321,44 @@ def add_person(request, pk):
         {
             "form": form,
             "grave": grave,
+        },
+    )
+
+@login_required
+def choose_grave_for_person(request):
+
+    cemeteries = Cemetery.objects.all().order_by("name")
+
+    selected_cemetery_id = request.GET.get("cemetery")
+    selected_grave_id = request.GET.get("grave")
+
+    graves = Grave.objects.none()
+
+    if selected_cemetery_id:
+        graves = Grave.objects.filter(
+            cemetery_id=selected_cemetery_id,
+            status=Grave.STATUS_APPROVED,
+        ).order_by("title", "id")
+
+    if selected_grave_id:
+        grave = get_object_or_404(
+            Grave,
+            pk=selected_grave_id,
+            status=Grave.STATUS_APPROVED,
+        )
+
+        return redirect(
+            "graves:add_person",
+            pk=grave.pk,
+        )
+
+    return render(
+        request,
+        "graves/choose_grave_for_person.html",
+        {
+            "cemeteries": cemeteries,
+            "graves": graves,
+            "selected_cemetery_id": selected_cemetery_id,
         },
     )
 
@@ -390,45 +490,86 @@ def person_list(request):
     birth_year = request.GET.get("birth_year", "").strip()
     death_year = request.GET.get("death_year", "").strip()
 
-    persons = Person.objects.select_related(
-        "grave",
-        "grave__cemetery"
-    ).filter(
-        grave__status=Grave.STATUS_APPROVED
+    show_all = request.GET.get("show_all") == "1"
+
+    has_search = bool(
+        query or
+        birth_year or
+        death_year or
+        show_all
     )
 
-    if query:
-        persons = persons.filter(
-            Q(first_name__icontains=query) |
-            Q(last_name__icontains=query)
+    persons = Person.objects.none()
+
+    if has_search:
+
+        persons = Person.objects.select_related(
+            "grave",
+            "grave__cemetery"
+        ).filter(
+            grave__status=Grave.STATUS_APPROVED,
+            status=Person.STATUS_APPROVED,
         )
 
-    if birth_year.isdigit():
-        persons = persons.filter(
-            birth_year=int(birth_year)
+        if query:
+            persons = persons.filter(
+                Q(first_name__icontains=query) |
+                Q(last_name__icontains=query)
+            )
+
+        if birth_year.isdigit():
+            persons = persons.filter(
+                birth_year=int(birth_year)
+            )
+
+        if death_year.isdigit():
+            persons = persons.filter(
+                death_year=int(death_year)
+            )
+
+        persons = persons.order_by(
+            "last_name",
+            "first_name",
+            "birth_year"
         )
 
-    if death_year.isdigit():
-        persons = persons.filter(
-            death_year=int(death_year)
-        )
+    paginator = Paginator(persons, 20)
 
-    persons = persons.order_by("last_name", "first_name")
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
 
-    return render(request, "graves/person_list.html", {
-        "persons": persons,
-        "query": query,
-        "birth_year": birth_year,
-        "death_year": death_year,
-    })
+    return render(
+        request,
+        "graves/person_list.html",
+        {
+            "persons": page_obj,
+            "page_obj": page_obj,
+            "query": query,
+            "birth_year": birth_year,
+            "death_year": death_year,
+            "show_all": show_all,
+            "has_search": has_search,
+            "result_count": paginator.count,
+        }
+    )
 
 def surname_list(request):
     query = request.GET.get("q", "").strip()
 
     surnames = (
         Person.objects
-        .filter(grave__status=Grave.STATUS_APPROVED)
+        .filter(grave__status=Grave.STATUS_APPROVED,
+            status=Person.STATUS_APPROVED, 
+            is_unknown=False,)
         .exclude(last_name="")
+        .exclude(
+            Q(last_name__iexact="nepoznat") |
+            Q(last_name__iexact="nepoznata") |
+            Q(last_name__iexact="nepoznato") |
+            Q(last_name__iexact="nn") |
+            Q(last_name__iexact="n.n.") |
+            Q(last_name__iexact="nije poznato")
+        )
         .values("last_name")
         .annotate(total=Count("id"))
     )
@@ -451,7 +592,9 @@ def surname_detail(request, last_name):
         Person.objects
         .filter(
             last_name__iexact=last_name,
-            grave__status=Grave.STATUS_APPROVED
+            grave__status=Grave.STATUS_APPROVED,
+            status=Person.STATUS_APPROVED,
+            is_unknown=False,
         )
         .select_related("grave", "grave__cemetery")
         .order_by("death_year", "birth_year", "first_name")
