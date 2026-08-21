@@ -21,6 +21,99 @@
     <section class="wg-dashboard-section">
 
         <div class="wg-section-heading">
+            <h2>Moderacija</h2>
+            <p>Stavke koje zahtijevaju pregled ili administrativnu akciju.</p>
+        </div>
+
+        <div class="wg-moderation-grid">
+
+            <a
+                href="{% url 'admin:graves_grave_changelist' %}?status__exact=pending"
+                class="wg-moderation-card {% if pending_graves_count %}wg-moderation-card-active{% endif %}"
+            >
+                <div class="wg-moderation-label">
+                    Grobovi na čekanju
+                </div>
+
+                <div class="wg-moderation-count">
+                    {{ pending_graves_count }}
+                </div>
+            </a>
+
+
+            <a
+                href="{% url 'admin:graves_person_changelist' %}?status__exact=pending"
+                class="wg-moderation-card {% if pending_persons_count %}wg-moderation-card-active{% endif %}"
+            >
+                <div class="wg-moderation-label">
+                    Osobe na čekanju
+                </div>
+
+                <div class="wg-moderation-count">
+                    {{ pending_persons_count }}
+                </div>
+            </a>
+
+            <a
+                href="{% url 'admin:graves_comment_changelist' %}?status__exact=pending"
+                class="wg-moderation-card {% if pending_comments_count %}wg-moderation-card-active{% endif %}"
+            >
+                <div class="wg-moderation-label">
+                    Komentari na čekanju
+                </div>
+
+                <div class="wg-moderation-count">
+                    {{ pending_comments_count }}
+                </div>
+            </a>
+
+            <a
+                href="{% url 'admin:graves_editsuggestion_changelist' %}?status__exact=pending"
+                class="wg-moderation-card {% if pending_edit_suggestions_count %}wg-moderation-card-active{% endif %}"
+            >
+                <div class="wg-moderation-label">
+                    Prijedlozi izmjena
+                </div>
+
+                <div class="wg-moderation-count">
+                    {{ pending_edit_suggestions_count }}
+                </div>
+            </a>
+
+            <a
+                href="{% url 'admin:graves_locationsuggestion_changelist' %}?approved__exact=0"
+                class="wg-moderation-card {% if pending_location_suggestions_count %}wg-moderation-card-active{% endif %}"
+            >
+                <div class="wg-moderation-label">
+                    Prijedlozi lokacije
+                </div>
+
+                <div class="wg-moderation-count">
+                    {{ pending_location_suggestions_count }}
+                </div>
+            </a>
+
+            <a
+                href="{% url 'admin:graves_problemreport_changelist' %}?status__exact=open"
+                class="wg-moderation-card {% if open_problem_reports_count %}wg-moderation-card-active{% endif %}"
+            >
+                <div class="wg-moderation-label">
+                    Otvorene prijave problema
+                </div>
+
+                <div class="wg-moderation-count">
+                    {{ open_problem_reports_count }}
+                </div>
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <section class="wg-dashboard-section">
+
+        <div class="wg-section-heading">
             <h2>Upravljanje sadržajem</h2>
             <p>Brzi pristup glavnim dijelovima sistema.</p>
         </div>

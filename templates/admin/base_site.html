@@ -8,18 +8,32 @@
 
 {% block extrahead %}
     {{ block.super }}
+
     <link
         rel="stylesheet"
         href="{% static 'graves/css/admin.css' %}"
     >
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="{% static 'graves/images/branding/wiki-greblje-icon.png' %}"
+    >
+
+    <script
+        src="{% static 'graves/js/admin_changelist.js' %}"
+        defer
+    ></script>
 {% endblock %}
 
 {% block branding %}
     <div class="wg-admin-brand">
 
-        <div class="wg-admin-brand-icon">
-            WG
-        </div>
+        <img
+            src="{% static 'graves/images/branding/wiki-greblje-logo.png' %}"
+            alt="Wiki Greblje"
+            class="wg-admin-brand-logo"
+        >
 
         <div>
             <div class="wg-admin-brand-title">

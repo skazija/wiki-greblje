@@ -43,22 +43,7 @@ body {
     gap: 12px;
 }
 
-.wg-admin-brand-icon {
-    width: 42px;
-    height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 
-    border-radius: 10px;
-
-    background: var(--wg-admin-dark);
-    color: #fff;
-
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-}
 
 .wg-admin-brand-title {
     font-size: 20px;
@@ -299,3 +284,1290 @@ a.button:hover {
         grid-template-columns: 1fr;
     }
 }
+
+
+
+/* =========================================================
+   Moderation dashboard
+   ========================================================= */
+
+.wg-moderation-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.wg-moderation-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    min-height: 88px;
+    padding: 18px;
+
+    background: var(--wg-admin-surface);
+    border: 1px solid var(--wg-admin-border);
+    border-radius: 10px;
+
+    text-decoration: none !important;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.wg-moderation-card:hover {
+    transform: translateY(-2px);
+    border-color: #b8b8b0;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.wg-moderation-label {
+    color: var(--wg-admin-text);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.wg-moderation-count {
+    min-width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: var(--wg-admin-dark);
+    color: #fff;
+
+    font-size: 16px;
+    font-weight: 700;
+}
+
+
+/* Responsive moderation cards */
+
+@media (max-width: 1000px) {
+    .wg-moderation-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .wg-moderation-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ---------------------------------------------------------
+   Moderation states
+   --------------------------------------------------------- */
+
+/* Nema stavki koje čekaju */
+.wg-moderation-card:not(.wg-moderation-card-active) {
+    opacity: 0.68;
+}
+
+.wg-moderation-card:not(.wg-moderation-card-active)
+.wg-moderation-count {
+    background: #8a918d;
+}
+
+
+/* Postoji nešto što zahtijeva pažnju */
+.wg-moderation-card-active {
+    border-color: #c8a96b;
+    background: #fffdf7;
+}
+
+.wg-moderation-card-active .wg-moderation-count {
+    background: #9a6b19;
+    color: #fff;
+}
+
+.wg-moderation-card-active:hover {
+    border-color: #9a6b19;
+}
+
+
+/* =========================================================
+   Admin changelist pages
+   ========================================================= */
+
+/* Glavni naslov liste */
+
+#changelist h1,
+.change-list #content h1 {
+    margin-bottom: 20px;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--wg-admin-text);
+}
+
+
+/* ---------------------------------------------------------
+   Toolbar / search
+   --------------------------------------------------------- */
+
+#changelist #toolbar {
+    margin-bottom: 16px;
+    padding: 14px 16px;
+
+    background: var(--wg-admin-surface);
+    border: 1px solid var(--wg-admin-border);
+    border-radius: 10px;
+}
+
+#changelist #toolbar form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#changelist #toolbar input[type="text"] {
+    min-height: 36px;
+    padding: 6px 10px;
+
+    border: 1px solid var(--wg-admin-border);
+    border-radius: 6px;
+
+    background: #fff;
+}
+
+
+/* ---------------------------------------------------------
+   Results table
+   --------------------------------------------------------- */
+
+#changelist .results {
+    overflow-x: auto;
+
+    background: var(--wg-admin-surface);
+    border: 1px solid var(--wg-admin-border);
+    border-radius: 10px;
+}
+
+#result_list {
+    margin: 0;
+}
+
+#result_list thead th {
+    padding: 12px 10px;
+    background: #f0f1ef;
+
+    color: var(--wg-admin-text);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+#result_list tbody td,
+#result_list tbody th {
+    padding: 11px 10px;
+    vertical-align: middle;
+}
+
+#result_list tbody tr:hover {
+    background: #f8f9f7;
+}
+
+
+/* ---------------------------------------------------------
+   Filters
+   --------------------------------------------------------- */
+
+#changelist-filter {
+    background: var(--wg-admin-surface);
+    border: 1px solid var(--wg-admin-border);
+    border-radius: 10px;
+}
+
+#changelist-filter h2 {
+    padding: 12px 14px;
+
+    background: var(--wg-admin-dark);
+    color: #fff;
+
+    border-radius: 9px 9px 0 0;
+}
+
+#changelist-filter h3 {
+    margin: 14px 14px 6px;
+    color: var(--wg-admin-text);
+    font-weight: 700;
+}
+
+#changelist-filter ul {
+    margin: 0 14px 14px;
+}
+
+
+/* ---------------------------------------------------------
+   Actions
+   --------------------------------------------------------- */
+
+#changelist .actions {
+    margin-bottom: 14px;
+    padding: 10px 14px;
+
+    background: var(--wg-admin-surface);
+    border: 1px solid var(--wg-admin-border);
+    border-radius: 10px;
+}
+
+#changelist .actions select {
+    min-height: 34px;
+
+    border: 1px solid var(--wg-admin-border);
+    border-radius: 6px;
+}
+
+
+/* ---------------------------------------------------------
+   Pagination
+   --------------------------------------------------------- */
+
+.paginator {
+    margin-top: 14px !important;
+    padding: 12px 14px !important;
+
+    background: var(--wg-admin-surface);
+    border: 1px solid var(--wg-admin-border);
+    border-radius: 10px;
+}
+
+
+/* ---------------------------------------------------------
+   Object tools - Add button
+   --------------------------------------------------------- */
+
+.object-tools a:link,
+.object-tools a:visited {
+    background: var(--wg-admin-dark);
+    color: #fff;
+
+    border-radius: 7px;
+    font-weight: 600;
+}
+
+.object-tools a:hover {
+    background: #111;
+}
+
+/* =========================================================
+   Admin change / edit pages
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   Main form container
+   --------------------------------------------------------- */
+
+.change-form #content {
+    max-width: 1200px;
+}
+
+.change-form #content-main {
+    width: 100%;
+}
+
+
+/* ---------------------------------------------------------
+   Fieldsets
+   --------------------------------------------------------- */
+
+.change-form fieldset.module {
+    margin-bottom: 18px;
+
+    background: var(--wg-admin-surface);
+    border: 1px solid var(--wg-admin-border);
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+.change-form fieldset.module h2 {
+    margin: 0;
+    padding: 12px 16px;
+
+    background: var(--wg-admin-dark);
+    color: #fff;
+
+    font-size: 14px;
+    font-weight: 700;
+}
+
+
+/* ---------------------------------------------------------
+   Form rows
+   --------------------------------------------------------- */
+
+.change-form .form-row {
+    padding: 14px 16px;
+
+    border-bottom: 1px solid var(--wg-admin-border);
+}
+
+.change-form .form-row:last-child {
+    border-bottom: 0;
+}
+
+.change-form .form-row label {
+    font-weight: 600;
+    color: var(--wg-admin-text);
+}
+
+
+/* ---------------------------------------------------------
+   Inputs
+   --------------------------------------------------------- */
+
+.change-form input[type="text"],
+.change-form input[type="number"],
+.change-form input[type="email"],
+.change-form input[type="url"],
+.change-form input[type="password"],
+.change-form select,
+.change-form textarea {
+    padding: 8px 10px;
+
+    background: #fff;
+    border: 1px solid var(--wg-admin-border);
+    border-radius: 6px;
+}
+
+.change-form input[type="text"]:focus,
+.change-form input[type="number"]:focus,
+.change-form input[type="email"]:focus,
+.change-form input[type="url"]:focus,
+.change-form input[type="password"]:focus,
+.change-form select:focus,
+.change-form textarea:focus {
+    outline: none;
+    border-color: #9da49f;
+}
+
+
+/* ---------------------------------------------------------
+   Help text
+   --------------------------------------------------------- */
+
+.change-form .help,
+.change-form p.help {
+    margin-top: 6px;
+
+    color: var(--wg-admin-muted);
+    font-size: 12px;
+}
+
+
+/* ---------------------------------------------------------
+   Submit row
+   --------------------------------------------------------- */
+
+.change-form .submit-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-top: 20px;
+    padding: 14px 16px;
+
+    background: var(--wg-admin-surface);
+    border: 1px solid var(--wg-admin-border);
+    border-radius: 10px;
+}
+
+.change-form .submit-row input {
+    min-height: 36px;
+    padding: 8px 14px;
+
+    border-radius: 6px;
+}
+
+
+/* Delete ostavljamo vizuelno odvojen */
+
+.change-form .submit-row a.deletelink {
+    padding: 8px 14px;
+
+    border-radius: 6px;
+
+    background: #8b3a3a;
+    color: #fff;
+
+    text-decoration: none;
+}
+
+
+/* ---------------------------------------------------------
+   Object tools
+   --------------------------------------------------------- */
+
+.change-form .object-tools {
+    margin-bottom: 14px;
+}
+
+
+/* ---------------------------------------------------------
+   Inline related objects
+   --------------------------------------------------------- */
+
+.change-form .inline-group {
+    margin-top: 20px;
+
+    background: var(--wg-admin-surface);
+    border: 1px solid var(--wg-admin-border);
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+.change-form .inline-group h2 {
+    padding: 12px 16px;
+
+    background: var(--wg-admin-dark);
+    color: #fff;
+}
+
+
+/* ---------------------------------------------------------
+   Errors
+   --------------------------------------------------------- */
+
+.change-form .errornote {
+    padding: 12px 16px;
+
+    border-radius: 8px;
+}
+
+
+/* =========================================================
+   Admin visibility fixes
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   Custom action buttons in changelist
+   --------------------------------------------------------- */
+
+#result_list a.button,
+#result_list .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 32px;
+    padding: 6px 12px;
+
+    background: #ffffff !important;
+    color: #176b3a !important;
+
+    border: 1px solid #4f9a68 !important;
+    border-radius: 6px;
+
+    font-weight: 600;
+    text-decoration: none !important;
+}
+
+#result_list a.button:hover,
+#result_list .button:hover {
+    background: #eef7f0 !important;
+    color: #0f552d !important;
+    border-color: #2f7d4c !important;
+}
+
+
+/* ---------------------------------------------------------
+   Select fields
+   --------------------------------------------------------- */
+
+.change-form select {
+    min-height: 38px !important;
+    height: auto !important;
+
+    padding: 7px 34px 7px 10px !important;
+
+    line-height: 1.4 !important;
+
+    color: var(--wg-admin-text) !important;
+    background-color: #ffffff !important;
+
+    border: 1px solid var(--wg-admin-border) !important;
+    border-radius: 6px;
+}
+
+
+/* ---------------------------------------------------------
+   Related-object icon spacing
+   --------------------------------------------------------- */
+
+.change-form .related-widget-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.change-form .related-widget-wrapper-link {
+    margin-left: 0 !important;
+}
+
+/* =========================================================
+   Collapsible changelist filters
+   ========================================================= */
+
+#changelist {
+    width: 100%;
+}
+
+
+/* ---------------------------------------------------------
+   Filter panel
+   --------------------------------------------------------- */
+
+.wg-changelist-filter-panel {
+    width: 100%;
+    margin: 0 0 16px;
+
+    background: var(--wg-admin-surface);
+    border: 1px solid var(--wg-admin-border);
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+
+/* Summary / naslov */
+
+.wg-changelist-filter-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    min-height: 44px;
+    padding: 10px 16px;
+
+    cursor: pointer;
+
+    background: var(--wg-admin-dark);
+    color: #fff;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    list-style: none;
+}
+
+.wg-changelist-filter-summary::-webkit-details-marker {
+    display: none;
+}
+
+.wg-changelist-filter-summary::marker {
+    display: none;
+    content: "";
+}
+
+
+.wg-filter-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wg-filter-icon {
+    font-size: 18px;
+}
+
+
+/* Strelica */
+
+.wg-filter-toggle::before {
+    content: "▾";
+    display: inline-block;
+
+    transition: transform 0.18s ease;
+}
+
+.wg-changelist-filter-panel[open]
+.wg-filter-toggle::before {
+    transform: rotate(180deg);
+}
+
+
+/* ---------------------------------------------------------
+   Filter body
+   --------------------------------------------------------- */
+
+.wg-changelist-filter-body {
+    padding: 16px;
+}
+
+
+/* Uklanjamo Django desni sidebar stil */
+
+.wg-changelist-filter-body #changelist-filter {
+    position: static !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: 0 !important;
+    background: transparent !important;
+}
+
+
+/* Originalni naslov "Filter" više nije potreban */
+
+.wg-changelist-filter-body #changelist-filter > h2 {
+    display: none;
+}
+
+
+/* ---------------------------------------------------------
+   Pojedinačne grupe filtera
+   --------------------------------------------------------- */
+
+.wg-changelist-filter-body #changelist-filter {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px 22px;
+    align-items: start;
+}
+
+
+/* Django filter details */
+
+.wg-changelist-filter-body #changelist-filter details {
+    margin: 0;
+    padding: 0;
+
+    border: 0;
+    background: transparent;
+}
+
+
+/* Filter naslov */
+
+.wg-changelist-filter-body #changelist-filter details summary {
+    margin-bottom: 7px;
+
+    color: var(--wg-admin-text);
+    font-weight: 700;
+}
+
+
+/* Liste */
+
+.wg-changelist-filter-body #changelist-filter ul {
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+}
+
+.wg-changelist-filter-body #changelist-filter li {
+    margin: 4px 0;
+}
+
+
+/* Clear filters i slični elementi */
+
+.wg-changelist-filter-body #changelist-filter-clear {
+    grid-column: 1 / -1;
+
+    margin: 0 0 4px;
+}
+
+
+/* ---------------------------------------------------------
+   Centralna tabela sada koristi punu širinu
+   --------------------------------------------------------- */
+
+#changelist .changelist-form-container {
+    width: 100% !important;
+    min-width: 0;
+}
+
+#changelist-form {
+    width: 100%;
+}
+
+#changelist .results {
+    width: 100%;
+    max-width: 100%;
+
+    overflow-x: auto;
+}
+
+#result_list {
+    width: 100%;
+}
+
+
+/* Django više ne treba rezervisati prostor desno */
+
+.change-list #content-main {
+    width: 100%;
+}
+
+
+/* ---------------------------------------------------------
+   Responsive
+   --------------------------------------------------------- */
+
+@media (max-width: 1000px) {
+
+    .wg-changelist-filter-body #changelist-filter {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 650px) {
+
+    .wg-changelist-filter-body #changelist-filter {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* =========================================================
+   Change form - final layout adjustments
+   ========================================================= */
+
+/* Glavna kartica forme */
+.change-form fieldset.module {
+    width: 100%;
+}
+
+
+/* ---------------------------------------------------------
+   Labels
+   --------------------------------------------------------- */
+
+.change-form .form-row > div {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.change-form .form-row label {
+    flex: 0 0 180px;
+    padding-top: 9px;
+}
+
+
+/* ---------------------------------------------------------
+   Standard fields
+   --------------------------------------------------------- */
+
+.change-form .form-row input[type="text"],
+.change-form .form-row input[type="email"],
+.change-form .form-row input[type="url"],
+.change-form .form-row input[type="number"] {
+    width: min(100%, 520px);
+    box-sizing: border-box;
+}
+
+.change-form .form-row select {
+    width: min(100%, 520px);
+    box-sizing: border-box;
+}
+
+
+/* Duža tekstualna polja */
+
+.change-form .form-row textarea {
+    width: min(100%, 760px);
+    max-width: 760px;
+    box-sizing: border-box;
+}
+
+
+/* ---------------------------------------------------------
+   Related widget wrapper
+   --------------------------------------------------------- */
+
+.change-form .related-widget-wrapper {
+    flex-wrap: wrap;
+}
+
+
+/* ---------------------------------------------------------
+   Readonly fields
+   --------------------------------------------------------- */
+
+.change-form .readonly {
+    padding-top: 9px;
+    color: var(--wg-admin-text);
+}
+
+
+/* ---------------------------------------------------------
+   Submit buttons
+   --------------------------------------------------------- */
+
+.change-form .submit-row {
+    justify-content: flex-start;
+}
+
+.change-form .submit-row input[type="submit"] {
+    min-width: 110px;
+}
+
+
+/* Glavno Save dugme */
+
+.change-form .submit-row input.default {
+    font-weight: 700;
+}
+
+
+/* Delete na desnu stranu */
+
+.change-form .submit-row .deletelink-box {
+    margin-left: auto;
+}
+
+
+/* ---------------------------------------------------------
+   Mobile / narrower screens
+   --------------------------------------------------------- */
+
+@media (max-width: 800px) {
+
+    .change-form .form-row > div {
+        display: block;
+    }
+
+    .change-form .form-row label {
+        display: block;
+        width: auto;
+        padding-top: 0;
+        margin-bottom: 6px;
+    }
+
+    .change-form .form-row input[type="text"],
+    .change-form .form-row input[type="email"],
+    .change-form .form-row input[type="url"],
+    .change-form .form-row input[type="number"],
+    .change-form .form-row select,
+    .change-form .form-row textarea {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+/* =========================================================
+   Wiki Greblje - final admin colour palette
+   ========================================================= */
+
+:root {
+    /* Brand */
+    --wg-green-950: #123c2d;
+    --wg-green-900: #184b38;
+    --wg-green-800: #245d46;
+    --wg-green-700: #356b50;
+    --wg-green-100: #eaf2ed;
+    --wg-green-50:  #f4f8f5;
+
+    /* Neutral */
+    --wg-text: #252b28;
+    --wg-muted: #6f7873;
+    --wg-border: #dce2de;
+    --wg-surface: #ffffff;
+    --wg-background: #f5f7f5;
+
+    /* States */
+    --wg-warning: #b57a12;
+    --wg-danger: #a63d3d;
+
+    /* Map existing admin variables to final palette */
+    --wg-admin-dark: var(--wg-green-950);
+    --wg-admin-text: var(--wg-text);
+    --wg-admin-muted: var(--wg-muted);
+    --wg-admin-border: var(--wg-border);
+    --wg-admin-surface: var(--wg-surface);
+}
+
+
+/* =========================================================
+   Django admin global colours
+   ========================================================= */
+
+html,
+body {
+    background: var(--wg-background);
+    color: var(--wg-text);
+}
+
+
+/* Main header */
+
+#header {
+    background: var(--wg-green-950) !important;
+    color: #fff;
+}
+
+#header a:link,
+#header a:visited {
+    color: #fff;
+}
+
+
+/* Breadcrumb bar */
+
+div.breadcrumbs {
+    background: var(--wg-green-900) !important;
+    color: #fff;
+}
+
+div.breadcrumbs a {
+    color: #fff !important;
+}
+
+
+/* =========================================================
+   Sidebar
+   ========================================================= */
+
+#nav-sidebar .module caption,
+#nav-sidebar .module h2 {
+    background: var(--wg-green-950) !important;
+    color: #fff;
+}
+
+#nav-sidebar .current-model {
+    background: var(--wg-green-100) !important;
+}
+
+#nav-sidebar a:link,
+#nav-sidebar a:visited {
+    color: var(--wg-text);
+}
+
+#nav-sidebar a:hover {
+    color: var(--wg-green-700);
+}
+
+
+/* Add links */
+
+.addlink {
+    color: var(--wg-green-700) !important;
+}
+
+
+/* =========================================================
+   General buttons
+   ========================================================= */
+
+.button,
+input[type="submit"],
+input[type="button"],
+.submit-row input,
+a.button {
+    background: var(--wg-green-700);
+    color: #fff;
+}
+
+.button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover,
+.submit-row input:hover,
+a.button:hover {
+    background: var(--wg-green-800);
+}
+
+
+/* Main/default action */
+
+.button.default,
+input[type="submit"].default,
+.submit-row input.default {
+    background: var(--wg-green-800);
+}
+
+.button.default:hover,
+input[type="submit"].default:hover,
+.submit-row input.default:hover {
+    background: var(--wg-green-950);
+}
+
+
+/* =========================================================
+   Object tools
+   ========================================================= */
+
+.object-tools a:link,
+.object-tools a:visited {
+    background: var(--wg-green-800);
+    color: #fff;
+}
+
+.object-tools a:hover {
+    background: var(--wg-green-950);
+}
+
+
+/* =========================================================
+   Filter panel
+   ========================================================= */
+
+.wg-changelist-filter-summary {
+    background: var(--wg-green-950);
+}
+
+.wg-changelist-filter-body a {
+    color: var(--wg-green-700);
+}
+
+.wg-changelist-filter-body a:hover {
+    color: var(--wg-green-950);
+}
+
+
+/* =========================================================
+   Change form
+   ========================================================= */
+
+.change-form fieldset.module h2,
+.change-form .inline-group h2 {
+    background: var(--wg-green-950);
+}
+
+.change-form input:focus,
+.change-form textarea:focus,
+.change-form select:focus {
+    border-color: var(--wg-green-700) !important;
+}
+
+
+/* =========================================================
+   Changelist custom action buttons
+   ========================================================= */
+
+#result_list a.button,
+#result_list .button {
+    background: #fff !important;
+    color: var(--wg-green-700) !important;
+    border-color: var(--wg-green-700) !important;
+}
+
+#result_list a.button:hover,
+#result_list .button:hover {
+    background: var(--wg-green-50) !important;
+    color: var(--wg-green-950) !important;
+    border-color: var(--wg-green-950) !important;
+}
+
+
+/* =========================================================
+   Links
+   ========================================================= */
+
+#content-main a:link,
+#content-main a:visited {
+    color: var(--wg-green-700);
+}
+
+#content-main a:hover {
+    color: var(--wg-green-950);
+}
+
+
+/* =========================================================
+   Delete remains destructive
+   ========================================================= */
+
+.deletelink,
+a.deletelink,
+.submit-row a.deletelink {
+    background: var(--wg-danger) !important;
+    color: #fff !important;
+}
+
+.deletelink:hover,
+a.deletelink:hover {
+    background: #843030 !important;
+}
+
+/* =========================================================
+   Dark green surfaces - text contrast fixes
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   Logo / branding
+   --------------------------------------------------------- */
+
+#site-name,
+#site-name a:link,
+#site-name a:visited {
+    color: #ffffff !important;
+}
+
+#site-name a:hover {
+    color: #eaf2ed !important;
+}
+
+
+/* Eventualni podnaslov "Administracija" */
+
+#branding,
+#branding *,
+#branding a {
+    color: #ffffff;
+}
+
+
+/* ---------------------------------------------------------
+   Header user links
+   --------------------------------------------------------- */
+
+#user-tools,
+#user-tools a:link,
+#user-tools a:visited {
+    color: #f4f8f5 !important;
+}
+
+#user-tools a:hover {
+    color: #ffffff !important;
+}
+
+
+/* ---------------------------------------------------------
+   Breadcrumbs
+   --------------------------------------------------------- */
+
+div.breadcrumbs,
+div.breadcrumbs a:link,
+div.breadcrumbs a:visited {
+    color: #f4f8f5 !important;
+}
+
+div.breadcrumbs a:hover {
+    color: #ffffff !important;
+}
+
+
+/* ---------------------------------------------------------
+   Sidebar section headings
+   Authentication and authorization / Graves
+   --------------------------------------------------------- */
+
+#nav-sidebar .module caption,
+#nav-sidebar .module caption a,
+#nav-sidebar .module h2,
+#nav-sidebar .module h2 a {
+    color: #ffffff !important;
+}
+
+
+/* ---------------------------------------------------------
+   Dashboard headings on dark background
+   --------------------------------------------------------- */
+
+.module caption,
+.module caption a,
+.module h2,
+.module h2 a {
+    color: #ffffff !important;
+}
+
+
+/* ---------------------------------------------------------
+   Object tools - History / View on site etc.
+   --------------------------------------------------------- */
+
+.object-tools a:link,
+.object-tools a:visited {
+    color: #ffffff !important;
+}
+
+.object-tools a:hover {
+    color: #ffffff !important;
+}
+
+
+/* ---------------------------------------------------------
+   Moderation / custom dark headings
+   --------------------------------------------------------- */
+
+.wg-changelist-filter-summary,
+.wg-changelist-filter-summary *,
+.wg-moderation-card-active .wg-moderation-count {
+    color: #ffffff !important;
+}
+
+.wg-admin-brand-logo {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    flex-shrink: 0;
+    border-radius: 10px;
+}
+
+
+/* =========================================================
+   Wiki Greblje - status badges
+   ========================================================= */
+
+.wg-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 78px;
+    min-height: 24px;
+    padding: 3px 9px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+
+    white-space: nowrap;
+}
+
+
+/* Pending */
+
+.wg-status-pending {
+    color: #8a5a00;
+    background: #fff4d6;
+    border: 1px solid #e7bd5a;
+}
+
+
+/* Approved */
+
+.wg-status-approved {
+    color: #245d46;
+    background: #eaf2ed;
+    border: 1px solid #9bc0a8;
+}
+
+
+/* Rejected */
+
+.wg-status-rejected {
+    color: #8a3030;
+    background: #fbeaea;
+    border: 1px solid #d9a0a0;
+}
+
+
+/* =========================================================
+   Wiki Greblje - Django theme switcher disabled
+   ========================================================= */
+
+.theme-toggle {
+    display: none !important;
+}
+

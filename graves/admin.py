@@ -355,25 +355,24 @@ class GraveAdmin(GISModelAdmin):
     location_warning.short_description = "Lokacija"
 
     def status_badge(self, obj):
-        colors = {
-            "approved": "green",
-            "pending": "orange",
-            "rejected": "red",
-        }
-
         labels = {
             "approved": "ODOBRENO",
             "pending": "PENDING",
             "rejected": "ODBIJENO",
         }
 
-        color = colors.get(obj.status, "gray")
         label = labels.get(obj.status, obj.status)
 
+        status_class = {
+            "approved": "wg-status-approved",
+            "pending": "wg-status-pending",
+            "rejected": "wg-status-rejected",
+        }.get(obj.status, "")
+
         return format_html(
-            '<strong style="color:{};">{}</strong>',
-            color,
-            label
+            '<span class="wg-status {}">{}</span>',
+            status_class,
+            label,
         )
 
     status_badge.short_description = "Status"
@@ -513,25 +512,22 @@ class PersonAdmin(admin.ModelAdmin):
     )
 
     def status_badge(self, obj):
-        colors = {
-            Person.STATUS_APPROVED: "green",
-            Person.STATUS_PENDING: "orange",
-            Person.STATUS_REJECTED: "red",
-        }
-
         labels = {
             Person.STATUS_APPROVED: "ODOBRENO",
-            Person.STATUS_PENDING: "ČEKA ODOBRENJE",
+            Person.STATUS_PENDING: "PENDING",
             Person.STATUS_REJECTED: "ODBIJENO",
         }
 
-        color = colors.get(obj.status, "gray")
-        label = labels.get(obj.status, obj.status)
+        status_class = {
+            Person.STATUS_APPROVED: "wg-status-approved",
+            Person.STATUS_PENDING: "wg-status-pending",
+            Person.STATUS_REJECTED: "wg-status-rejected",
+        }.get(obj.status, "")
 
         return format_html(
-            '<strong style="color:{};">{}</strong>',
-            color,
-            label,
+            '<span class="wg-status {}">{}</span>',
+            status_class,
+            labels.get(obj.status, obj.status),
         )
 
     status_badge.short_description = "Status"
@@ -594,9 +590,24 @@ class EditHistoryAdmin(admin.ModelAdmin):
 
 @admin.register(LocationSuggestion)
 class LocationSuggestionAdmin(GISModelAdmin):
-    list_display = ("grave", "suggested_by", "approved", "created_at")
+    list_display = ("grave", "suggested_by", "approval_badge", "created_at")
     list_filter = ("approved",)
 
+    def approval_badge(self, obj):
+        if obj.approved:
+            label = "ODOBRENO"
+            status_class = "wg-status-approved"
+        else:
+            label = "ČEKA PREGLED"
+            status_class = "wg-status-pending"
+
+        return format_html(
+            '<span class="wg-status {}">{}</span>',
+            status_class,
+            label,
+        )
+
+    approval_badge.short_description = "Status"
 
 
 @admin.register(EditSuggestion)
@@ -607,7 +618,7 @@ class EditSuggestionAdmin(admin.ModelAdmin):
         "grave",
         "field_name",
         "suggested_by",
-        "status",
+        "status_badge",
         "created_at",
     )
 
@@ -665,6 +676,27 @@ class EditSuggestionAdmin(admin.ModelAdmin):
 
             suggestion.save()
 
+    def status_badge(self, obj):
+        labels = {
+            EditSuggestion.STATUS_APPROVED: "ODOBRENO",
+            EditSuggestion.STATUS_PENDING: "PENDING",
+            EditSuggestion.STATUS_REJECTED: "ODBIJENO",
+        }
+
+        status_class = {
+            EditSuggestion.STATUS_APPROVED: "wg-status-approved",
+            EditSuggestion.STATUS_PENDING: "wg-status-pending",
+            EditSuggestion.STATUS_REJECTED: "wg-status-rejected",
+        }.get(obj.status, "")
+
+        return format_html(
+            '<span class="wg-status {}">{}</span>',
+            status_class,
+            labels.get(obj.status, obj.status),
+        )
+
+    status_badge.short_description = "Status"
+    
     def save_model(self, request, obj, form, change):
         old_status = None
 
@@ -701,7 +733,7 @@ class CommentAdmin(admin.ModelAdmin):
     "comment_photo_thumb",
     "grave",
     "author",
-    "status",
+    "status_badge",
     "created_at",
     )
 
@@ -718,6 +750,27 @@ class CommentAdmin(admin.ModelAdmin):
 
     actions = ["approve_comments"]
 
+    def status_badge(self, obj):
+        labels = {
+            Comment.STATUS_APPROVED: "ODOBRENO",
+            Comment.STATUS_PENDING: "PENDING",
+            Comment.STATUS_REJECTED: "ODBIJENO",
+        }
+
+        status_class = {
+            Comment.STATUS_APPROVED: "wg-status-approved",
+            Comment.STATUS_PENDING: "wg-status-pending",
+            Comment.STATUS_REJECTED: "wg-status-rejected",
+        }.get(obj.status, "")
+
+        return format_html(
+            '<span class="wg-status {}">{}</span>',
+            status_class,
+            labels.get(obj.status, obj.status),
+        )
+
+    status_badge.short_description = "Status"
+    
     def comment_photo_thumb(self, obj):
         if obj.photo:
             return format_html(
@@ -749,7 +802,7 @@ class ProblemReportAdmin(admin.ModelAdmin):
         "grave",
         "problem_type",
         "reported_by",
-        "status",
+        "status_badge",
         "created_at",
     )
 
@@ -770,6 +823,28 @@ class ProblemReportAdmin(admin.ModelAdmin):
         "mark_rejected",
     ]
 
+    
+    def status_badge(self, obj):
+        labels = {
+            ProblemReport.STATUS_OPEN: "OTVORENO",
+            ProblemReport.STATUS_RESOLVED: "RIJEŠENO",
+            ProblemReport.STATUS_REJECTED: "ODBIJENO",
+        }
+
+        status_class = {
+            ProblemReport.STATUS_OPEN: "wg-status-pending",
+            ProblemReport.STATUS_RESOLVED: "wg-status-approved",
+            ProblemReport.STATUS_REJECTED: "wg-status-rejected",
+        }.get(obj.status, "")
+
+        return format_html(
+            '<span class="wg-status {}">{}</span>',
+            status_class,
+            labels.get(obj.status, obj.status),
+        )
+
+    status_badge.short_description = "Status"
+
     @admin.action(description="Označi kao riješeno")
     def mark_resolved(self, request, queryset):
         queryset.update(status=ProblemReport.STATUS_RESOLVED)
@@ -777,3 +852,48 @@ class ProblemReportAdmin(admin.ModelAdmin):
     @admin.action(description="Označi kao odbijeno")
     def mark_rejected(self, request, queryset):
         queryset.update(status=ProblemReport.STATUS_REJECTED)
+        
+        
+# =========================================================
+# Wiki Greblje - Admin dashboard
+# =========================================================
+
+_original_admin_index = admin.site.index
+
+
+def wiki_admin_index(request, extra_context=None):
+    extra_context = extra_context or {}
+
+    extra_context.update({
+        "pending_graves_count": Grave.objects.filter(
+            status=Grave.STATUS_PENDING
+        ).count(),
+
+        "pending_persons_count": Person.objects.filter(
+            status=Person.STATUS_PENDING
+        ).count(),
+
+        "pending_comments_count": Comment.objects.filter(
+            status=Comment.STATUS_PENDING
+        ).count(),
+
+        "pending_edit_suggestions_count": EditSuggestion.objects.filter(
+            status=EditSuggestion.STATUS_PENDING
+        ).count(),
+
+        "pending_location_suggestions_count": LocationSuggestion.objects.filter(
+            approved=False
+        ).count(),
+
+        "open_problem_reports_count": ProblemReport.objects.filter(
+            status=ProblemReport.STATUS_OPEN
+        ).count(),
+    })
+
+    return _original_admin_index(
+        request,
+        extra_context=extra_context,
+    )
+
+
+admin.site.index = wiki_admin_index
