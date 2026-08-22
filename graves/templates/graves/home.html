@@ -108,7 +108,7 @@
 
             <div class="card grave-card h-100">
 
-                {% with first_photo=grave.photos.first %}
+                {% with first_photo=grave.approved_photos.0 %}
                     {% if first_photo %}
                         <img src="{{ first_photo.image.url }}"
                              class="grave-card-image">

@@ -110,10 +110,17 @@ class PublicGraveForm(forms.ModelForm):
             photos = self.cleaned_data.get("photos", [])
 
             for photo in photos:
+                photo_status = (
+                    Photo.STATUS_APPROVED
+                    if user and user.is_staff
+                    else Photo.STATUS_PENDING
+                )
+
                 Photo.objects.create(
                     grave=grave,
                     image=photo,
                     uploaded_by=user if user else None,
+                    status=photo_status,
                 )
 
             first_name = (self.cleaned_data.get("first_name") or "").strip()

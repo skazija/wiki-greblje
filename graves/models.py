@@ -98,7 +98,15 @@ class CemeteryPhoto(models.Model):
         on_delete=models.CASCADE,
         related_name="photos"
     )
+    STATUS_PENDING = "pending"
+    STATUS_APPROVED = "approved"
+    STATUS_REJECTED = "rejected"
 
+    STATUS_CHOICES = [
+        (STATUS_PENDING, "Čeka odobrenje"),
+        (STATUS_APPROVED, "Odobreno"),
+        (STATUS_REJECTED, "Odbijeno"),
+    ]
     image = models.ImageField(
         upload_to="cemetery_photos/"
     )
@@ -114,6 +122,12 @@ class CemeteryPhoto(models.Model):
         blank=True
     )
 
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_APPROVED,
+    )
+    
     is_primary = models.BooleanField(
         default=False,
         verbose_name="Glavna fotografija"
@@ -423,10 +437,21 @@ class Photo(models.Model):
         related_name="photos"
     )
 
+    STATUS_PENDING = "pending"
+    STATUS_APPROVED = "approved"
+    STATUS_REJECTED = "rejected"
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, "Čeka odobrenje"),
+        (STATUS_APPROVED, "Odobreno"),
+        (STATUS_REJECTED, "Odbijeno"),
+    ]
+
     image = models.ImageField(upload_to="grave_photos/")
     image_original = models.ImageField(upload_to="grave_photos/originals/%Y/%m/", blank=True, null=True,)
     caption = models.CharField(max_length=255, blank=True)
-
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_APPROVED,)
+    
     is_primary = models.BooleanField(
         default=False,
         verbose_name="Glavna fotografija"

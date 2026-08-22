@@ -10,7 +10,7 @@ from .models import EditSuggestion
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
 from django.core.paginator import Paginator
-from .models import Cemetery, Grave, Person, Photo, EditSuggestion, Comment, ProblemReport
+from .models import Cemetery, Grave, Person, Photo, EditSuggestion, Comment, ProblemReport, CemeteryPhoto
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
@@ -49,7 +49,16 @@ def cemetery_detail(request, pk):
     graves = cemetery.graves.filter(
         status=Grave.STATUS_APPROVED
     ).prefetch_related(
-        "photos",
+        Prefetch(
+            "photos",
+            queryset=Photo.objects.filter(
+                status=Photo.STATUS_APPROVED
+            ).order_by(
+                "-is_primary",
+                "id",
+            ),
+            to_attr="approved_photos",
+        ),
         Prefetch(
             "persons",
             queryset=Person.objects.filter(
@@ -59,7 +68,9 @@ def cemetery_detail(request, pk):
         )
     )
 
-    cemetery_photos = cemetery.photos.all().order_by(
+    cemetery_photos = cemetery.photos.filter(
+        status=CemeteryPhoto.STATUS_APPROVED
+    ).order_by(
         "-is_primary",
         "id"
     )
@@ -151,7 +162,9 @@ def grave_detail(request, pk):
             .annotate(distance=Distance("location", grave.location))
             .order_by("distance")[:10]
         )
-    grave_photos = grave.photos.all().order_by(
+    grave_photos = grave.photos.filter(
+        status=Photo.STATUS_APPROVED
+    ).order_by(
         "-is_primary",
         "id"
     )
@@ -229,15 +242,40 @@ def home(request):
     cemetery_count = Cemetery.objects.count()
     grave_count = Grave.objects.count()
     person_count = Person.objects.count()
-    photo_count = Photo.objects.count()
+    photo_count = Photo.objects.filter(status=Photo.STATUS_APPROVED, grave__status=Grave.STATUS_APPROVED,).count()
     user_count = User.objects.count()
 
-    latest_graves = Grave.objects.prefetch_related(
-        "photos",
-        "persons"
-    ).order_by("-created_at")[:6]
+    latest_graves = (
+        Grave.objects
+        .filter(
+            status=Grave.STATUS_APPROVED
+        )
+        .prefetch_related(
+            Prefetch(
+                "photos",
+                queryset=Photo.objects.filter(
+                    status=Photo.STATUS_APPROVED
+                ).order_by(
+                    "-is_primary",
+                    "id",
+                ),
+                to_attr="approved_photos",
+            ),
+            Prefetch(
+                "persons",
+                queryset=Person.objects.filter(
+                    status=Person.STATUS_APPROVED
+                ),
+                to_attr="approved_persons",
+            ),
+        )
+        .order_by("-created_at")[:6]
+    )
 
-    latest_photos = Photo.objects.select_related(
+    latest_photos = Photo.objects.filter(
+        status=Photo.STATUS_APPROVED,
+        grave__status=Grave.STATUS_APPROVED,
+    ).select_related(
         "grave",
         "grave__cemetery"
     ).order_by("-uploaded_at")[:8]

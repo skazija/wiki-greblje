@@ -68,6 +68,18 @@
             </a>
 
             <a
+                href="{% url 'admin:graves_photo_changelist' %}?status__exact=pending"
+                class="wg-moderation-card {% if pending_photos_count %}wg-moderation-card-active{% endif %}"
+            >
+                <div class="wg-moderation-label">
+                    Fotografije na čekanju
+                </div>
+
+                <div class="wg-moderation-count">
+                    {{ pending_photos_count }}
+                </div>
+            </a>
+            <a
                 href="{% url 'admin:graves_editsuggestion_changelist' %}?status__exact=pending"
                 class="wg-moderation-card {% if pending_edit_suggestions_count %}wg-moderation-card-active{% endif %}"
             >

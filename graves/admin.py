@@ -579,8 +579,270 @@ class PersonAdmin(admin.ModelAdmin):
 
 @admin.register(Photo)
 class PhotoAdmin(GISModelAdmin):
-    list_display = ("id", "grave", "caption", "uploaded_at")
 
+    actions = [
+        "approve_photos",
+        "reject_photos",
+    ]
+
+    list_display = (
+        "image_preview",
+        "id",
+        "grave",
+        "caption",
+        "uploaded_by",
+        "status_badge",
+        "uploaded_at",
+        "approve_link",
+    )
+
+    list_filter = (
+        "status",
+        "uploaded_at",
+    )
+
+    search_fields = (
+        "grave__title",
+        "caption",
+        "uploaded_by__username",
+    )
+
+    readonly_fields = (
+        "image_preview",
+        "uploaded_at",
+    )
+
+    fields = (
+        "image_preview",
+        "grave",
+        "image",
+        "caption",
+        "is_primary",
+        "gps_location",
+        "uploaded_by",
+        "status",
+        "uploaded_at",
+    )
+
+
+    def image_preview(self, obj):
+        if obj and obj.image:
+            return format_html(
+                '<a href="{}" target="_blank">'
+                '<img src="{}" '
+                'style="height:80px; width:100px; '
+                'object-fit:cover; border-radius:6px;" />'
+                '</a>',
+                obj.image.url,
+                obj.image.url,
+            )
+
+        return "-"
+
+    image_preview.short_description = "Pregled"
+
+
+    def status_badge(self, obj):
+        labels = {
+            Photo.STATUS_APPROVED: "ODOBRENO",
+            Photo.STATUS_PENDING: "PENDING",
+            Photo.STATUS_REJECTED: "ODBIJENO",
+        }
+
+        status_class = {
+            Photo.STATUS_APPROVED: "wg-status-approved",
+            Photo.STATUS_PENDING: "wg-status-pending",
+            Photo.STATUS_REJECTED: "wg-status-rejected",
+        }.get(obj.status, "")
+
+        return format_html(
+            '<span class="wg-status {}">{}</span>',
+            status_class,
+            labels.get(obj.status, obj.status),
+        )
+
+    status_badge.short_description = "Status"
+
+
+    def approve_link(self, obj):
+        if obj.status == Photo.STATUS_PENDING:
+            return format_html(
+                '<a class="button" href="{}">Odobri</a>',
+                f"/admin/graves/photo/{obj.id}/approve/",
+            )
+
+        return "-"
+
+    approve_link.short_description = "Akcija"
+
+
+    def get_urls(self):
+        urls = super().get_urls()
+
+        custom_urls = [
+            path(
+                "<int:photo_id>/approve/",
+                self.admin_site.admin_view(self.approve_photo),
+                name="graves_photo_approve",
+            ),
+        ]
+
+        return custom_urls + urls
+
+
+    def approve_photo(self, request, photo_id):
+        photo = Photo.objects.get(id=photo_id)
+        photo.status = Photo.STATUS_APPROVED
+        photo.save(update_fields=["status"])
+
+        return redirect("/admin/graves/photo/")
+
+
+    @admin.action(description="Odobri odabrane fotografije")
+    def approve_photos(self, request, queryset):
+        queryset.update(
+            status=Photo.STATUS_APPROVED
+        )
+
+
+    @admin.action(description="Odbij odabrane fotografije")
+    def reject_photos(self, request, queryset):
+        queryset.update(
+            status=Photo.STATUS_REJECTED
+        )
+
+@admin.register(CemeteryPhoto)
+class CemeteryPhotoAdmin(admin.ModelAdmin):
+
+    actions = [
+        "approve_photos",
+        "reject_photos",
+    ]
+
+    list_display = (
+        "image_preview",
+        "id",
+        "cemetery",
+        "caption",
+        "uploaded_by",
+        "status_badge",
+        "uploaded_at",
+        "approve_link",
+    )
+
+    list_filter = (
+        "status",
+        "uploaded_at",
+    )
+
+    search_fields = (
+        "cemetery__name",
+        "caption",
+        "uploaded_by__username",
+    )
+
+    readonly_fields = (
+        "image_preview",
+        "uploaded_at",
+    )
+
+    fields = (
+        "image_preview",
+        "cemetery",
+        "image",
+        "caption",
+        "is_primary",
+        "uploaded_by",
+        "status",
+        "uploaded_at",
+    )
+
+
+    def image_preview(self, obj):
+        if obj and obj.image:
+            return format_html(
+                '<a href="{}" target="_blank">'
+                '<img src="{}" '
+                'style="height:80px; width:100px; '
+                'object-fit:cover; border-radius:6px;" />'
+                '</a>',
+                obj.image.url,
+                obj.image.url,
+            )
+
+        return "-"
+
+    image_preview.short_description = "Pregled"
+
+
+    def status_badge(self, obj):
+        labels = {
+            CemeteryPhoto.STATUS_APPROVED: "ODOBRENO",
+            CemeteryPhoto.STATUS_PENDING: "PENDING",
+            CemeteryPhoto.STATUS_REJECTED: "ODBIJENO",
+        }
+
+        status_class = {
+            CemeteryPhoto.STATUS_APPROVED: "wg-status-approved",
+            CemeteryPhoto.STATUS_PENDING: "wg-status-pending",
+            CemeteryPhoto.STATUS_REJECTED: "wg-status-rejected",
+        }.get(obj.status, "")
+
+        return format_html(
+            '<span class="wg-status {}">{}</span>',
+            status_class,
+            labels.get(obj.status, obj.status),
+        )
+
+    status_badge.short_description = "Status"
+
+
+    def approve_link(self, obj):
+        if obj.status == CemeteryPhoto.STATUS_PENDING:
+            return format_html(
+                '<a class="button" href="{}">Odobri</a>',
+                f"/admin/graves/cemeteryphoto/{obj.id}/approve/",
+            )
+
+        return "-"
+
+    approve_link.short_description = "Akcija"
+
+
+    def get_urls(self):
+        urls = super().get_urls()
+
+        custom_urls = [
+            path(
+                "<int:photo_id>/approve/",
+                self.admin_site.admin_view(self.approve_photo),
+                name="graves_cemeteryphoto_approve",
+            ),
+        ]
+
+        return custom_urls + urls
+
+
+    def approve_photo(self, request, photo_id):
+        photo = CemeteryPhoto.objects.get(id=photo_id)
+        photo.status = CemeteryPhoto.STATUS_APPROVED
+        photo.save(update_fields=["status"])
+
+        return redirect("/admin/graves/cemeteryphoto/")
+
+
+    @admin.action(description="Odobri odabrane fotografije")
+    def approve_photos(self, request, queryset):
+        queryset.update(
+            status=CemeteryPhoto.STATUS_APPROVED
+        )
+
+
+    @admin.action(description="Odbij odabrane fotografije")
+    def reject_photos(self, request, queryset):
+        queryset.update(
+            status=CemeteryPhoto.STATUS_REJECTED
+        )
 
 @admin.register(EditHistory)
 class EditHistoryAdmin(admin.ModelAdmin):
@@ -876,6 +1138,16 @@ def wiki_admin_index(request, extra_context=None):
         "pending_comments_count": Comment.objects.filter(
             status=Comment.STATUS_PENDING
         ).count(),
+        
+        "pending_photos_count": (
+            Photo.objects.filter(
+                status=Photo.STATUS_PENDING
+            ).count()
+            +
+            CemeteryPhoto.objects.filter(
+                status=CemeteryPhoto.STATUS_PENDING
+            ).count()
+        ),
 
         "pending_edit_suggestions_count": EditSuggestion.objects.filter(
             status=EditSuggestion.STATUS_PENDING

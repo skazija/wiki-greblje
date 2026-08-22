@@ -255,7 +255,7 @@
 
                 <article class="card grave-card h-100">
 
-                    {% with first_photo=grave.photos.first %}
+                    {% with first_photo=grave.approved_photos.0 %}
                         {% if first_photo %}
                             <a href="{% url 'graves:grave_detail' grave.id %}"
                                class="grave-card-image-link">
