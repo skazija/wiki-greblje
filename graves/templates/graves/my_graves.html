@@ -4,56 +4,166 @@
 
 {% block content %}
 
-<h1 class="mb-4">Moji dodani grobovi</h1>
+<div class="wg-page-header">
 
-{% for grave in graves %}
-    <div class="card shadow-sm mb-3">
-              
-        <div class="card-body">
-            {% with first_photo=grave.photos.first %}
-                {% if first_photo %}
-                    <a href="{{ first_photo.image.url }}" target="_blank">
-                        <img src="{{ first_photo.image.url }}"
-                            style="
-                                width:100%;
-                                height:220px;
-                                object-fit:cover;
-                                border-top-left-radius:6px;
-                                border-top-right-radius:6px;
-                                cursor:zoom-in;
-                            ">
-                    </a>
-                {% endif %}
-            {% endwith %}
-            
-            <h4>
-                <a href="{% url 'graves:grave_detail' grave.id %}">
-                    {{ grave.title|default:"Neimenovan grob" }}
-                </a>
-            </h4>
+    <div class="wg-page-heading">
+        <span class="wg-page-kicker">Moji doprinosi</span>
 
-            <p class="text-muted mb-1">
-                {{ grave.cemetery.name }}
-            </p>
-            <p class="text-muted small">Fotografije: {{ grave.photo_count }}</p>
-            <p>{{ grave.inscription|truncatechars:150 }}</p>
-            {% if grave.status == "approved" %}
-                <span class="badge bg-success">Odobreno</span>
-            {% elif grave.status == "pending" %}
-                <span class="badge bg-warning text-dark">Čeka odobrenje</span>
-            {% elif grave.status == "rejected" %}
-                <span class="badge bg-danger">Odbijeno</span>
-            {% endif %}
-            <a href="{% url 'graves:grave_detail' grave.id %}"
-               class="btn btn-sm btn-outline-dark">
-                Otvori detalje
-            </a>
-             <p class="text-muted small mt-2 ">  Dodano: {{ grave.created_at }}</p>
-        </div>
-       
+        <h1>Moji dodani grobovi</h1>
+
+        <p>
+            Pregled grobova koje ste dodali i njihov trenutni status.
+        </p>
     </div>
-{% empty %}
-    <p>Još nisi dodao nijedan grob.</p>
-{% endfor %}
+
+</div>
+
+
+<div class="my-graves-list">
+
+    {% for grave in graves %}
+
+        <article class="my-grave-card">
+
+            {% with first_photo=grave.photos.first %}
+
+                {% if first_photo %}
+
+                    <a
+                        href="{% url 'graves:grave_detail' grave.id %}"
+                        class="my-grave-card__media"
+                    >
+                        <img
+                            src="{{ first_photo.image.url }}"
+                            alt="{{ grave.title|default:'Fotografija groba' }}"
+                            class="my-grave-card__image"
+                            loading="lazy"
+                        >
+                    </a>
+
+                {% else %}
+
+                    <div class="my-grave-card__placeholder">
+                        <i class="bi bi-image"></i>
+                        <span>Nema fotografije</span>
+                    </div>
+
+                {% endif %}
+
+            {% endwith %}
+
+
+            <div class="my-grave-card__body">
+
+                <div class="my-grave-card__header">
+
+                    <div>
+
+                        <h2 class="my-grave-card__title">
+                            <a href="{% url 'graves:grave_detail' grave.id %}">
+                                {{ grave.title|default:"Neimenovan grob" }}
+                            </a>
+                        </h2>
+
+                        <p class="my-grave-card__cemetery">
+                            <i class="bi bi-geo-alt me-1"></i>
+                            {{ grave.cemetery.name }}
+                        </p>
+
+                    </div>
+
+
+                    {% if grave.status == "approved" %}
+
+                        <span class="my-grave-status my-grave-status--approved">
+                            Odobreno
+                        </span>
+
+                    {% elif grave.status == "pending" %}
+
+                        <span class="my-grave-status my-grave-status--pending">
+                            Čeka odobrenje
+                        </span>
+
+                    {% elif grave.status == "rejected" %}
+
+                        <span class="my-grave-status my-grave-status--rejected">
+                            Odbijeno
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="my-grave-card__meta">
+
+                    <span>
+                        <i class="bi bi-images"></i>
+                        Fotografije: {{ grave.photo_count }}
+                    </span>
+
+                    <span>
+                        <i class="bi bi-clock"></i>
+                        Dodano: {{ grave.created_at }}
+                    </span>
+
+                </div>
+
+
+                {% if grave.inscription %}
+
+                    <p class="my-grave-card__text">
+                        {{ grave.inscription|truncatechars:150 }}
+                    </p>
+
+                {% else %}
+
+                    <p class="my-grave-card__text my-grave-card__text--muted">
+                        Natpis nije unesen.
+                    </p>
+
+                {% endif %}
+
+
+                <div class="my-grave-card__actions">
+
+                    <a
+                        href="{% url 'graves:grave_detail' grave.id %}"
+                        class="btn wg-card-action"
+                    >
+                        Otvori detalje
+                        <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+
+                </div>
+
+            </div>
+
+        </article>
+
+    {% empty %}
+
+        <div class="empty-state">
+            <i class="bi bi-pin-map"></i>
+
+            <h3>Još nema dodanih grobova</h3>
+
+            <p>
+                Kada dodate prvi grob, pojavit će se ovdje.
+            </p>
+
+            <a
+                href="{% url 'graves:add_grave' %}"
+                class="btn wg-search-button"
+            >
+                <i class="bi bi-plus-circle me-1"></i>
+                Dodaj grob
+            </a>
+        </div>
+
+    {% endfor %}
+
+</div>
 
 {% endblock %}

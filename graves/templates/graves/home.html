@@ -10,14 +10,17 @@
     <div class="hero-content">
         <h1>Wiki Greblje</h1>
 
-        <p class="lead mt-3">Digitalni arhiv grobalja, spomenika i sepulkralne baštine Bosne i Hercegovine.</p>
+        <p class="lead mt-3">Digitalna memorija mjesta ukopa u Bosni i Hercegovini.</p>
 
         <div class="hero-actions">
-            <a href="{% url 'graves:search' %}" class="btn btn-light btn-lg me-2 mb-2">
+            <a href="{% url 'graves:search' %}" class="btn wg-hero-primary btn-lg me-2 mb-2">
+                <i class="bi bi-search me-1"></i>
                 Pretraži
             </a>
         
-            <a href="{% url 'graves:add_grave' %}" class="btn btn-outline-light btn-lg mb-2">
+            <a href="{% url 'graves:add_grave' %}" 
+                class="btn wg-hero-secondary btn-lg mb-2">
+                    <i class="bi bi-plus-circle me-1"></i>
                 Dodaj grob
             </a>
         </div>
@@ -37,7 +40,7 @@
                     placeholder="Unesite ime osobe, prezime ili naziv groblja..."
                 >
 
-                <button class="btn btn-dark" type="submit">
+                <button class="btn wg-search-button" type="submit">
                     Pretraži
                 </button>
             </div>
@@ -99,7 +102,12 @@
 </div>
 </section>
 
-<h2 class="mb-4">Najnovije dodani grobovi</h2>
+<div class="wg-home-section-heading">
+    <div>
+        <span class="wg-home-section-kicker">Novo u arhivi</span>
+        <h2>Najnovije dodani grobovi</h2>
+    </div>
+</div>
 
 <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
 
@@ -110,8 +118,13 @@
 
                 {% with first_photo=grave.approved_photos.0 %}
                     {% if first_photo %}
-                        <img src="{{ first_photo.image.url }}"
-                             class="grave-card-image">
+                        <a href="{% url 'graves:grave_detail' grave.id %}"
+                        class="grave-card-image-link">
+                            <img src="{{ first_photo.image.url }}"
+                                class="grave-card-image"
+                                alt="{{ grave.title|default:'Fotografija groba' }}"
+                                loading="lazy">
+                        </a>
                     {% endif %}
                 {% endwith %}
 
@@ -129,9 +142,10 @@
                         {{ grave.inscription|truncatechars:120 }}
                     </p>
 
-                    <a href="{% url 'graves:grave_detail' grave.id %}"
-                       class="btn btn-outline-dark w-100">
+                   <a href="{% url 'graves:grave_detail' grave.id %}"
+                    class="btn wg-card-action w-100">
                         Otvori detalje
+                        <i class="bi bi-arrow-right ms-1"></i>
                     </a>
 
                 </div>
@@ -141,7 +155,12 @@
     {% endfor %}
 
 </div>
-<h2 class="mb-4 mt-5">Najnovije fotografije</h2>
+<div class="wg-home-section-heading wg-home-section-heading-spaced">
+    <div>
+        <span class="wg-home-section-kicker">Vizuelni zapisi</span>
+        <h2>Najnovije fotografije</h2>
+    </div>
+</div>
 
 <div class="row row-cols-2 row-cols-md-4 g-4">
 
@@ -150,8 +169,13 @@
 
             <div class="card photo-card h-100">
 
-                <img src="{{ photo.image.url }}"
-                     class="photo-card-image">
+                <a href="{% url 'graves:grave_detail' photo.grave.id %}"
+                class="wg-photo-card-image-link">
+                    <img src="{{ photo.image.url }}"
+                        class="photo-card-image"
+                        alt="Fotografija groba {{ photo.grave.title|default:'Grob' }}"
+                        loading="lazy">
+                </a>
                      
                 <div class="card-body">
 

@@ -4,44 +4,105 @@
 
 {% block content %}
 
-<a href="{% url 'graves:grave_detail' grave.id %}"
-   class="btn btn-sm btn-outline-dark mb-3">
-    ← Nazad na grob
-</a>
+<div class="suggest-edit-wrapper">
 
-<div class="row justify-content-center">
-    <div class="col-md-7">
-        <div class="card shadow-sm">
-            <div class="card-body">
+    <a
+        href="{% url 'graves:grave_detail' grave.id %}"
+        class="suggest-edit-back"
+    >
+        <i class="bi bi-arrow-left"></i>
+        Nazad na grob
+    </a>
 
-                <h2 class="mb-3">Predloži izmjenu</h2>
+    <section class="suggest-edit-card">
 
-                <p class="text-muted">
-                    Grob:
-                    <strong>{{ grave.title|default:"Neimenovan grob" }}</strong>
-                </p>
+        <div class="suggest-edit-heading">
 
-                <form method="post">
-                    {% csrf_token %}
+            <span class="wg-page-kicker">
+                Doprinos evidenciji
+            </span>
 
-                    <div class="mb-3">
-                        {{ form.field_name.label_tag }}
-                        {{ form.field_name }}
+            <h1>
+                Predloži izmjenu
+            </h1>
+
+            <p>
+                Predložite ispravku ili dopunu podataka za grob
+                <strong>
+                    {{ grave.title|default:"Neimenovan grob" }}
+                </strong>.
+                Prijedlog će biti pregledan prije objave.
+            </p>
+
+        </div>
+
+
+        <form method="post" class="suggest-edit-form">
+
+            {% csrf_token %}
+
+            <div class="suggest-edit-field">
+
+                <label for="{{ form.field_name.id_for_label }}">
+                    {{ form.field_name.label }}
+                </label>
+
+                {{ form.field_name }}
+
+                {% if form.field_name.errors %}
+                    <div class="suggest-edit-errors">
+                        {{ form.field_name.errors }}
                     </div>
-
-                    <div class="mb-3">
-                        {{ form.new_value.label_tag }}
-                        {{ form.new_value }}
-                    </div>
-
-                    <button type="submit" class="btn btn-dark">
-                        Pošalji prijedlog
-                    </button>
-                </form>
+                {% endif %}
 
             </div>
-        </div>
-    </div>
+
+
+            <div class="suggest-edit-field">
+
+                <label for="{{ form.new_value.id_for_label }}">
+                    {{ form.new_value.label }}
+                </label>
+
+                {{ form.new_value }}
+
+                {% if form.new_value.errors %}
+                    <div class="suggest-edit-errors">
+                        {{ form.new_value.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <div class="suggest-edit-note">
+
+                <i class="bi bi-info-circle"></i>
+
+                <span>
+                    Unesite samo podatke za koje imate pouzdanu osnovu.
+                    Administrator će pregledati prijedlog prije njegove objave.
+                </span>
+
+            </div>
+
+
+            <div class="suggest-edit-actions">
+
+                <button
+                    type="submit"
+                    class="btn wg-search-button"
+                >
+                    <i class="bi bi-send me-1"></i>
+                    Pošalji prijedlog
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
 </div>
 
 {% endblock %}

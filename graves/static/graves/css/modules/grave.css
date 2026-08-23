@@ -1,4 +1,121 @@
 /* =====================================================
+   GRAVE DETAIL - WG STYLE
+===================================================== */
+
+.grave-header,
+.grave-gallery-section,
+.grave-persons-section,
+.memorial-section,
+.grave-location-section,
+.nearby-graves-section,
+.related-persons-section,
+.comments-section,
+.edit-history-section {
+    border: 1px solid var(--wg-border);
+    border-radius: 14px;
+
+    background: var(--wg-surface);
+
+    box-shadow: 0 3px 12px rgba(22, 60, 47, .05);
+}
+
+.grave-header .card-body,
+.grave-gallery-section .card-body,
+.grave-persons-section .card-body,
+.memorial-section .card-body,
+.grave-location-section .card-body,
+.nearby-graves-section .card-body,
+.related-persons-section .card-body,
+.comments-section .card-body,
+.edit-history-section .card-body {
+    padding: 1.5rem;
+}
+
+
+/* =====================================================
+   Grave header
+===================================================== */
+
+.grave-header {
+    border-left: 4px solid var(--wg-green-700);
+}
+
+.grave-header .detail-icon {
+    color: var(--wg-green-700);
+}
+
+.grave-title {
+    color: var(--wg-green-950);
+}
+
+.grave-location {
+    color: var(--wg-muted);
+}
+
+.grave-location i {
+    color: var(--wg-green-700);
+}
+
+.grave-intro {
+    color: var(--wg-text);
+}
+
+
+/* =====================================================
+   Grave metadata chips
+===================================================== */
+
+.grave-chip {
+    border: 1px solid rgba(59, 114, 88, .16);
+
+    background: var(--wg-green-50);
+    color: var(--wg-text);
+}
+
+.grave-chip i {
+    color: var(--wg-green-700);
+}
+
+
+/* =====================================================
+   Section headings
+===================================================== */
+
+.grave-gallery-section .section-title,
+.grave-persons-section .section-title,
+.memorial-section .section-title,
+.grave-location-section .section-title,
+.nearby-graves-section .section-title,
+.related-persons-section .section-title,
+.comments-section .section-title,
+.edit-history-section .section-title {
+    color: var(--wg-green-950);
+
+    font-weight: 700;
+}
+
+.grave-gallery-section .section-title i,
+.grave-persons-section .section-title i,
+.memorial-section .section-title i,
+.grave-location-section .section-title i,
+.nearby-graves-section .section-title i,
+.related-persons-section .section-title i,
+.comments-section .section-title i,
+.edit-history-section .section-title i {
+    color: var(--wg-green-700);
+}
+
+.grave-location-section .section-intro,
+.nearby-graves-section .section-intro,
+.related-persons-section .section-intro,
+.comments-section .section-intro,
+.edit-history-section .section-intro {
+    color: var(--wg-muted);
+}
+
+
+
+/* =====================================================
    GRAVE GALLERY PREVIEW
 ===================================================== */
 
@@ -17,10 +134,10 @@
 
     overflow: hidden;
 
-    border: 1px solid rgba(44, 62, 80, .12);
+    border: 1px solid var(--wg-border);
     border-radius: var(--card-radius);
 
-    background: #fff;
+    background: var(--wg-surface);
 }
 
 .grave-gallery-preview-button {
@@ -34,7 +151,7 @@
 
     overflow: hidden;
 
-    background: #e9ecef;
+    background: var(--wg-green-50);
 
     cursor: zoom-in;
 }
@@ -129,7 +246,7 @@
 .grave-gallery-preview-note {
     margin: 1rem 0 0;
 
-    color: #6c757d;
+    color: var(--wg-muted);
 
     font-size: .9rem;
     text-align: center;
@@ -151,6 +268,283 @@
     }
 }
 
+/* =====================================================
+   Memorial record blocks
+===================================================== */
+
+.memorial-section .record-block {
+    border-color: var(--wg-border);
+    border-left-color: var(--wg-green-700);
+
+    background: var(--wg-green-50);
+}
+
+.memorial-section .record-block:hover {
+    background: var(--wg-surface);
+}
+
+.memorial-section .record-icon {
+    background: var(--wg-green-100);
+    color: var(--wg-green-700);
+}
+
+.memorial-section .record-title {
+    color: var(--wg-green-950);
+}
+
+.memorial-section .record-subtitle,
+.memorial-section .record-empty {
+    color: var(--wg-muted);
+}
+
+
+/* =====================================================
+   Nearby graves + related persons
+===================================================== */
+
+.nearby-grave-card,
+.related-person-card {
+    border-color: var(--wg-border);
+    background: var(--wg-surface);
+}
+
+.nearby-grave-card:hover,
+.related-person-card:hover {
+    border-color: rgba(22, 60, 47, .20);
+
+    box-shadow: 0 8px 20px rgba(22, 60, 47, .08);
+}
+
+.nearby-grave-icon,
+.related-person-icon {
+    background: var(--wg-green-100);
+    color: var(--wg-green-700);
+}
+
+.nearby-grave-title,
+.related-person-name {
+    color: var(--wg-green-950);
+}
+
+
+/* =====================================================
+   Comments
+===================================================== */
+
+.comment-card {
+    border-color: var(--wg-border);
+
+    background: var(--wg-green-50);
+}
+
+.comment-avatar {
+    background: var(--wg-green-100);
+    color: var(--wg-green-700);
+}
+
+.comment-author,
+.add-comment-title {
+    color: var(--wg-green-950);
+}
+
+.comment-date {
+    color: var(--wg-muted);
+}
+
+.add-comment-card {
+    border-color: var(--wg-border);
+
+    background: var(--wg-surface);
+}
+
+
+/* =====================================================
+   Map metadata
+===================================================== */
+
+.grave-location-meta {
+    border-top-color: var(--wg-border);
+}
+
+.grave-location-meta i {
+    color: var(--wg-green-700);
+}
+
+/* =====================================================
+   GRAVE PENDING
+===================================================== */
+
+.grave-pending-wrapper {
+    display: flex;
+    justify-content: center;
+
+    padding: 2rem 0;
+}
+
+.grave-pending-card {
+    width: 100%;
+    max-width: 760px;
+
+    padding: 2rem;
+
+    border: 1px solid var(--wg-border);
+    border-radius: 16px;
+
+    background: var(--wg-surface);
+
+    box-shadow: 0 6px 22px rgba(22, 60, 47, .08);
+
+    text-align: center;
+}
+
+.grave-pending-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 64px;
+    height: 64px;
+
+    margin: 0 auto 1rem;
+
+    border-radius: 50%;
+
+    background: #fff8e8;
+    color: var(--wg-warning);
+
+    font-size: 1.6rem;
+}
+
+.grave-pending-kicker {
+    display: block;
+
+    margin-bottom: .35rem;
+
+    color: var(--wg-warning);
+
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.grave-pending-title {
+    margin-bottom: .8rem;
+
+    color: var(--wg-green-950);
+
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.grave-pending-intro {
+    max-width: 620px;
+
+    margin: 0 auto 1.5rem;
+
+    color: var(--wg-text);
+
+    line-height: 1.65;
+}
+
+.grave-pending-status {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+
+    margin: 1.5rem 0;
+}
+
+.grave-pending-status-item {
+    padding: 1rem;
+
+    border: 1px solid var(--wg-border);
+    border-radius: 12px;
+
+    background: var(--wg-green-50);
+}
+
+.grave-pending-status-label {
+    display: block;
+
+    margin-bottom: .35rem;
+
+    color: var(--wg-muted);
+
+    font-size: .8rem;
+    font-weight: 600;
+
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.grave-pending-status-value {
+    color: var(--wg-green-950);
+
+    font-weight: 700;
+}
+
+.grave-pending-status-waiting {
+    color: var(--wg-warning);
+}
+
+.grave-pending-note {
+    margin: 0;
+
+    padding: .9rem 1rem;
+
+    border-radius: 10px;
+
+    background: var(--wg-green-50);
+    color: var(--wg-muted);
+
+    font-size: .95rem;
+    line-height: 1.55;
+}
+
+.grave-pending-actions {
+    display: flex;
+    justify-content: center;
+    gap: .75rem;
+    flex-wrap: wrap;
+
+    margin-top: 1.5rem;
+}
+
+.grave-pending-secondary {
+    border: 1px solid var(--wg-border);
+
+    background: var(--wg-surface);
+    color: var(--wg-text);
+
+    font-weight: 600;
+}
+
+.grave-pending-secondary:hover {
+    border-color: var(--wg-green-700);
+
+    background: var(--wg-green-50);
+    color: var(--wg-green-800);
+}
+
+@media (max-width: 576px) {
+
+    .grave-pending-card {
+        padding: 1.4rem;
+    }
+
+    .grave-pending-status {
+        grid-template-columns: 1fr;
+    }
+
+    .grave-pending-actions {
+        flex-direction: column;
+    }
+
+    .grave-pending-actions .btn {
+        width: 100%;
+    }
+}
 
 
 
@@ -284,5 +678,391 @@
 
     .grave-lightbox-next {
         right: 8px;
+    }
+}
+
+/* =====================================================
+   MY GRAVES
+===================================================== */
+
+.my-graves-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.my-grave-card {
+    display: grid;
+    grid-template-columns: minmax(260px, 34%) 1fr;
+
+    overflow: hidden;
+
+    border: 1px solid var(--wg-border);
+    border-radius: 14px;
+
+    background: var(--wg-surface);
+
+    box-shadow: 0 3px 12px rgba(22, 60, 47, .05);
+
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        border-color .18s ease;
+}
+
+.my-grave-card:hover {
+    transform: translateY(-2px);
+
+    border-color: rgba(22, 60, 47, .20);
+
+    box-shadow: 0 8px 20px rgba(22, 60, 47, .08);
+}
+
+.my-grave-card__media {
+    display: block;
+    overflow: hidden;
+
+    min-height: 230px;
+
+    background: var(--wg-green-50);
+}
+
+.my-grave-card__image {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+    min-height: 230px;
+
+    object-fit: cover;
+
+    transition: transform .25s ease;
+}
+
+.my-grave-card:hover .my-grave-card__image {
+    transform: scale(1.025);
+}
+
+.my-grave-card__placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+
+    min-height: 230px;
+
+    background: var(--wg-green-50);
+    color: var(--wg-muted);
+}
+
+.my-grave-card__placeholder i {
+    color: var(--wg-green-700);
+    font-size: 2rem;
+}
+
+.my-grave-card__body {
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+    padding: 1.4rem 1.5rem;
+}
+
+.my-grave-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.my-grave-card__title {
+    margin: 0 0 .35rem;
+
+    font-size: 1.35rem;
+    font-weight: 700;
+}
+
+.my-grave-card__title a {
+    color: var(--wg-green-950);
+    text-decoration: none;
+}
+
+.my-grave-card__title a:hover {
+    color: var(--wg-green-700);
+}
+
+.my-grave-card__cemetery {
+    margin: 0;
+
+    color: var(--wg-muted);
+}
+
+.my-grave-card__cemetery i {
+    color: var(--wg-green-700);
+}
+
+.my-grave-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem 1.25rem;
+
+    margin-top: 1rem;
+
+    color: var(--wg-muted);
+    font-size: .9rem;
+}
+
+.my-grave-card__meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+}
+
+.my-grave-card__meta i {
+    color: var(--wg-green-700);
+}
+
+.my-grave-card__text {
+    margin: 1rem 0 0;
+
+    color: var(--wg-text);
+    line-height: 1.6;
+}
+
+.my-grave-card__text--muted {
+    color: var(--wg-muted);
+    font-style: italic;
+}
+
+.my-grave-card__actions {
+    margin-top: auto;
+    padding-top: 1.25rem;
+}
+
+
+/* Status badges */
+
+.my-grave-status {
+    display: inline-flex;
+    align-items: center;
+
+    flex-shrink: 0;
+
+    padding: .4rem .7rem;
+
+    border-radius: 999px;
+
+    font-size: .8rem;
+    font-weight: 700;
+}
+
+.my-grave-status--approved {
+    border: 1px solid rgba(59, 114, 88, .20);
+
+    background: var(--wg-green-50);
+    color: var(--wg-green-800);
+}
+
+.my-grave-status--pending {
+    border: 1px solid rgba(154, 107, 25, .22);
+
+    background: #fff8e8;
+    color: var(--wg-warning);
+}
+
+.my-grave-status--rejected {
+    border: 1px solid rgba(166, 61, 61, .20);
+
+    background: #fff1f1;
+    color: #943737;
+}
+
+
+/* Responsive */
+
+@media (max-width: 767.98px) {
+
+    .my-grave-card {
+        grid-template-columns: 1fr;
+    }
+
+    .my-grave-card__media,
+    .my-grave-card__image,
+    .my-grave-card__placeholder {
+        min-height: 240px;
+    }
+
+    .my-grave-card__header {
+        flex-direction: column;
+    }
+
+    .my-grave-status {
+        align-self: flex-start;
+    }
+
+    .my-grave-card__actions .btn {
+        width: 100%;
+    }
+}
+
+/* =====================================================
+   SUGGEST GRAVE EDIT
+===================================================== */
+
+.suggest-edit-wrapper {
+    width: 100%;
+    max-width: 820px;
+
+    margin: 0 auto;
+    padding: 1rem 0 2rem;
+}
+
+.suggest-edit-back {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+
+    margin-bottom: 1rem;
+
+    color: var(--wg-green-800);
+
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.suggest-edit-back:hover {
+    color: var(--wg-green-700);
+}
+
+.suggest-edit-card {
+    padding: 1.8rem;
+
+    border: 1px solid var(--wg-border);
+    border-radius: 16px;
+
+    background: var(--wg-surface);
+
+    box-shadow: 0 5px 18px rgba(22, 60, 47, .07);
+}
+
+.suggest-edit-heading {
+    margin-bottom: 1.5rem;
+}
+
+.suggest-edit-heading h1 {
+    margin: 0 0 .6rem;
+
+    color: var(--wg-green-950);
+
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.suggest-edit-heading p {
+    margin: 0;
+
+    color: var(--wg-muted);
+
+    line-height: 1.65;
+}
+
+.suggest-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.suggest-edit-field {
+    display: flex;
+    flex-direction: column;
+    gap: .45rem;
+}
+
+.suggest-edit-field label {
+    color: var(--wg-text);
+
+    font-weight: 600;
+}
+
+.suggest-edit-field select,
+.suggest-edit-field input,
+.suggest-edit-field textarea {
+    width: 100%;
+
+    padding: .7rem .85rem;
+
+    border: 1px solid var(--wg-border);
+    border-radius: 9px;
+
+    background: var(--wg-surface);
+    color: var(--wg-text);
+}
+
+.suggest-edit-field select:focus,
+.suggest-edit-field input:focus,
+.suggest-edit-field textarea:focus {
+    outline: none;
+
+    border-color: var(--wg-green-700);
+
+    box-shadow: 0 0 0 .15rem rgba(59, 114, 88, .10);
+}
+
+.suggest-edit-errors {
+    color: #943737;
+
+    font-size: .9rem;
+}
+
+.suggest-edit-errors ul {
+    margin: 0;
+    padding-left: 1.2rem;
+}
+
+.suggest-edit-note {
+    display: flex;
+    align-items: flex-start;
+    gap: .6rem;
+
+    padding: .85rem 1rem;
+
+    border: 1px solid rgba(59, 114, 88, .14);
+    border-radius: 10px;
+
+    background: var(--wg-green-50);
+    color: var(--wg-muted);
+
+    font-size: .92rem;
+    line-height: 1.55;
+}
+
+.suggest-edit-note i {
+    margin-top: .1rem;
+
+    color: var(--wg-green-700);
+
+    flex-shrink: 0;
+}
+
+.suggest-edit-actions {
+    display: flex;
+    justify-content: flex-start;
+
+    padding-top: .25rem;
+}
+
+@media (max-width: 576px) {
+
+    .suggest-edit-card {
+        padding: 1.3rem;
+    }
+
+    .suggest-edit-heading h1 {
+        font-size: 1.65rem;
+    }
+
+    .suggest-edit-actions .btn {
+        width: 100%;
     }
 }

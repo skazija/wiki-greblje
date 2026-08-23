@@ -4,6 +4,26 @@
 
 .cemetery-card {
     overflow: hidden;
+
+    border: 1px solid var(--wg-border);
+    border-radius: 14px;
+
+    background: var(--wg-surface);
+
+    box-shadow: 0 3px 12px rgba(22, 60, 47, .06);
+
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        border-color .18s ease;
+}
+
+.cemetery-card:hover {
+    transform: translateY(-2px);
+
+    border-color: rgba(22, 60, 47, .20);
+
+    box-shadow: 0 9px 22px rgba(22, 60, 47, .09);
 }
 
 .cemetery-card-row {
@@ -25,7 +45,7 @@
 
     padding: 12px;
 
-    background: #fff;
+    background: var(--wg-surface);
 }
 
 .cemetery-card-image {
@@ -72,6 +92,28 @@
     align-items: center;
 }
 
+
+
+.cemetery-title {
+    margin-bottom: .65rem;
+
+    color: var(--wg-green-950);
+
+    font-weight: 700;
+}
+
+.cemetery-title i {
+    color: var(--wg-green-700);
+}
+
+.cemetery-description {
+    margin-top: .75rem;
+    margin-bottom: 0;
+
+    color: var(--wg-text);
+
+    line-height: 1.65;
+}
 /* =====================================================
    CEMETERY FALLBACK ICON
 ===================================================== */
@@ -88,7 +130,7 @@
     overflow: hidden;
     border-radius: 10px;
 
-    background: #f3f2ed;
+    background: var(--wg-green-50);
 }
 
 .cemetery-card-fallback-image {
@@ -102,7 +144,7 @@
 
     padding: 12px;
 
-    background: #f3f2ed;
+    background: var(--wg-green-50);
 }
 
 /* Mobile */
@@ -154,7 +196,7 @@
     overflow: hidden;
     border-radius: 10px;
 
-    background: #e9ecef;
+    background: var(--wg-green-50);
     cursor: zoom-in;
 }
 
@@ -310,20 +352,21 @@
     gap: .45rem;
 
     margin-bottom: 1rem;
-    padding: .45rem .8rem;
+    padding: .4rem .75rem;
 
-    border: 1px solid rgba(44, 62, 80, .14);
+    border: 1px solid rgba(59, 114, 88, .18);
     border-radius: 999px;
 
-    background: rgba(44, 62, 80, .06);
-    color: var(--primary);
+    background: var(--wg-green-50);
+    color: var(--wg-green-800);
 
-    font-size: .92rem;
+    font-size: .88rem;
     font-weight: 600;
 }
 
 .cemetery-type-badge i {
-    font-size: .85rem;
+    color: var(--wg-green-700);
+    font-size: .82rem;
 }
 
 
@@ -359,4 +402,85 @@
     .cemetery-lightbox-next {
         right: 8px;
     }
+}
+
+/* =====================================================
+   CEMETERY DETAIL - WG STYLE
+===================================================== */
+
+.cemetery-detail-header {
+    border: 1px solid var(--wg-border);
+    border-radius: 14px;
+
+    background: var(--wg-surface);
+
+    box-shadow: 0 3px 12px rgba(22, 60, 47, .06);
+}
+
+.cemetery-detail-header .card-body {
+    padding: 1.6rem;
+}
+
+.cemetery-detail-header .detail-icon {
+    color: var(--wg-green-700);
+}
+
+.cemetery-detail-title {
+    margin-bottom: .4rem;
+
+    color: var(--wg-green-950);
+
+    font-weight: 700;
+}
+
+.cemetery-detail-location {
+    margin-bottom: .75rem;
+
+    color: var(--wg-muted);
+}
+
+.cemetery-detail-location i {
+    color: var(--wg-green-700);
+}
+
+.cemetery-detail-description {
+    margin-bottom: 0;
+
+    color: var(--wg-text);
+
+    line-height: 1.65;
+}
+
+.cemetery-detail-card,
+.cemetery-gallery {
+    margin-top: 1.5rem;
+
+    border: 1px solid var(--wg-border);
+    border-radius: 14px;
+
+    background: var(--wg-surface);
+
+    box-shadow: 0 3px 12px rgba(22, 60, 47, .05);
+}
+
+.cemetery-detail-card .card-body,
+.cemetery-gallery .card-body {
+    padding: 1.5rem;
+}
+
+.cemetery-detail-card .input-group-text {
+    background: var(--wg-surface);
+    border-color: var(--wg-border);
+
+    color: var(--wg-green-700);
+}
+
+.cemetery-detail-card .form-control {
+    border-color: var(--wg-border);
+}
+
+.cemetery-detail-card .form-control:focus {
+    border-color: var(--wg-green-700);
+
+    box-shadow: 0 0 0 .15rem rgba(59, 114, 88, .10);
 }

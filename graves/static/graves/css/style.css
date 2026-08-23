@@ -33,7 +33,28 @@
     --shadow: 0 2px 8px rgba(0,0,0,.08);
 }
 
+/* =====================================================
+   Wiki Greblje - Brand palette
+===================================================== */
 
+:root {
+    --wg-green-950: #163c2f;
+    --wg-green-900: #1d4d3a;
+    --wg-green-800: #285f48;
+    --wg-green-700: #3b7258;
+
+    --wg-green-100: #e7f0eb;
+    --wg-green-50: #f3f7f4;
+
+    --wg-surface: #ffffff;
+    --wg-background: #f5f7f5;
+
+    --wg-text: #26312c;
+    --wg-muted: #6d7972;
+    --wg-border: #d9e1dc;
+
+    --wg-warning: #9a6b19;
+}
 
 /* =====================================================
    BASE
@@ -46,6 +67,186 @@
 /* =====================================================
    NAVIGATION
 ===================================================== */
+
+.wg-site-body {
+    background: var(--wg-background);
+    color: var(--wg-text);
+}
+
+
+/* =====================================================
+   Main navigation
+===================================================== */
+
+.wg-navbar {
+    min-height: 82px;
+    padding: 10px 0;
+
+    background: var(--wg-green-950);
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+    box-shadow:
+        0 4px 18px rgba(22, 60, 47, 0.12);
+}
+
+
+.wg-navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    margin-right: 24px;
+    padding: 0;
+
+    color: #fff !important;
+}
+
+
+.wg-navbar-logo {
+    width: 58px;
+    height: 58px;
+
+    object-fit: contain;
+
+    flex-shrink: 0;
+}
+
+
+.wg-navbar-brand-text {
+    display: flex;
+    flex-direction: column;
+
+    line-height: 1.15;
+}
+
+
+.wg-navbar-title {
+    color: #fff;
+
+    font-size: 1.15rem;
+    font-weight: 700;
+
+    letter-spacing: 0.01em;
+}
+
+
+.wg-navbar-subtitle {
+    margin-top: 4px;
+
+    color: rgba(255, 255, 255, 0.68);
+
+    font-size: 0.72rem;
+    font-weight: 400;
+
+    white-space: nowrap;
+}
+
+
+.wg-navbar .nav-link {
+    position: relative;
+
+    margin: 0 1px;
+    padding: 9px 9px !important;
+
+    border-radius: 7px;
+
+    color: rgba(255, 255, 255, 0.78);
+
+    font-size: 0.92rem;
+    font-weight: 500;
+
+    transition:
+        background-color 0.18s ease,
+        color 0.18s ease;
+}
+
+
+.wg-navbar .nav-link:hover,
+.wg-navbar .nav-link:focus {
+    background: rgba(255, 255, 255, 0.09);
+    color: #fff;
+}
+
+
+.wg-navbar-add {
+    margin-left: 7px !important;
+
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff !important;
+
+    font-weight: 600 !important;
+}
+
+
+.wg-navbar-add:hover {
+    background: rgba(255, 255, 255, 0.20) !important;
+}
+
+
+.wg-navbar-pending {
+    color: #f2d28c !important;
+}
+
+
+.wg-navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+
+.wg-navbar-toggler:focus {
+    box-shadow: 0 0 0 0.15rem rgba(255, 255, 255, 0.15);
+}
+
+
+/* Bootstrap toggler icon on our dark-green background */
+
+.wg-navbar .navbar-toggler-icon {
+    filter: brightness(0) invert(1);
+}
+
+
+@media (max-width: 1199.98px) {
+
+    .wg-navbar {
+        min-height: auto;
+    }
+
+    .wg-navbar .navbar-collapse {
+        margin-top: 12px;
+        padding-top: 12px;
+
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .wg-navbar .nav-link {
+        margin: 2px 0;
+        padding: 9px 11px !important;
+    }
+
+    .wg-navbar-add {
+        margin-left: 0 !important;
+    }
+}
+
+
+@media (max-width: 576px) {
+
+    .wg-navbar-logo {
+        width: 50px;
+        height: 50px;
+    }
+
+    .wg-navbar-title {
+        font-size: 1.05rem;
+    }
+
+    .wg-navbar-subtitle {
+        display: none;
+    }
+}
+
+
 
 /* =====================================================
    HERO
@@ -131,6 +332,77 @@
     }
 }
 
+.hero {
+    border: 1px solid rgba(59, 114, 88, 0.75);
+
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(22, 60, 47, 0.06);
+}
+
+.hero h1 {
+    text-shadow: 0 3px 12px rgba(0, 0, 0, 0.30);
+}
+
+.hero .lead {
+    color: rgba(255, 255, 255, 0.88);
+    line-height: 1.6;
+}
+
+.wg-hero-primary {
+    background: #fff;
+    border: 1px solid #fff;
+    color: var(--wg-green-950);
+    font-weight: 600;
+}
+
+.wg-hero-primary:hover {
+    background: var(--wg-green-100);
+    border-color: var(--wg-green-100);
+    color: var(--wg-green-950);
+}
+
+.wg-hero-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    color: #fff;
+    font-weight: 600;
+}
+
+.wg-hero-secondary:hover {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: #fff;
+    color: #fff;
+}
+
+.hero-search .input-group-text {
+    background: #fff;
+    border-color: #fff;
+    color: var(--wg-green-800);
+}
+
+.hero-search .form-control {
+    border-color: #fff;
+}
+
+.hero-search .form-control:focus {
+    border-color: var(--wg-green-100);
+    box-shadow: none;
+}
+
+.wg-search-button {
+    min-width: 120px !important;
+    background: var(--wg-green-900);
+    border-color: var(--wg-green-900);
+    color: #fff;
+    font-weight: 600;
+}
+
+.wg-search-button:hover {
+    background: var(--wg-green-800);
+    border-color: var(--wg-green-800);
+    color: #fff;
+}
 
 /* Home actions */
 
@@ -202,6 +474,78 @@
    STATISTICS
 ===================================================== */
 
+.stat-section {
+    margin-top: 2rem;
+}
+
+.stat-card {
+    position: relative;
+    overflow: hidden;
+
+    border: 1px solid var(--wg-border);
+    border-radius: 14px;
+
+    background: var(--wg-surface);
+
+    box-shadow: 0 3px 12px rgba(22, 60, 47, 0.06);
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.stat-card::before {
+    content: "";
+
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 3px;
+
+    background: var(--wg-green-700);
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+
+    border-color: rgba(22, 60, 47, 0.22);
+
+    box-shadow: 0 8px 22px rgba(22, 60, 47, 0.10);
+}
+
+.stat-card .card-body {
+    padding: 1.6rem 1rem;
+}
+
+.stat-icon {
+    display: block;
+
+    margin-bottom: 0.65rem;
+
+    color: var(--wg-green-700);
+
+    font-size: 1.4rem;
+}
+
+.stat-card h2 {
+    margin-bottom: 0.25rem;
+
+    color: var(--wg-green-950);
+
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.stat-card p {
+    color: var(--wg-muted);
+    font-weight: 500;
+}
+
+
+
 /* =====================================================
    SHARED COMPONENTS
 ===================================================== */
@@ -257,6 +601,162 @@
         font-size: 1.35rem;
     }
 }
+
+
+/* =====================================================
+   Home section headings
+===================================================== */
+
+.wg-home-section-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem;
+
+    margin-bottom: 1.25rem;
+}
+
+.wg-home-section-heading-spaced {
+    margin-top: 3.5rem;
+}
+
+.wg-home-section-kicker {
+    display: block;
+    margin-bottom: .25rem;
+
+    color: var(--wg-green-700);
+
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.wg-home-section-heading h2 {
+    margin: 0;
+
+    color: var(--wg-green-950);
+
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+
+/* =====================================================
+   Home grave cards
+===================================================== */
+
+.grave-card {
+    border: 1px solid var(--wg-border);
+    border-radius: 14px;
+
+    background: var(--wg-surface);
+
+    box-shadow: 0 3px 12px rgba(22, 60, 47, 0.06);
+
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        border-color .18s ease;
+}
+
+.grave-card:hover {
+    transform: translateY(-3px);
+
+    border-color: rgba(22, 60, 47, 0.20);
+
+    box-shadow: 0 10px 24px rgba(22, 60, 47, 0.10);
+}
+
+.grave-card-title {
+    color: var(--wg-green-950);
+}
+
+.grave-card-meta {
+    color: var(--wg-green-700);
+    font-weight: 600;
+}
+
+.grave-card-text {
+    color: var(--wg-text);
+}
+
+.wg-card-action {
+    border: 1px solid var(--wg-green-700);
+
+    background: transparent;
+    color: var(--wg-green-800);
+
+    font-weight: 600;
+}
+
+.wg-card-action:hover {
+    background: var(--wg-green-800);
+    border-color: var(--wg-green-800);
+
+    color: #fff;
+}
+
+
+/* =====================================================
+   Home photo cards
+===================================================== */
+
+.photo-card {
+    overflow: hidden;
+
+    border: 1px solid var(--wg-border);
+    border-radius: 14px;
+
+    background: var(--wg-surface);
+
+    box-shadow: 0 3px 12px rgba(22, 60, 47, 0.05);
+
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        border-color .18s ease;
+}
+
+.photo-card:hover {
+    transform: translateY(-3px);
+
+    border-color: rgba(22, 60, 47, 0.20);
+
+    box-shadow: 0 9px 22px rgba(22, 60, 47, 0.09);
+}
+
+.wg-photo-card-image-link {
+    display: block;
+    overflow: hidden;
+}
+
+.photo-card-image {
+    display: block;
+    width: 100%;
+
+    transition: transform .25s ease;
+}
+
+.photo-card:hover .photo-card-image {
+    transform: scale(1.035);
+}
+
+.photo-title a {
+    color: var(--wg-green-950);
+
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.photo-title a:hover {
+    color: var(--wg-green-700);
+}
+
+.photo-meta {
+    color: var(--wg-muted);
+}
+
 
 /* =====================================================
    PHOTO CARD
@@ -407,7 +907,9 @@
     text-decoration: underline;
 }
 
-.cemetery-detail-header {
+.cemetery-detail-header,
+.cemetery-gallery,
+.cemetery-graves-section + .content-card{
     border-left: 5px solid var(--primary);
 }
 
@@ -3287,5 +3789,121 @@ font-size:1rem;
     .person-summary-card__date-text,
     .person-summary-card__notes {
         font-size: 0.88rem;
+    }
+}
+
+
+
+/* =====================================================
+   Footer
+===================================================== */
+
+.wg-footer {
+    margin-top: 4rem;
+
+    background: var(--wg-green-950);
+    color: rgba(255, 255, 255, 0.82);
+
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.wg-footer .container {
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+}
+
+.wg-footer h5 {
+    margin-bottom: .25rem;
+
+    color: #fff;
+
+    font-weight: 700;
+}
+
+.wg-footer p {
+    margin-bottom: .25rem;
+
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.wg-footer small {
+    color: rgba(255, 255, 255, 0.52);
+}
+
+
+/* =====================================================
+   Page header
+===================================================== */
+
+.wg-page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+
+    margin-bottom: 2rem;
+}
+
+.wg-page-heading {
+    max-width: 650px;
+}
+
+.wg-page-kicker {
+    display: block;
+    margin-bottom: .3rem;
+
+    color: var(--wg-green-700);
+
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.wg-page-heading h1 {
+    margin: 0;
+
+    color: var(--wg-green-950);
+
+    font-weight: 700;
+}
+
+.wg-page-heading p {
+    margin: .45rem 0 0;
+
+    color: var(--wg-muted);
+}
+
+.wg-page-search {
+    width: 100%;
+    max-width: 430px;
+}
+
+.wg-page-search .input-group-text {
+    background: var(--wg-surface);
+    border-color: var(--wg-border);
+
+    color: var(--wg-green-700);
+}
+
+.wg-page-search .form-control {
+    border-color: var(--wg-border);
+}
+
+.wg-page-search .form-control:focus {
+    border-color: var(--wg-green-700);
+
+    box-shadow: 0 0 0 .15rem rgba(59, 114, 88, .10);
+}
+
+@media (max-width: 767.98px) {
+
+    .wg-page-header {
+        display: block;
+    }
+
+    .wg-page-search {
+        max-width: none;
+        margin-top: 1.25rem;
     }
 }

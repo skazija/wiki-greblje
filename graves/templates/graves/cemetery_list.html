@@ -6,12 +6,19 @@
 
 <div class="container py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-        <h1 class="mb-3 mb-md-0">Groblja</h1>
+    <div class="wg-page-header">
 
-        <form method="get"
-              action="{% url 'graves:search' %}"
-              class="d-flex">
+    <div class="wg-page-heading">
+        <span class="wg-page-kicker">Mjesta ukopa</span>
+        <h1>Groblja</h1>
+        <p>
+            Pregled evidentiranih grobalja i drugih mjesta ukopa.
+        </p>
+    </div>
+
+    <form method="get"
+          action="{% url 'graves:search' %}"
+          class="wg-page-search">
 
             <div class="input-group">
 
@@ -26,7 +33,7 @@
                     placeholder="Pretraži osobe, grobove, natpise..."
                 >
 
-                <button class="btn btn-dark" type="submit">
+                <button class="btn wg-search-button" type="submit">
                     Pretraži
                 </button>
 
@@ -70,9 +77,10 @@
                     <div class="mt-auto pt-3">
                         <a
                             href="{% url 'graves:cemetery_detail' cemetery.id %}"
-                            class="btn btn-outline-dark"
+                            class="btn wg-card-action"
                         >
                             Otvori groblje
+                            <i class="bi bi-arrow-right ms-1"></i>
                         </a>
                     </div>
 

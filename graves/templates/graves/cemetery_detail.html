@@ -106,7 +106,7 @@
             </h2>
 
             {% if cemetery_photos|length > 1 %}
-                <span class="badge rounded-pill text-bg-dark">
+                <span class="badge rounded-pill wg-count-badge">
                     {{ cemetery_photos|length }} fotografije
                 </span>
             {% endif %}
@@ -157,7 +157,7 @@
      Cemetery Map
 ===================================================== -->
 
-<section class="card content-card">
+<section class="card content-card cemetery-detail-card">
     <div class="card-body">
 
         <h2 class="section-title">
@@ -180,7 +180,7 @@
      Grave Search
 ===================================================== -->
 
-<section class="card content-card">
+<section class="card content-card cemetery-detail-card">
     <div class="card-body">
 
         <h2 class="section-title">
@@ -234,7 +234,7 @@
             Grobovi
         </h2>
 
-        <span class="badge rounded-pill text-bg-dark grave-count-badge">
+        <span class="badge rounded-pill wg-count-badge grave-count-badge">
             {{ graves|length }}
         </span>
     </div>
@@ -312,7 +312,7 @@
                         <div class="mt-auto pt-3">
                             <a
                                 href="{% url 'graves:grave_detail' grave.id %}"
-                                class="btn btn-outline-dark w-100"
+                                class="btn wg-card-action w-100"
                             >
                                 Otvori detalje
                             </a>
@@ -337,7 +337,7 @@
 
                     <a
                         href="{% url 'graves:add_grave' %}"
-                        class="btn btn-dark"
+                        class="wg-search-button"
                     >
                         Dodaj prvi grob
                     </a>
@@ -521,7 +521,7 @@
                     graveMarker{{ grave.id }}.bindPopup(`
                         <div class="map-popup">
 
-                            {% with first_photo=grave.photos.first %}
+                            {% with first_photo=grave.approved_photos.0 %}
                                 {% if first_photo %}
                                     <img
                                         src="{{ first_photo.image.url }}"
@@ -536,9 +536,8 @@
                             </strong>
 
                             <div class="map-popup-persons">
-                                {% for person in grave.persons.all %}
-                                    {{ person.first_name|escapejs }}
-                                    {{ person.last_name|escapejs }}<br>
+                               {% for person in grave.approved_persons %}
+                                    {{ person|escapejs }}<br>
                                 {% empty %}
                                     <span>Nema evidentiranih osoba</span><br>
                                 {% endfor %}
@@ -555,6 +554,7 @@
                                 class="map-popup-link"
                             >
                                 Otvori detalje
+                                <i class="bi bi-arrow-right ms-1"></i>
                             </a>
 
                         </div>

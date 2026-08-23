@@ -4,60 +4,82 @@
 
 {% block content %}
 
-<div class="row justify-content-center">
+<div class="grave-pending-wrapper">
 
-    <div class="col-md-8">
+    <section class="grave-pending-card">
 
-        <div class="card shadow-sm">
+        <div class="grave-pending-icon" aria-hidden="true">
+            <i class="bi bi-hourglass-split"></i>
+        </div>
 
-            <div class="card-body text-center">
+        <span class="grave-pending-kicker">
+            Moderacija zapisa
+        </span>
 
-                <h2 class="mb-4 text-warning">
-                    Unos čeka odobrenje
-                </h2>
+        <h1 class="grave-pending-title">
+            Unos čeka odobrenje
+        </h1>
 
-                <p>
-                    Grob:
-                    <strong>
-                        {{ grave.title|default:"Neimenovan grob" }}
-                    </strong>
-                </p>
+        <p class="grave-pending-intro">
+            Grob
+            <strong>
+                {{ grave.title|default:"Neimenovan grob" }}
+            </strong>
+            uspješno je evidentiran i trenutno čeka pregled administratora.
+        </p>
 
-                <p class="text-muted">
-                    Ovaj unos još nije javno dostupan.
-                </p>
+        <div class="grave-pending-status">
 
-                <p class="text-muted">
-                    Trenutno evidentirano osoba:
-                    <strong>{{ grave.persons.count }}</strong>
-                </p>
+            <div class="grave-pending-status-item">
+                <span class="grave-pending-status-label">
+                    Status
+                </span>
 
-                <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+                <span class="grave-pending-status-value grave-pending-status-waiting">
+                    <i class="bi bi-clock me-1"></i>
+                    Čeka odobrenje
+                </span>
+            </div>
 
-                    <a
-                        href="{% url 'graves:add_person' grave.pk %}"
-                        class="btn btn-success"
-                    >
-                        <i class="bi bi-person-plus me-1"></i>
-                        Dodaj još jednu osobu
-                    </a>
+            <div class="grave-pending-status-item">
+                <span class="grave-pending-status-label">
+                    Evidentirane osobe
+                </span>
 
-                    <a
-                        href="{% url 'graves:my_graves' %}"
-                        class="btn btn-outline-dark"
-                    >
-                        Nazad na moje grobove
-                    </a>
-
-                </div>
-
-                
-
+                <span class="grave-pending-status-value">
+                    {{ grave.persons.count }}
+                </span>
             </div>
 
         </div>
 
-    </div>
+        <p class="grave-pending-note">
+            <i class="bi bi-info-circle me-1"></i>
+            Ovaj zapis još nije javno dostupan. Nakon odobrenja bit će
+            prikazan u javnoj evidenciji Wiki Greblje.
+        </p>
+
+        <div class="grave-pending-actions">
+
+            <a
+                href="{% url 'graves:add_person' grave.pk %}"
+                class="btn wg-card-action"
+            >
+                <i class="bi bi-person-plus me-1"></i>
+                Dodaj još jednu osobu
+            </a>
+
+            <a
+                href="{% url 'graves:my_graves' %}"
+                class="btn grave-pending-secondary"
+            >
+                <i class="bi bi-arrow-left me-1"></i>
+                Nazad na moje grobove
+            </a>
+
+        </div>
+
+    </section>
 
 </div>
 

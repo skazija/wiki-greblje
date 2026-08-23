@@ -13,56 +13,143 @@
     <link rel="stylesheet" href="{% static 'graves/css/modules/login.css' %}">
     <link rel="stylesheet" href="{% static 'graves/css/modules/cemetery.css' %}">
     <link rel="stylesheet" href="{% static 'graves/css/modules/grave.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'graves/images/branding/wiki-greblje-icon.png' %}">
     
-
-    {% block extra_head %}{% endblock %}
+        {% block extra_head %}{% endblock %}
 </head>
 
-<body class="bg-light">
+<body class="wg-site-body">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+<nav class="navbar navbar-expand-xl wg-navbar mb-4">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="{% url 'graves:home' %}">
-            Wiki Greblje
+
+        <a class="navbar-brand wg-navbar-brand"
+           href="{% url 'graves:home' %}">
+
+            <img
+                src="{% static 'graves/images/branding/wiki-greblje-logo.png' %}"
+                alt="Wiki Greblje"
+                class="wg-navbar-logo"
+            >
+
+            <span class="wg-navbar-brand-text">
+                <span class="wg-navbar-title">
+                    Wiki Greblje
+                </span>
+
+                <span class="wg-navbar-subtitle">
+                    Digitalna memorija mjesta ukopa
+                </span>
+            </span>
+
         </a>
-        <button class="navbar-toggler" type="button"  data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+
+        <button
+            class="navbar-toggler wg-navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#mainNavbar"
+            aria-controls="mainNavbar"
+            aria-expanded="false"
+            aria-label="Otvori navigaciju"
+        >
             <span class="navbar-toggler-icon"></span>
         </button>
-        
+
         <div class="collapse navbar-collapse" id="mainNavbar">
-            <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="{% url 'graves:home' %}">Početna</a>
-            <a class="nav-link" href="{% url 'graves:cemetery_list' %}">Groblja</a>
-            <a class="nav-link" href="{% url 'graves:add_grave' %}">Dodaj grob</a>
-            <a class="nav-link" href="{% url 'graves:search' %}">Pretraga</a>
-            <a class="nav-link" href="{% url 'graves:person_list' %}">Osobe</a>
-            <a class="nav-link" href="{% url 'graves:surname_list' %}">Prezimena</a>
-            <a class="nav-link" href="{% url 'graves:statistics' %}">Statistika</a>    
-            <a class="nav-link" href="{% url 'graves:contributors' %}">Doprinosi</a>        
-            {% if user.is_authenticated %}
-            {% if user.is_staff and pending_graves_count > 0 %}
-                <a class="nav-link text-warning" href="/admin/graves/grave/?status__exact=pending">Pending: {{ pending_graves_count }}</a>
-            {% endif %}
-           
-    <a class="nav-link" href="/admin/">Admin</a>
-    <a class="nav-link" href="{% url 'graves:my_graves' %}">Moji grobovi</a>
-    <a class="nav-link" href="{% url 'graves:profile' %}">Moj profil</a>
-    <form method="post" action="{% url 'logout' %}" class="d-inline">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-link nav-link">
-            Logout
-        </button>
-    </form>
-{% else %}
-    <a class="nav-link" href="{% url 'login' %}">
-        Login
-    </a>
-{% endif %}
-{% if not user.is_authenticated %}
-    <a class="nav-link" href="{% url 'register' %}">Registracija</a>
-{% endif %}
+
+            <div class="navbar-nav ms-auto align-items-xl-center">
+
+                <a class="nav-link" href="{% url 'graves:home' %}">
+                    Početna
+                </a>
+
+                <a class="nav-link" href="{% url 'graves:cemetery_list' %}">
+                    Groblja
+                </a>
+
+                <a class="nav-link" href="{% url 'graves:search' %}">
+                    Pretraga
+                </a>
+
+                <a class="nav-link" href="{% url 'graves:person_list' %}">
+                    Osobe
+                </a>
+
+                <a class="nav-link" href="{% url 'graves:surname_list' %}">
+                    Prezimena
+                </a>
+
+                <a class="nav-link" href="{% url 'graves:statistics' %}">
+                    Statistika
+                </a>
+
+                <a class="nav-link" href="{% url 'graves:contributors' %}">
+                    Doprinosi
+                </a>
+
+                <a class="nav-link wg-navbar-add"
+                   href="{% url 'graves:add_grave' %}">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Dodaj grob
+                </a>
+
+                {% if user.is_authenticated %}
+
+                    {% if user.is_staff and pending_graves_count > 0 %}
+                        <a
+                            class="nav-link wg-navbar-pending"
+                            href="/admin/graves/grave/?status__exact=pending"
+                        >
+                            Pending: {{ pending_graves_count }}
+                        </a>
+                    {% endif %}
+
+                    {% if user.is_staff %}
+                        <a class="nav-link" href="/admin/">
+                            Admin
+                        </a>
+                    {% endif %}
+
+                    <a class="nav-link" href="{% url 'graves:my_graves' %}">
+                        Moji grobovi
+                    </a>
+
+                    <a class="nav-link" href="{% url 'graves:profile' %}">
+                        Moj profil
+                    </a>
+
+                    <form
+                        method="post"
+                        action="{% url 'logout' %}"
+                        class="d-inline"
+                    >
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="btn btn-link nav-link"
+                        >
+                            Odjava
+                        </button>
+                    </form>
+
+                {% else %}
+
+                    <a class="nav-link" href="{% url 'login' %}">
+                        Prijava
+                    </a>
+
+                    <a class="nav-link" href="{% url 'register' %}">
+                        Registracija
+                    </a>
+
+                {% endif %}
+
             </div>
+
         </div>
+
     </div>
 </nav>
 
@@ -70,22 +157,18 @@
     {% block content %}{% endblock %}
 </main>
 
-<footer class="footer mt-5">
+<footer class="footer wg-footer mt-5">
 
     <div class="container text-center">
 
         <h5>Wiki Greblje</h5>
 
         <p class="mb-2">
-            Digitalni arhiv grobalja i sepulkralne baštine Bosne i Hercegovine.
+            Digitalna memorija mjesta ukopa u Bosni i Hercegovini.
         </p>
 
         <small>
-
-            Version 1.1 · Foundations Edition
-            
-            © 2026
-
+            Version 1.1 · Foundations Edition  © 2026
         </small>
 
     </div>
