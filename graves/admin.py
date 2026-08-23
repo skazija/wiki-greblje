@@ -4,7 +4,7 @@ from django import forms
 from django.contrib import admin
 from django.contrib.gis.admin import GISModelAdmin
 from django.contrib.gis.geos import Point
-from .models import Cemetery, Grave, Person, Photo, EditHistory, LocationSuggestion, EditSuggestion, Comment, ProblemReport, CemeteryPhoto
+from .models import Cemetery, Grave, Person, Photo, EditHistory, LocationSuggestion, EditSuggestion, PersonEditSuggestion, Comment, ProblemReport, CemeteryPhoto
 from django.db.models import Case, When, Value, IntegerField
 import json
 from django.contrib.gis.geos import Polygon
@@ -852,10 +852,49 @@ class EditHistoryAdmin(admin.ModelAdmin):
 
 @admin.register(LocationSuggestion)
 class LocationSuggestionAdmin(GISModelAdmin):
-    list_display = ("grave", "suggested_by", "approval_badge", "created_at")
-    list_filter = ("approved",)
+
+    actions = [
+        "approve_location_suggestions",
+    ]
+
+    list_display = (
+        "grave",
+        "suggested_by",
+        "approval_badge",
+        "created_at",
+    )
+
+    list_filter = (
+        "approved",
+    )
+
+    search_fields = (
+        "grave__title",
+        "grave__cemetery__name",
+        "suggested_by__username",
+        "reason",
+    )
+
+    fields = (
+        "grave",
+        "suggested_by",
+        "suggested_location",
+        "reason",
+        "approved",
+        "created_at",
+    )
+
+    readonly_fields = (
+        "grave",
+        "suggested_by",
+        "suggested_location",
+        "reason",
+        "created_at",
+    )
+
 
     def approval_badge(self, obj):
+
         if obj.approved:
             label = "ODOBRENO"
             status_class = "wg-status-approved"
@@ -871,6 +910,110 @@ class LocationSuggestionAdmin(GISModelAdmin):
 
     approval_badge.short_description = "Status"
 
+
+    def apply_location_suggestion(
+        self,
+        suggestion,
+        reviewed_by,
+    ):
+
+        if suggestion.approved:
+            return
+
+        grave = suggestion.grave
+
+        old_location = grave.location
+        new_location = suggestion.suggested_location
+
+        grave.location = new_location
+
+        grave.save(
+            update_fields=[
+                "location",
+            ]
+        )
+
+        suggestion.approved = True
+
+        suggestion.save(
+            update_fields=[
+                "approved",
+            ]
+        )
+
+        EditHistory.objects.create(
+            grave=grave,
+            edited_by=reviewed_by,
+            field_name="Lokacija",
+            old_value=(
+                str(old_location)
+                if old_location
+                else ""
+            ),
+            new_value=(
+                str(new_location)
+                if new_location
+                else ""
+            ),
+        )
+
+
+    @admin.action(
+        description="Odobri i primijeni predložene lokacije"
+    )
+    def approve_location_suggestions(
+        self,
+        request,
+        queryset,
+    ):
+
+        for suggestion in queryset:
+
+            self.apply_location_suggestion(
+                suggestion,
+                request.user,
+            )
+
+
+    def save_model(
+        self,
+        request,
+        obj,
+        form,
+        change,
+    ):
+
+        old_approved = False
+
+        if change:
+
+            old_obj = LocationSuggestion.objects.get(
+                pk=obj.pk
+            )
+
+            old_approved = old_obj.approved
+
+        super().save_model(
+            request,
+            obj,
+            form,
+            change,
+        )
+
+        if (
+            obj.approved
+            and not old_approved
+        ):
+
+            # save_model je već spremio approved=True,
+            # pa ga privremeno vratimo kako bi zajednička
+            # metoda mogla primijeniti izmjenu.
+            obj.approved = False
+
+            self.apply_location_suggestion(
+                obj,
+                request.user,
+            )
 
 @admin.register(EditSuggestion)
 class EditSuggestionAdmin(admin.ModelAdmin):
@@ -989,6 +1132,201 @@ class EditSuggestionAdmin(admin.ModelAdmin):
                 old_value=obj.old_value,
                 new_value=obj.new_value,
             )
+            
+@admin.register(PersonEditSuggestion)
+class PersonEditSuggestionAdmin(admin.ModelAdmin):
+
+    actions = [
+        "approve_suggestions",
+        "reject_suggestions",
+    ]
+
+    list_display = (
+        "person",
+        "grave_display",
+        "field_name",
+        "suggested_by",
+        "status_badge",
+        "created_at",
+    )
+
+    list_filter = (
+        "status",
+        "field_name",
+    )
+
+    search_fields = (
+        "person__first_name",
+        "person__last_name",
+        "person__grave__title",
+        "old_value",
+        "new_value",
+        "suggested_by__username",
+    )
+
+    fields = (
+        "person",
+        "suggested_by",
+        "field_name",
+        "old_value",
+        "new_value",
+        "status",
+        "admin_note",
+        "created_at",
+        "reviewed_at",
+    )
+
+    readonly_fields = (
+        "person",
+        "suggested_by",
+        "field_name",
+        "old_value",
+        "created_at",
+        "reviewed_at",
+    )
+
+    def grave_display(self, obj):
+        return obj.person.grave
+
+    grave_display.short_description = "Grob"
+
+
+    def status_badge(self, obj):
+
+        labels = {
+            PersonEditSuggestion.STATUS_APPROVED: "ODOBRENO",
+            PersonEditSuggestion.STATUS_PENDING: "PENDING",
+            PersonEditSuggestion.STATUS_REJECTED: "ODBIJENO",
+        }
+
+        status_class = {
+            PersonEditSuggestion.STATUS_APPROVED: "wg-status-approved",
+            PersonEditSuggestion.STATUS_PENDING: "wg-status-pending",
+            PersonEditSuggestion.STATUS_REJECTED: "wg-status-rejected",
+        }.get(obj.status, "")
+
+        return format_html(
+            '<span class="wg-status {}">{}</span>',
+            status_class,
+            labels.get(obj.status, obj.status),
+        )
+
+    status_badge.short_description = "Status"
+
+
+    def apply_suggestion(self, suggestion, reviewed_by):
+
+        person = suggestion.person
+        field_name = suggestion.field_name
+        new_value = suggestion.new_value.strip()
+
+        if field_name in ("birth_year", "death_year"):
+
+            if new_value:
+                new_value = int(new_value)
+            else:
+                new_value = None
+
+        elif field_name == "gender":
+
+            allowed_genders = {
+                Person.GENDER_UNKNOWN,
+                Person.GENDER_MALE,
+                Person.GENDER_FEMALE,
+            }
+
+            if new_value not in allowed_genders:
+                raise ValueError(
+                    "Neispravna vrijednost za spol."
+                )
+
+        setattr(
+            person,
+            field_name,
+            new_value,
+        )
+
+        if field_name in ("first_name", "last_name"):
+            person.is_unknown = not bool(
+                person.first_name.strip()
+                or person.last_name.strip()
+            )
+
+        person.save()
+
+        suggestion.status = PersonEditSuggestion.STATUS_APPROVED
+        suggestion.reviewed_at = timezone.now()
+        suggestion.save(
+            update_fields=[
+                "status",
+                "reviewed_at",
+            ]
+        )
+
+        EditHistory.objects.create(
+            grave=person.grave,
+            edited_by=reviewed_by,
+            field_name=f"Osoba - {suggestion.get_field_name_display()}",
+            old_value=suggestion.old_value,
+            new_value=str(new_value or ""),
+        )
+
+
+    @admin.action(
+        description="Odobri i primijeni prijedloge izmjena osoba"
+    )
+    def approve_suggestions(self, request, queryset):
+
+        for suggestion in queryset:
+
+            if suggestion.status == PersonEditSuggestion.STATUS_APPROVED:
+                continue
+
+            self.apply_suggestion(
+                suggestion,
+                request.user,
+            )
+
+
+    @admin.action(
+        description="Odbij odabrane prijedloge"
+    )
+    def reject_suggestions(self, request, queryset):
+
+        queryset.filter(
+            status=PersonEditSuggestion.STATUS_PENDING
+        ).update(
+            status=PersonEditSuggestion.STATUS_REJECTED,
+            reviewed_at=timezone.now(),
+        )
+
+
+    def save_model(self, request, obj, form, change):
+
+        old_status = None
+
+        if change:
+            old_obj = PersonEditSuggestion.objects.get(
+                pk=obj.pk
+            )
+            old_status = old_obj.status
+
+        super().save_model(
+            request,
+            obj,
+            form,
+            change,
+        )
+
+        if (
+            obj.status == PersonEditSuggestion.STATUS_APPROVED
+            and old_status != PersonEditSuggestion.STATUS_APPROVED
+        ):
+            self.apply_suggestion(
+                obj,
+                request.user,
+            )
+            
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = (

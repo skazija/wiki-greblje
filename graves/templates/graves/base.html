@@ -96,19 +96,24 @@
 
                 {% if user.is_authenticated %}
 
-                    {% if user.is_staff and pending_graves_count > 0 %}
-                        <a
-                            class="nav-link wg-navbar-pending"
-                            href="/admin/graves/grave/?status__exact=pending"
-                        >
-                            Pending: {{ pending_graves_count }}
-                        </a>
-                    {% endif %}
-
                     {% if user.is_staff %}
-                        <a class="nav-link" href="/admin/">
-                            Admin
+
+                        <a
+                            class="nav-link wg-admin-link"
+                            href="/admin/"
+                        >
+                            <i class="bi bi-shield-check me-1"></i>
+                            Administracija
+
+                            {% if has_pending_admin_items %}
+                                <span
+                                    class="wg-admin-indicator"
+                                    title="Postoje stavke koje čekaju administraciju"
+                                    aria-label="Postoje stavke koje čekaju administraciju"
+                                ></span>
+                            {% endif %}
                         </a>
+
                     {% endif %}
 
                     <a class="nav-link" href="{% url 'graves:my_graves' %}">

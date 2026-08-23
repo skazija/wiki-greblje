@@ -1,0 +1,362 @@
+{% extends "graves/base.html" %}
+
+{% block title %}Predloži ispravku lokacije{% endblock %}
+
+{% block extra_head %}
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet/dist/leaflet.css"
+>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="suggest-location-wrapper">
+
+    <a
+        href="{% url 'graves:grave_detail' grave.id %}"
+        class="suggest-edit-back"
+    >
+        <i class="bi bi-arrow-left"></i>
+        Nazad na grob
+    </a>
+
+
+    <section class="suggest-location-card">
+
+        <div class="suggest-edit-heading">
+
+            <span class="wg-page-kicker">
+                Ispravka lokacije
+            </span>
+
+            <h1>
+                Predloži novu lokaciju groba
+            </h1>
+
+            <p>
+                Predlažete ispravku lokacije za grob
+                <strong>
+                    {{ grave.title|default:"Neimenovan grob" }}
+                </strong>
+                na groblju
+                <strong>{{ grave.cemetery.name }}</strong>.
+            </p>
+
+        </div>
+
+
+        <form method="post" class="suggest-location-form">
+
+            {% csrf_token %}
+
+            {{ form.latitude }}
+            {{ form.longitude }}
+
+
+            <div class="suggest-location-map-wrapper">
+
+                <div class="suggest-location-map-heading">
+
+                    <div>
+                        <strong>
+                            Odaberite novu lokaciju
+                        </strong>
+
+                        <p>
+                            Kliknite na mapu ili pomjerite marker
+                            na tačno mjesto groba.
+                        </p>
+                    </div>
+
+                    <span
+                        id="locationSuggestionStatus"
+                        class="suggest-location-status"
+                    >
+                        Lokacija nije promijenjena
+                    </span>
+
+                </div>
+
+                <div
+                    id="suggestLocationMap"
+                    class="suggest-location-map"
+                ></div>
+
+                <div class="suggest-location-coordinates">
+
+                    <span>
+                        <strong>Latitude:</strong>
+                        <span id="suggestLatitudeDisplay">—</span>
+                    </span>
+
+                    <span>
+                        <strong>Longitude:</strong>
+                        <span id="suggestLongitudeDisplay">—</span>
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="suggest-edit-field">
+
+                <label for="{{ form.reason.id_for_label }}">
+                    {{ form.reason.label }}
+                </label>
+
+                {{ form.reason }}
+
+                <small class="suggest-location-helper">
+                    Ako možete, ukratko navedite kako ste utvrdili
+                    tačniju lokaciju.
+                </small>
+
+                {% if form.reason.errors %}
+                    <div class="suggest-edit-errors">
+                        {{ form.reason.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            {% if form.latitude.errors or form.longitude.errors %}
+
+                <div class="suggest-edit-errors">
+
+                    {{ form.latitude.errors }}
+                    {{ form.longitude.errors }}
+
+                </div>
+
+            {% endif %}
+
+
+            <div class="suggest-edit-note">
+
+                <i class="bi bi-info-circle"></i>
+
+                <span>
+                    Trenutna javna lokacija neće biti promijenjena
+                    dok administrator ne pregleda i ne odobri prijedlog.
+                </span>
+
+            </div>
+
+
+            <div class="suggest-edit-actions">
+
+                <button
+                    type="submit"
+                    class="btn wg-search-button"
+                >
+                    <i class="bi bi-geo-alt me-1"></i>
+                    Pošalji prijedlog lokacije
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const latitudeInput =
+        document.getElementById("id_latitude");
+
+    const longitudeInput =
+        document.getElementById("id_longitude");
+
+    const latitudeDisplay =
+        document.getElementById("suggestLatitudeDisplay");
+
+    const longitudeDisplay =
+        document.getElementById("suggestLongitudeDisplay");
+
+    const status =
+        document.getElementById("locationSuggestionStatus");
+
+
+    let startLat = null;
+    let startLng = null;
+
+
+    if (
+        latitudeInput &&
+        longitudeInput &&
+        latitudeInput.value &&
+        longitudeInput.value
+    ) {
+
+        startLat = parseFloat(latitudeInput.value);
+        startLng = parseFloat(longitudeInput.value);
+
+    }
+
+    {% if grave.cemetery.location %}
+
+        const cemeteryLat =
+            {{ grave.cemetery.location.y|stringformat:"f" }};
+
+        const cemeteryLng =
+            {{ grave.cemetery.location.x|stringformat:"f" }};
+
+    {% else %}
+
+        const cemeteryLat = 43.9889;
+        const cemeteryLng = 18.1781;
+
+    {% endif %}
+
+
+    const map = L.map(
+        "suggestLocationMap"
+    ).setView(
+        [
+            startLat !== null ? startLat : cemeteryLat,
+            startLng !== null ? startLng : cemeteryLng
+        ],
+        startLat !== null ? 19 : 17
+    );
+
+
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            maxZoom: 22,
+            attribution: "&copy; OpenStreetMap contributors"
+        }
+    ).addTo(map);
+
+
+    let marker = null;
+
+
+    function updateLocation(lat, lng) {
+
+        latitudeInput.value = lat.toFixed(7);
+        longitudeInput.value = lng.toFixed(7);
+
+        latitudeDisplay.textContent =
+            lat.toFixed(7);
+
+        longitudeDisplay.textContent =
+            lng.toFixed(7);
+
+        status.textContent =
+            "Nova lokacija odabrana";
+
+        status.classList.add(
+            "is-selected"
+        );
+
+    }
+
+
+    function placeMarker(lat, lng) {
+
+        if (!marker) {
+
+            marker = L.marker(
+                [lat, lng],
+                {
+                    draggable: true
+                }
+            ).addTo(map);
+
+            marker.on(
+                "dragend",
+                function (event) {
+
+                    const position =
+                        event.target.getLatLng();
+
+                    updateLocation(
+                        position.lat,
+                        position.lng
+                    );
+
+                }
+            );
+
+        } else {
+
+            marker.setLatLng(
+                [lat, lng]
+            );
+
+        }
+
+        updateLocation(lat, lng);
+
+    }
+
+
+    if (
+        startLat !== null &&
+        startLng !== null
+    ) {
+
+        marker = L.marker(
+            [startLat, startLng],
+            {
+                draggable: true
+            }
+        ).addTo(map);
+
+        marker.on(
+            "dragend",
+            function (event) {
+
+                const position =
+                    event.target.getLatLng();
+
+                updateLocation(
+                    position.lat,
+                    position.lng
+                );
+
+            }
+        );
+
+        latitudeDisplay.textContent =
+            startLat.toFixed(7);
+
+        longitudeDisplay.textContent =
+            startLng.toFixed(7);
+
+    }
+
+
+    map.on(
+        "click",
+        function (event) {
+
+            placeMarker(
+                event.latlng.lat,
+                event.latlng.lng
+            );
+
+        }
+    );
+
+});
+
+</script>
+
+{% endblock %}

@@ -252,6 +252,46 @@
     text-align: center;
 }
 
+.gallery-preview__item {
+    border: 1px solid var(--wg-border);
+    border-radius: 10px;
+
+    background: var(--wg-surface);
+}
+
+.gallery-preview__number {
+    background: var(--wg-green-950);
+    color: #fff;
+}
+
+.gallery-preview__name {
+    background: rgba(15, 49, 37, .88);
+    color: #fff;
+}
+
+.gallery-empty-state {
+    border-color: var(--wg-border);
+
+    background: var(--wg-green-50);
+    color: var(--wg-muted);
+}
+
+.gallery-empty-state i {
+    color: var(--wg-green-700);
+}
+
+.gallery-selection-status {
+    border-color: var(--wg-border);
+
+    background: var(--wg-green-50);
+    color: var(--wg-muted);
+}
+
+.gallery-selection-status strong {
+    color: var(--wg-green-800);
+}
+
+
 
 /* Mobile */
 
@@ -881,6 +921,31 @@
 
 /* Responsive */
 
+@media (max-width: 991.98px) {
+
+    .submit-card__checklist {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 576px) {
+
+    .grave-entry-form .wg-card__header,
+    .grave-entry-form .wg-card__body {
+        padding-left: 1.1rem;
+        padding-right: 1.1rem;
+    }
+
+    .submit-card__checklist {
+        grid-template-columns: 1fr;
+    }
+
+    .grave-entry-form .submit-card {
+        padding: 1.25rem;
+    }
+}
+
+
 @media (max-width: 767.98px) {
 
     .my-grave-card {
@@ -1064,5 +1129,479 @@
 
     .suggest-edit-actions .btn {
         width: 100%;
+    }
+}
+
+/* =====================================================
+   ADD GRAVE - WG DIGITALIZATION WORKFLOW
+===================================================== */
+
+.grave-entry-form .wg-card,
+.grave-entry-form .content-card {
+    overflow: hidden;
+
+    border: 1px solid var(--wg-border);
+    border-radius: 14px;
+
+    background: var(--wg-surface);
+
+    box-shadow: 0 3px 12px rgba(22, 60, 47, .05);
+}
+
+.grave-entry-form .wg-card--spaced {
+    margin-top: 1.5rem;
+}
+
+.grave-entry-form .wg-card__header {
+    padding: 1.35rem 1.5rem 1.1rem;
+
+    border-bottom: 1px solid var(--wg-border);
+
+    background: var(--wg-green-50);
+}
+
+.grave-entry-form .wg-card__title {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+
+    margin: 0;
+
+    color: var(--wg-green-950);
+
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.grave-entry-form .wg-card__title i {
+    color: var(--wg-green-700);
+}
+
+.grave-entry-form .wg-card__description {
+    margin: .45rem 0 0;
+
+    color: var(--wg-muted);
+
+    line-height: 1.55;
+}
+
+.grave-entry-form .wg-card__body {
+    padding: 1.5rem;
+}
+
+/* Form fields */
+
+.grave-entry-form .person-field label {
+    margin-bottom: .4rem;
+
+    color: var(--wg-text);
+
+    font-weight: 600;
+}
+
+.grave-entry-form .person-field input,
+.grave-entry-form .person-field select,
+.grave-entry-form .person-field textarea {
+    width: 100%;
+
+    border: 1px solid var(--wg-border);
+    border-radius: 9px;
+
+    background: var(--wg-surface);
+    color: var(--wg-text);
+}
+
+.grave-entry-form .person-field input:focus,
+.grave-entry-form .person-field select:focus,
+.grave-entry-form .person-field textarea:focus {
+    outline: none;
+
+    border-color: var(--wg-green-700);
+
+    box-shadow: 0 0 0 .15rem rgba(59, 114, 88, .10);
+}
+
+.grave-entry-form .person-field__helper {
+    color: var(--wg-muted);
+}
+
+.grave-entry-form .person-field__errors {
+    color: #943737;
+}
+
+/* Submit / digitalization status */
+
+.grave-entry-form .submit-card {
+    margin-top: 1.5rem;
+    padding: 1.6rem;
+
+    border: 1px solid rgba(59, 114, 88, .22);
+    border-top: 4px solid var(--wg-green-700);
+
+    background: var(--wg-surface);
+}
+
+.submit-card__header {
+    text-align: center;
+}
+
+.submit-card__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 58px;
+    height: 58px;
+
+    margin: 0 auto .8rem;
+
+    border-radius: 50%;
+
+    background: var(--wg-green-100);
+    color: var(--wg-green-700);
+
+    font-size: 1.45rem;
+}
+
+.submit-card__header h2 {
+    color: var(--wg-green-950);
+
+    font-weight: 700;
+}
+
+.submit-card__header p {
+    max-width: 620px;
+
+    margin-left: auto;
+    margin-right: auto;
+
+    color: var(--wg-muted);
+}
+
+.submit-card__checklist {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: .7rem;
+
+    margin: 1.4rem 0;
+}
+
+.check-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .4rem;
+
+    padding: .8rem .5rem;
+
+    border: 1px solid var(--wg-border);
+    border-radius: 10px;
+
+    background: var(--wg-green-50);
+    color: var(--wg-muted);
+
+    text-align: center;
+    font-size: .85rem;
+}
+
+.check-item > i:first-child {
+    color: var(--wg-green-700);
+}
+
+.check-item.is-complete {
+    border-color: rgba(59, 114, 88, .25);
+
+    background: var(--wg-green-100);
+    color: var(--wg-green-950);
+}
+
+.check-item.is-complete > i:first-child {
+    color: var(--wg-green-800);
+}
+
+.submit-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+
+    width: 100%;
+
+    padding: .8rem 1rem;
+
+    border: 1px solid var(--wg-green-800);
+    border-radius: 9px;
+
+    background: var(--wg-green-800);
+    color: #fff;
+
+    font-weight: 700;
+
+    transition:
+        background .18s ease,
+        border-color .18s ease,
+        transform .18s ease;
+}
+
+.submit-button:hover {
+    border-color: var(--wg-green-950);
+
+    background: var(--wg-green-950);
+
+    transform: translateY(-1px);
+}
+
+
+.gallery-card__helper,
+.person-entry__helper,
+.record-card__helper {
+    border: 1px solid rgba(59, 114, 88, .14);
+    border-radius: 10px;
+
+    background: var(--wg-green-50);
+    color: var(--wg-muted);
+}
+
+.gallery-card__helper i,
+.person-entry__helper i,
+.record-card__helper i {
+    color: var(--wg-green-700);
+}
+
+.person-entry__identity {
+    border: 1px solid var(--wg-border);
+    border-radius: 12px;
+
+    background: var(--wg-green-50);
+}
+
+.person-entry__avatar {
+    background: var(--wg-green-100);
+    color: var(--wg-green-700);
+}
+
+.person-entry__eyebrow {
+    color: var(--wg-green-700);
+}
+
+.person-entry__identity-text strong {
+    color: var(--wg-green-950);
+}
+
+.person-entry__identity-text > span:last-child {
+    color: var(--wg-muted);
+}
+
+.person-photo-preview {
+    border-color: var(--wg-border);
+
+    background: var(--wg-green-50);
+}
+
+.person-photo-fallback {
+    color: var(--wg-green-700);
+}
+
+.person-photo-upload {
+    border-color: var(--wg-border);
+
+    background: var(--wg-surface);
+    color: var(--wg-green-800);
+}
+
+.person-photo-upload:hover {
+    border-color: var(--wg-green-700);
+
+    background: var(--wg-green-50);
+}
+
+.record-summary {
+    border: 1px solid var(--wg-border);
+    border-left: 4px solid var(--wg-green-700);
+
+    background: var(--wg-green-50);
+}
+
+.record-summary > i {
+    color: var(--wg-green-700);
+}
+
+.record-summary strong {
+    color: var(--wg-green-950);
+}
+
+.record-summary span {
+    color: var(--wg-muted);
+}
+
+/* =====================================================
+   MY GRAVES - INFO
+===================================================== */
+
+.my-graves-info {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.1rem;
+
+    border: 1px solid rgba(59, 114, 88, .16);
+    border-radius: 12px;
+
+    background: var(--wg-green-50);
+    color: var(--wg-text);
+}
+
+.my-graves-info > i {
+    margin-top: .1rem;
+
+    color: var(--wg-green-700);
+    font-size: 1.1rem;
+
+    flex-shrink: 0;
+}
+
+.my-graves-info strong {
+    display: block;
+
+    margin-bottom: .2rem;
+
+    color: var(--wg-green-950);
+}
+
+.my-graves-info p {
+    margin: 0;
+
+    color: var(--wg-muted);
+
+    font-size: .92rem;
+    line-height: 1.55;
+}
+
+/* =====================================================
+   LOCATION SUGGESTION
+===================================================== */
+
+.suggest-location-wrapper {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem 0 2rem;
+}
+
+.suggest-location-card {
+    padding: 1.8rem;
+
+    border: 1px solid var(--wg-border);
+    border-radius: 16px;
+
+    background: var(--wg-surface);
+
+    box-shadow: 0 5px 18px rgba(22, 60, 47, .07);
+}
+
+.suggest-location-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.suggest-location-map-wrapper {
+    overflow: hidden;
+
+    border: 1px solid var(--wg-border);
+    border-radius: 12px;
+
+    background: var(--wg-surface);
+}
+
+.suggest-location-map-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+
+    padding: 1rem 1.1rem;
+
+    border-bottom: 1px solid var(--wg-border);
+
+    background: var(--wg-green-50);
+}
+
+.suggest-location-map-heading strong {
+    color: var(--wg-green-950);
+}
+
+.suggest-location-map-heading p {
+    margin: .25rem 0 0;
+
+    color: var(--wg-muted);
+    font-size: .9rem;
+}
+
+.suggest-location-map {
+    width: 100%;
+    height: 480px;
+}
+
+.suggest-location-status {
+    flex-shrink: 0;
+
+    padding: .35rem .6rem;
+
+    border-radius: 999px;
+
+    background: var(--wg-surface);
+    color: var(--wg-muted);
+
+    font-size: .8rem;
+    font-weight: 600;
+}
+
+.suggest-location-status.is-selected {
+    background: var(--wg-green-100);
+    color: var(--wg-green-800);
+}
+
+.suggest-location-coordinates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 1.5rem;
+
+    padding: .75rem 1.1rem;
+
+    border-top: 1px solid var(--wg-border);
+
+    background: var(--wg-green-50);
+    color: var(--wg-muted);
+
+    font-size: .85rem;
+}
+
+.suggest-location-coordinates strong {
+    color: var(--wg-text);
+}
+
+.suggest-location-helper {
+    color: var(--wg-muted);
+}
+
+@media (max-width: 576px) {
+
+    .suggest-location-card {
+        padding: 1.25rem;
+    }
+
+    .suggest-location-map {
+        height: 360px;
+    }
+
+    .suggest-location-map-heading {
+        flex-direction: column;
+    }
+
+    .suggest-location-status {
+        align-self: flex-start;
     }
 }

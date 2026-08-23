@@ -73,7 +73,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                "graves.context_processors.pending_graves_count",
+                "graves.context_processors.pending_admin_items",
             ],
         },
     },

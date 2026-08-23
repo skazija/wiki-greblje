@@ -26,7 +26,7 @@
             <h1 id="grave-entry-title">Digitalizacija novog groba</h1>
 
             <p class="grave-entry-hero__intro">
-                Svaki evidentirani grob čuva dio kulturne i porodične historije
+                Evidentiranjem groba čuvate dio porodične i kulturne memorije
                 za buduće generacije.
             </p>
 
@@ -123,7 +123,7 @@
                     Status lokacije
                 </span>
 
-                <span id="LocationStatus" class="status waiting">
+                <span id="locationStatus" class="status waiting">
                     ○ Lokacija nije određena
                 </span>
             </div>
@@ -151,7 +151,7 @@
             <button
                 type="button"
                 id="useCurrentLocation"
-                class="btn btn-outline-success w-100"
+                class="btn wg-card-action w-100"
             >
                 <i class="bi bi-crosshair"></i>
                 Preuzmi trenutnu GPS lokaciju
@@ -599,9 +599,8 @@
         </h2>
 
         <p>
-            Pregledajte unesene podatke prije slanja.
-            Nakon slanja zapis će biti dostupan
-            administratorima na pregled i odobravanje.
+            Pregledajte evidentirane podatke prije slanja.
+            Nakon slanja zapis će čekati pregled i odobrenje administratora.
         </p>
 
     </div>
@@ -654,9 +653,6 @@
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-<p class="text-muted">
-    Ako ne kliknete lokaciju na mapi, sistem će pokušati preuzeti GPS lokaciju iz fotografije.
-</p>
 
 <script>
     var map = L.map('map').setView([44.2, 17.9], 8);

@@ -1,0 +1,108 @@
+{% extends "graves/base.html" %}
+
+{% block title %}Predloži izmjenu podataka osobe{% endblock %}
+
+{% block content %}
+
+<div class="suggest-edit-wrapper">
+
+    <a
+        href="{% url 'graves:grave_detail' grave.id %}"
+        class="suggest-edit-back"
+    >
+        <i class="bi bi-arrow-left"></i>
+        Nazad na grob
+    </a>
+
+    <section class="suggest-edit-card">
+
+        <div class="suggest-edit-heading">
+
+            <span class="wg-page-kicker">
+                Doprinos evidenciji
+            </span>
+
+            <h1>
+                Predloži izmjenu podataka osobe
+            </h1>
+
+            <p>
+                Predlažete izmjenu za osobu
+                <strong>{{ person }}</strong>
+                na grobu
+                <strong>{{ grave.title|default:"Neimenovan grob" }}</strong>.
+                Prijedlog će biti pregledan prije objave.
+            </p>
+
+        </div>
+
+
+        <form method="post" class="suggest-edit-form">
+
+            {% csrf_token %}
+
+            <div class="suggest-edit-field">
+
+                <label for="{{ form.field_name.id_for_label }}">
+                    {{ form.field_name.label }}
+                </label>
+
+                {{ form.field_name }}
+
+                {% if form.field_name.errors %}
+                    <div class="suggest-edit-errors">
+                        {{ form.field_name.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <div class="suggest-edit-field">
+
+                <label for="{{ form.new_value.id_for_label }}">
+                    {{ form.new_value.label }}
+                </label>
+
+                {{ form.new_value }}
+
+                {% if form.new_value.errors %}
+                    <div class="suggest-edit-errors">
+                        {{ form.new_value.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <div class="suggest-edit-note">
+
+                <i class="bi bi-info-circle"></i>
+
+                <span>
+                    Trenutni podatak ostaje javno prikazan dok administrator
+                    ne pregleda i ne odobri prijedlog.
+                </span>
+
+            </div>
+
+
+            <div class="suggest-edit-actions">
+
+                <button
+                    type="submit"
+                    class="btn wg-search-button"
+                >
+                    <i class="bi bi-send me-1"></i>
+                    Pošalji prijedlog
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}

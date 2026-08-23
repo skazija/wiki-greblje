@@ -10,12 +10,12 @@ from .models import EditSuggestion
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
 from django.core.paginator import Paginator
-from .models import Cemetery, Grave, Person, Photo, EditSuggestion, Comment, ProblemReport, CemeteryPhoto
+from .models import Cemetery, Grave, Person, Photo, EditSuggestion, PersonEditSuggestion, Comment, ProblemReport, CemeteryPhoto
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 
-from .forms import PublicGraveForm, PersonForm, EditSuggestionForm, CommentForm, ProblemReportForm
+from .forms import PublicGraveForm, PersonForm, EditSuggestionForm, PersonEditSuggestionForm, LocationSuggestionForm, CommentForm, ProblemReportForm
 from django.http import JsonResponse
 
 from django.db.models import Count
@@ -496,6 +496,118 @@ def suggest_grave_edit(request, pk):
         "form": form,
         "grave": grave,
     })
+
+@login_required
+def suggest_grave_location(request, pk):
+
+    grave = get_object_or_404(
+        Grave.objects.select_related("cemetery"),
+        pk=pk,
+        status=Grave.STATUS_APPROVED,
+    )
+
+    if request.method == "POST":
+
+        form = LocationSuggestionForm(request.POST)
+
+        if form.is_valid():
+
+            suggestion = form.save(commit=False)
+
+            suggestion.grave = grave
+            suggestion.suggested_by = request.user
+            suggestion.approved = False
+
+            suggestion.save()
+
+            return redirect(
+                "graves:grave_detail",
+                pk=grave.pk,
+            )
+
+    else:
+
+        initial = {}
+
+        if grave.location:
+            initial = {
+                "latitude": grave.location.y,
+                "longitude": grave.location.x,
+            }
+
+        form = LocationSuggestionForm(
+            initial=initial
+        )
+
+    return render(
+        request,
+        "graves/suggest_grave_location.html",
+        {
+            "form": form,
+            "grave": grave,
+        },
+    )
+
+
+@login_required
+def suggest_person_edit(request, pk):
+
+    person = get_object_or_404(
+        Person.objects.select_related(
+            "grave",
+            "grave__cemetery",
+        ),
+        pk=pk,
+        status=Person.STATUS_APPROVED,
+        grave__status=Grave.STATUS_APPROVED,
+    )
+
+    if request.method == "POST":
+
+        form = PersonEditSuggestionForm(request.POST)
+
+        if form.is_valid():
+
+            suggestion = form.save(commit=False)
+
+            suggestion.person = person
+            suggestion.suggested_by = request.user
+
+            field_name = suggestion.field_name
+
+            old_value = getattr(
+                person,
+                field_name,
+                "",
+            )
+
+            suggestion.old_value = (
+                ""
+                if old_value is None
+                else str(old_value)
+            )
+
+            suggestion.save()
+
+            return redirect(
+                "graves:grave_detail",
+                pk=person.grave.id,
+            )
+
+    else:
+
+        form = PersonEditSuggestionForm()
+
+    return render(
+        request,
+        "graves/suggest_person_edit.html",
+        {
+            "form": form,
+            "person": person,
+            "grave": person.grave,
+        },
+    )
+
 
 def statistics(request):
     stats = {

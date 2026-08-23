@@ -3907,3 +3907,24 @@ font-size:1rem;
         margin-top: 1.25rem;
     }
 }
+
+/* =========================================================
+   Admin navbar indicator
+   ========================================================= */
+
+.wg-admin-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+}
+
+.wg-admin-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-left: 4px;
+    border-radius: 50%;
+    background: #d6a84b;
+    box-shadow: 0 0 0 3px rgba(214, 168, 75, 0.16);
+    flex-shrink: 0;
+}

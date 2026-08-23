@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.gis.geos import Point
 
-from .models import Grave, Photo, Person, EditSuggestion, Comment, ProblemReport
+from .models import Grave, Photo, Person, EditSuggestion, PersonEditSuggestion, Comment, ProblemReport, LocationSuggestion
 
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
@@ -304,6 +304,91 @@ class EditSuggestionForm(forms.ModelForm):
             "new_value": "Nova vrijednost",
         }
 
+class PersonEditSuggestionForm(forms.ModelForm):
+
+    class Meta:
+        model = PersonEditSuggestion
+
+        fields = [
+            "field_name",
+            "new_value",
+        ]
+
+        widgets = {
+            "field_name": forms.Select(
+                attrs={
+                    "class": "form-control",
+                }
+            ),
+
+            "new_value": forms.Textarea(
+                attrs={
+                    "rows": 4,
+                    "class": "form-control",
+                }
+            ),
+        }
+
+        labels = {
+            "field_name": "Polje koje predlažete izmijeniti",
+            "new_value": "Nova vrijednost",
+        }
+
+class LocationSuggestionForm(forms.ModelForm):
+
+    latitude = forms.FloatField(
+        required=True,
+        widget=forms.HiddenInput(),
+    )
+
+    longitude = forms.FloatField(
+        required=True,
+        widget=forms.HiddenInput(),
+    )
+
+    class Meta:
+        model = LocationSuggestion
+
+        fields = [
+            "reason",
+        ]
+
+        widgets = {
+            "reason": forms.Textarea(
+                attrs={
+                    "rows": 4,
+                    "class": "form-control",
+                    "placeholder": (
+                        "Ukratko navedite zašto predlažete "
+                        "ispravku lokacije."
+                    ),
+                }
+            ),
+        }
+
+        labels = {
+            "reason": "Razlog ili napomena",
+        }
+
+    def save(self, commit=True):
+
+        suggestion = super().save(commit=False)
+
+        latitude = self.cleaned_data["latitude"]
+        longitude = self.cleaned_data["longitude"]
+
+        suggestion.suggested_location = Point(
+            float(longitude),
+            float(latitude),
+            srid=4326,
+        )
+
+        if commit:
+            suggestion.save()
+
+        return suggestion
+    
+    
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment

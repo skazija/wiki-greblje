@@ -15,6 +15,7 @@ urlpatterns = [
     path("api/cemetery-location/<int:pk>/", views.cemetery_location_api, name="cemetery_location_api",),
     path("moj-profil/", views.profile, name="profile"),
     path("grobovi/<int:pk>/predlozi-izmjenu/",views.suggest_grave_edit,name="suggest_grave_edit",),
+    path("osoba/<int:pk>/predlozi-izmjenu/", views.suggest_person_edit, name="suggest_person_edit",),
     path("statistika/", views.statistics, name="statistics"),
     path("osobe/",views.person_list,name="person_list"),
     path("grobovi/<int:pk>/komentar/",views.add_comment,name="add_comment",),
@@ -24,4 +25,5 @@ urlpatterns = [
     path("grobovi/<int:pk>/prijavi-problem/",views.report_problem,name="report_problem",),
     path("fotografije/<int:pk>/ocr/",views.photo_ocr,name="photo_ocr",),
     path("persons/add/", views.choose_grave_for_person, name="choose_grave_for_person",),
+    path("grob/<int:pk>/predlozi-lokaciju/", views.suggest_grave_location, name="suggest_grave_location", ),
 ]
