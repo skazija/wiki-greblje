@@ -1,124 +1,243 @@
 {% extends "graves/base.html" %}
 
 {% block title %}Prezime {{ last_name }}{% endblock %}
-{% block extra_head %}
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
-{% endblock %}
+
 {% block content %}
 
-<a href="{% url 'graves:surname_list' %}" class="btn btn-sm btn-outline-dark mb-3">
-    ← Nazad na prezimena
-</a>
 
-<h1 class="mb-4">Prezime: {{ last_name }}</h1>
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
 
-{% if map_graves %}
-<div class="card shadow-sm mb-4">
+        <li class="breadcrumb-item">
+            <a href="{% url 'graves:home' %}">
+                Početna
+            </a>
+        </li>
+
+        <li class="breadcrumb-item">
+            <a href="{% url 'graves:surname_list' %}">
+                Prezimena
+            </a>
+        </li>
+
+        <li
+            class="breadcrumb-item active"
+            aria-current="page"
+        >
+            {{ last_name }}
+        </li>
+
+    </ol>
+</nav>
+
+
+<div class="wg-page-header mb-4">
+
+    <div class="wg-page-heading">
+
+        <span class="wg-page-kicker">
+            Arhiva osoba
+        </span>
+
+        <h1>
+            {{ last_name }}
+        </h1>
+
+        <p>
+            Evidentirane osobe sa prezimenom {{ last_name }}.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="row g-3 mb-4">
+
+    <div class="col-sm-6">
+
+        <div class="card content-card h-100">
+
+            <div class="card-body d-flex align-items-center gap-3">
+
+                <div class="detail-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+
+                <div>
+                    <span class="text-muted small">
+                        Evidentirano osoba
+                    </span>
+
+                    <h2 class="section-title mb-0">
+                        {{ persons|length }}
+                    </h2>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-sm-6">
+
+        <div class="card content-card h-100">
+
+            <div class="card-body d-flex align-items-center gap-3">
+
+                <div class="detail-icon">
+                    <i class="bi bi-bank"></i>
+                </div>
+
+                <div>
+                    <span class="text-muted small">
+                        Evidentirano na grobljima
+                    </span>
+
+                    <h2 class="section-title mb-0">
+                        {{ cemeteries|length }}
+                    </h2>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% if cemeteries %}
+
+<section class="card content-card mb-4">
+
     <div class="card-body">
 
-        <h4>Raspored grobova na mapi</h4>
+        <span class="wg-page-kicker">
+            Lokacije
+        </span>
 
-        <div id="surname-map"
-             style="height:500px;border-radius:8px;">
+        <h2 class="section-title mb-3">
+            Groblja na kojima je prezime evidentirano
+        </h2>
+
+        <div class="d-flex flex-wrap gap-2">
+
+            {% for cemetery in cemeteries %}
+
+                <a
+                    href="{% url 'graves:cemetery_detail' cemetery.id %}"
+                    class="badge rounded-pill text-bg-light border text-decoration-none surname-cemetery-link"
+                >
+                    <i class="bi bi-geo-alt me-1"></i>
+                    {{ cemetery.name }}
+                    · {{ cemetery.person_count }} osoba
+                </a>
+
+            {% endfor %}
+
         </div>
 
     </div>
+
+</section>
+
+{% endif %}
+
+
+<div class="wg-page-header mb-3">
+
+    <div class="wg-page-heading">
+
+        <span class="wg-page-kicker">
+            Osobe
+        </span>
+
+        <h2>
+            Evidentirane osobe
+        </h2>
+
+    </div>
+
 </div>
-{% endif %}
 
-{% for person in persons %}
-    <div class="card shadow-sm mb-3">
-        <div class="card-body">
-            <h5>
-                {{ person }}
-            </h5>
 
-            <p class="mb-1">
-                {{ person.birth_year|default:"?" }} -
-                {{ person.death_year|default:"?" }}
-            </p>
+<div class="row g-3">
 
-            <p class="text-muted mb-2">
-                {{ person.grave.cemetery.name }}
-            </p>
+    {% for person in persons %}
 
-            <a href="{% url 'graves:grave_detail' person.grave.id %}"
-               class="btn btn-sm btn-dark">
-                Otvori grob
+        <div class="col-md-6">
+
+            <a
+                href="{% url 'graves:grave_detail' person.grave.id %}"
+                class="card content-card h-100 text-decoration-none surname-card-link"
+            >
+
+                <div class="card-body">
+
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="detail-icon">
+                            <i class="bi bi-person"></i>
+                        </div>
+
+                        <div class="flex-grow-1">
+
+                            <h3 class="section-title surname-card-title mb-1">
+                                {{ person }}
+                            </h3>
+
+                            <p class="text-muted mb-1">
+                                {{ person.birth_year|default:"?" }}
+                                –
+                                {{ person.death_year|default:"?" }}
+                            </p>
+
+                            <p class="text-muted small mb-0">
+                                <i class="bi bi-geo-alt me-1"></i>
+                                {{ person.grave.cemetery.name }}
+                            </p>
+
+                        </div>
+
+                        <span class="surname-card-arrow">
+                            <i class="bi bi-chevron-right"></i>
+                        </span>
+
+                    </div>
+
+                </div>
+
             </a>
+
         </div>
-    </div>
-{% empty %}
-    <p>Nema osoba sa ovim prezimenom.</p>
-{% endfor %}
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-{% if map_graves %}
 
-{{ map_graves|json_script:"surname-graves-data" }}
+    {% empty %}
 
+        <div class="col-12">
 
-<script>
+            <div class="card content-card">
 
-document.addEventListener("DOMContentLoaded", function() {
+                <div class="card-body text-center py-5">
 
-    const data = JSON.parse(
-        document.getElementById("surname-graves-data").textContent
-    );
+                    <i class="bi bi-person-x fs-2 text-muted"></i>
 
-    if (!data.length) return;
+                    <p class="text-muted mt-3 mb-0">
+                        Nema evidentiranih osoba sa ovim prezimenom.
+                    </p>
 
-    const map = L.map("surname-map");
+                </div>
 
-    const first = data[0];
+            </div>
 
-    map.setView(
-        [first.lat, first.lng],
-        14
-    );
+        </div>
 
-    L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        {
-            attribution: "&copy; OpenStreetMap contributors"
-        }
-    ).addTo(map);
+    {% endfor %}
 
-    const bounds = [];
+</div>
 
-    data.forEach(function(grave) {
-
-        const marker = L.marker([
-            grave.lat,
-            grave.lng
-        ]).addTo(map);
-
-        marker.bindPopup(
-            `
-            <strong>${grave.title}</strong>
-            <br>
-            ${grave.cemetery}
-            <br><br>
-            <a href="/grobovi/${grave.id}/">
-                Otvori grob
-            </a>
-            `
-        );
-
-        bounds.push([
-            grave.lat,
-            grave.lng
-        ]);
-
-    });
-
-    if (bounds.length > 1) {
-        map.fitBounds(bounds);
-    }
-
-});
-
-</script>
-
-{% endif %}
 
 {% endblock %}

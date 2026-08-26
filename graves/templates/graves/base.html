@@ -162,19 +162,36 @@
     {% block content %}{% endblock %}
 </main>
 
-<footer class="footer wg-footer mt-5">
+<footer class="footer mt-5">
 
-    <div class="container text-center">
+    <div class="container">
 
-        <h5>Wiki Greblje</h5>
+        <div class="wg-footer-brand">
 
-        <p class="mb-2">
-            Digitalna memorija mjesta ukopa u Bosni i Hercegovini.
-        </p>
+            <div class="wg-footer-brand__logo">
+                <img
+                    src="{% static 'graves/images/branding/wiki-greblje-logo.png' %}"
+                    alt="Wiki Greblje"
+                >
+            </div>
 
-        <small>
-            Version 1.1 · Foundations Edition  © 2026
-        </small>
+            <div class="wg-footer-brand__content">
+
+                <h5>
+                    Wiki Greblje
+                </h5>
+
+                <p>
+                    Digitalna memorija mjesta ukopa u Bosni i Hercegovini.
+                </p>
+
+                <small>
+                    Version 1.1 · Foundation Edition © 2026
+                </small>
+
+            </div>
+
+        </div>
 
     </div>
 

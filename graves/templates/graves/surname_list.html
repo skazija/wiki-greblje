@@ -4,9 +4,32 @@
 
 {% block content %}
 
-<h1 class="mb-4">Prezimena</h1>
-<form method="get" class="mb-4">
+
+<div class="wg-page-header mb-4">
+
+    <div class="wg-page-heading">
+
+        <span class="wg-page-kicker">
+            Arhiva osoba
+        </span>
+
+        <h1>
+            Prezimena
+        </h1>
+
+        <p>
+            Pregled prezimena evidentiranih u projektu Wiki Greblje.
+        </p>
+
+    </div>
+
+</div>
+
+
+<form method="get" class="wg-search-panel mb-4">
+
     <div class="input-group">
+
         <input
             type="text"
             name="q"
@@ -15,33 +38,190 @@
             placeholder="Pretraži prezime..."
         >
 
-        <button class="btn btn-dark" type="submit">
+        <button
+            class="btn wg-search-button"
+            type="submit"
+        >
+            <i class="bi bi-search me-1"></i>
             Pretraži
         </button>
+
     </div>
+
 </form>
-<p class="text-muted">Pronađeno prezimena: {{ surnames|length }}</p>
 
-<div class="row">
-    {% for item in surnames %}
-        <div class="col-md-4 mb-3">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5>
-                        <a href="{% url 'graves:surname_detail' item.last_name %}">
-                            {{ item.last_name }}
-                        </a>
-                    </h5>
 
-                    <p class="text-muted mb-0">
-                        Broj osoba: {{ item.total }}
-                    </p>
-                </div>
-            </div>
-        </div>
-    {% empty %}
-        <p>Nema unesenih prezimena.</p>
-    {% endfor %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <p class="text-muted mb-0">
+        Pronađeno prezimena:
+        <strong>{{ result_count }}</strong>
+    </p>
+
 </div>
+
+
+<div class="row g-3">
+
+    {% for item in surnames %}
+
+        <div class="col-sm-6 col-lg-4">
+
+            <a
+                href="{% url 'graves:surname_detail' item.last_name %}"
+                class="card content-card h-100 text-decoration-none surname-card-link"
+            >
+
+                <div class="card-body">
+
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="detail-icon">
+                            <i class="bi bi-people"></i>
+                        </div>
+
+                        <div class="flex-grow-1">
+
+                            <h2 class="section-title mb-1 surname-card-title">
+                                {{ item.last_name }}
+                            </h2>
+
+                            <p class="text-muted mb-0">
+                                {{ item.total }} osoba
+                            </p>
+
+                        </div>
+
+                        <span class="surname-card-arrow">
+                            <i class="bi bi-chevron-right"></i>
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
+
+    {% empty %}
+
+        <div class="col-12">
+
+            <div class="card content-card">
+
+                <div class="card-body text-center py-5">
+
+                    <i class="bi bi-search fs-2 text-muted"></i>
+
+                    <p class="text-muted mt-3 mb-0">
+                        Nema pronađenih prezimena.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+</div>
+{% if page_obj.has_other_pages %}
+
+    <nav
+        class="mt-4"
+        aria-label="Stranice prezimena"
+    >
+
+        <ul class="pagination justify-content-center flex-wrap">
+
+            {% if page_obj.has_previous %}
+
+                <li class="page-item">
+
+                    <a
+                        class="page-link"
+                        href="?q={{ query|urlencode }}&page={{ page_obj.previous_page_number }}"
+                    >
+                        Prethodna
+                    </a>
+
+                </li>
+
+            {% else %}
+
+                <li class="page-item disabled">
+
+                    <span class="page-link">
+                        Prethodna
+                    </span>
+
+                </li>
+
+            {% endif %}
+
+
+            {% for num in page_obj.paginator.page_range %}
+
+                {% if num == page_obj.number %}
+
+                    <li
+                        class="page-item active"
+                        aria-current="page"
+                    >
+                        <span class="page-link">
+                            {{ num }}
+                        </span>
+                    </li>
+
+                {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+
+                    <li class="page-item">
+
+                        <a
+                            class="page-link"
+                            href="?q={{ query|urlencode }}&page={{ num }}"
+                        >
+                            {{ num }}
+                        </a>
+
+                    </li>
+
+                {% endif %}
+
+            {% endfor %}
+
+
+            {% if page_obj.has_next %}
+
+                <li class="page-item">
+
+                    <a
+                        class="page-link"
+                        href="?q={{ query|urlencode }}&page={{ page_obj.next_page_number }}"
+                    >
+                        Sljedeća
+                    </a>
+
+                </li>
+
+            {% else %}
+
+                <li class="page-item disabled">
+
+                    <span class="page-link">
+                        Sljedeća
+                    </span>
+
+                </li>
+
+            {% endif %}
+
+        </ul>
+
+    </nav>
+
+{% endif %}
 
 {% endblock %}

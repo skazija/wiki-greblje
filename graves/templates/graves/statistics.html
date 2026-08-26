@@ -4,98 +4,141 @@
 
 {% block content %}
 
-<h1 class="mb-4">Statistika projekta</h1>
+<div class="wg-page-header mb-4">
 
-<div class="row text-center">
+    <div class="wg-page-heading">
 
-    <div class="col-md-3 mb-3">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h2>{{ stats.cemetery_count }}</h2>
-                <p>Groblja</p>
-            </div>
-        </div>
+        <span class="wg-page-kicker">
+            Pregled arhive
+        </span>
+
+        <h1>
+            Statistika projekta
+        </h1>
+
+        <p>
+            Trenutni broj javno dostupnih zapisa u projektu Wiki Greblje.
+        </p>
+
     </div>
 
-    <div class="col-md-3 mb-3">
-        <div class="card shadow-sm">
+</div>
+
+
+<div class="row text-center g-3">
+
+    <div class="col-6 col-lg">
+
+        <div class="card stat-card h-100">
+
             <div class="card-body">
-                <h2>{{ stats.grave_count }}</h2>
-                <p>Ukupno grobova</p>
+
+                <i class="bi bi-bank stat-icon"></i>
+
+                <h2>
+                    {{ stats.cemetery_count }}
+                </h2>
+
+                <p class="mb-0">
+                    Groblja
+                </p>
+
             </div>
+
         </div>
+
     </div>
 
-    <div class="col-md-3 mb-3">
-        <div class="card shadow-sm border-success">
+
+    <div class="col-6 col-lg">
+
+        <div class="card stat-card h-100">
+
             <div class="card-body">
-                <h2>{{ stats.approved_grave_count }}</h2>
-                <p>Odobreni grobovi</p>
+
+                <i class="bi bi-map stat-icon"></i>
+
+                <h2>
+                    {{ stats.grave_count }}
+                </h2>
+
+                <p class="mb-0">
+                    Grobovi
+                </p>
+
             </div>
+
         </div>
+
     </div>
 
-    <div class="col-md-3 mb-3">
-        <div class="card shadow-sm border-warning">
+
+    <div class="col-6 col-lg">
+
+        <div class="card stat-card h-100">
+
             <div class="card-body">
-                <h2>{{ stats.pending_grave_count }}</h2>
-                <p>Grobovi na čekanju</p>
+
+                <i class="bi bi-person stat-icon"></i>
+
+                <h2>
+                    {{ stats.person_count }}
+                </h2>
+
+                <p class="mb-0">
+                    Osobe
+                </p>
+
             </div>
+
         </div>
+
     </div>
 
-    <div class="col-md-3 mb-3">
-        <div class="card shadow-sm border-danger">
+
+    <div class="col-6 col-lg">
+
+        <div class="card stat-card h-100">
+
             <div class="card-body">
-                <h2>{{ stats.rejected_grave_count }}</h2>
-                <p>Odbijeni grobovi</p>
+
+                <i class="bi bi-camera stat-icon"></i>
+
+                <h2>
+                    {{ stats.photo_count }}
+                </h2>
+
+                <p class="mb-0">
+                    Fotografije
+                </p>
+
             </div>
+
         </div>
+
     </div>
 
-    <div class="col-md-3 mb-3">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h2>{{ stats.person_count }}</h2>
-                <p>Osobe</p>
-            </div>
-        </div>
-    </div>
 
-    <div class="col-md-3 mb-3">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h2>{{ stats.photo_count }}</h2>
-                <p>Fotografije</p>
-            </div>
-        </div>
-    </div>
+    <div class="col-12 col-lg">
 
-    <div class="col-md-3 mb-3">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h2>{{ stats.user_count }}</h2>
-                <p>Korisnici</p>
-            </div>
-        </div>
-    </div>
+        <div class="card stat-card h-100">
 
-    <div class="col-md-3 mb-3">
-        <div class="card shadow-sm">
             <div class="card-body">
-                <h2>{{ stats.edit_suggestion_count }}</h2>
-                <p>Prijedlozi izmjena</p>
-            </div>
-        </div>
-    </div>
 
-    <div class="col-md-3 mb-3">
-        <div class="card shadow-sm border-warning">
-            <div class="card-body">
-                <h2>{{ stats.pending_edit_suggestion_count }}</h2>
-                <p>Izmjene na čekanju</p>
+                <i class="bi bi-people stat-icon"></i>
+
+                <h2>
+                    {{ stats.user_count }}
+                </h2>
+
+                <p class="mb-0">
+                    Korisnici
+                </p>
+
             </div>
+
         </div>
+
     </div>
 
 </div>

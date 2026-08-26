@@ -10,7 +10,7 @@ from .models import EditSuggestion
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
 from django.core.paginator import Paginator
-from .models import Cemetery, Grave, Person, Photo, EditSuggestion, PersonEditSuggestion, Comment, ProblemReport, CemeteryPhoto
+from .models import Cemetery, Grave, Person, Photo, EditSuggestion, PersonEditSuggestion, Comment, ProblemReport, CemeteryPhoto, LocationSuggestion
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
@@ -197,51 +197,81 @@ def search(request):
     persons = Person.objects.none()
     map_graves = []
 
-    
-    if query:
-        graves = Grave.objects.filter(
-            Q(title__icontains=query) |
-            Q(inscription__icontains=query) |
-            Q(notes__icontains=query) |
-            Q(cemetery__name__icontains=query),
-            status=Grave.STATUS_APPROVED
-        ).select_related("cemetery")
+    graves_page = None
+    persons_page = None
 
-        persons = Person.objects.filter(
-            grave__status=Grave.STATUS_APPROVED,
-            status=Person.STATUS_APPROVED,
-        ).filter(
-            Q(first_name__icontains=query) |
-            Q(last_name__icontains=query) |
-            Q(birth_date_text__icontains=query) |
-            Q(death_date_text__icontains=query) |
-            Q(notes__icontains=query)
-        ).select_related("grave", "grave__cemetery")
+    if query:
+        graves = (
+            Grave.objects
+            .filter(
+                Q(title__icontains=query) |
+                Q(inscription__icontains=query) |
+                Q(cemetery__name__icontains=query),
+                status=Grave.STATUS_APPROVED,
+            )
+            .select_related("cemetery")
+            .order_by("id")
+        )
+
+        persons = (
+            Person.objects
+            .filter(
+                grave__status=Grave.STATUS_APPROVED,
+                status=Person.STATUS_APPROVED,
+            )
+            .filter(
+                Q(first_name__icontains=query) |
+                Q(last_name__icontains=query) |
+                Q(birth_date_text__icontains=query) |
+                Q(death_date_text__icontains=query) 
+            )
+            .select_related(
+                "grave",
+                "grave__cemetery",
+            )
+            .order_by("last_name", "first_name", "id")
+        )
+
+        graves_paginator = Paginator(graves, 10)
+        persons_paginator = Paginator(persons, 10)
+
+        graves_page = graves_paginator.get_page(
+            request.GET.get("graves_page")
+        )
+
+        persons_page = persons_paginator.get_page(
+            request.GET.get("persons_page")
+        )
 
         grave_ids = set()
 
-        for grave in graves:
+        for grave in graves_page:
             if grave.location and grave.id not in grave_ids:
                 grave_ids.add(grave.id)
                 map_graves.append(grave)
 
-        for person in persons:
+        for person in persons_page:
             grave = person.grave
+
             if grave.location and grave.id not in grave_ids:
                 grave_ids.add(grave.id)
                 map_graves.append(grave)
 
-    return render(request, "graves/search.html", {
-        "query": query,
-        "graves": graves,
-        "persons": persons,
-        "map_graves": map_graves,
-    })
+    return render(
+        request,
+        "graves/search.html",
+        {
+            "query": query,
+            "graves": graves_page,
+            "persons": persons_page,
+            "map_graves": map_graves,
+        },
+    )
 
 def home(request):
     cemetery_count = Cemetery.objects.count()
-    grave_count = Grave.objects.count()
-    person_count = Person.objects.count()
+    grave_count = Grave.objects.filter(status=Grave.STATUS_APPROVED).count()
+    person_count = Person.objects.filter( status=Person.STATUS_APPROVED, grave__status=Grave.STATUS_APPROVED,).count()
     photo_count = Photo.objects.filter(status=Photo.STATUS_APPROVED, grave__status=Grave.STATUS_APPROVED,).count()
     user_count = User.objects.count()
 
@@ -426,26 +456,234 @@ def cemetery_location_api(request, pk):
 
 @login_required
 def profile(request):
+
     user_graves = Grave.objects.filter(
         created_by=request.user
     )
 
-    total_graves = user_graves.count()
+    user_persons = Person.objects.filter(
+        created_by=request.user
+    )
 
-    approved_graves = user_graves.filter(
+    user_grave_photos = Photo.objects.filter(
+        uploaded_by=request.user
+    )
+
+    user_cemetery_photos = CemeteryPhoto.objects.filter(
+        uploaded_by=request.user
+    )
+
+    user_comments = Comment.objects.filter(
+        author=request.user
+    )
+
+    user_grave_suggestions = EditSuggestion.objects.filter(
+        suggested_by=request.user
+    )
+
+    user_person_suggestions = PersonEditSuggestion.objects.filter(
+        suggested_by=request.user
+    )
+
+    user_location_suggestions = LocationSuggestion.objects.filter(
+        suggested_by=request.user
+    )
+
+
+    # -------------------------------------------------
+    # GROBNI ZAPISI
+    # -------------------------------------------------
+
+    grave_count = user_graves.count()
+
+    grave_approved = user_graves.filter(
         status=Grave.STATUS_APPROVED
     ).count()
 
-    pending_graves = user_graves.filter(
+    grave_pending = user_graves.filter(
         status=Grave.STATUS_PENDING
     ).count()
 
-    return render(request, "graves/profile.html", {
-        "total_graves": total_graves,
-        "approved_graves": approved_graves,
-        "pending_graves": pending_graves,
-    })
+    grave_rejected = user_graves.filter(
+        status=Grave.STATUS_REJECTED
+    ).count()
 
+
+    # -------------------------------------------------
+    # OSOBE
+    # -------------------------------------------------
+
+    person_count = user_persons.count()
+
+    person_approved = user_persons.filter(
+        status=Person.STATUS_APPROVED
+    ).count()
+
+    person_pending = user_persons.filter(
+        status=Person.STATUS_PENDING
+    ).count()
+
+    person_rejected = user_persons.filter(
+        status=Person.STATUS_REJECTED
+    ).count()
+
+
+    # -------------------------------------------------
+    # FOTOGRAFIJE
+    # grobovi + groblja
+    # -------------------------------------------------
+
+    photo_count = (
+        user_grave_photos.count()
+        + user_cemetery_photos.count()
+    )
+
+    photo_approved = (
+        user_grave_photos.filter(
+            status=Photo.STATUS_APPROVED
+        ).count()
+        +
+        user_cemetery_photos.filter(
+            status=CemeteryPhoto.STATUS_APPROVED
+        ).count()
+    )
+
+    photo_pending = (
+        user_grave_photos.filter(
+            status=Photo.STATUS_PENDING
+        ).count()
+        +
+        user_cemetery_photos.filter(
+            status=CemeteryPhoto.STATUS_PENDING
+        ).count()
+    )
+
+    photo_rejected = (
+        user_grave_photos.filter(
+            status=Photo.STATUS_REJECTED
+        ).count()
+        +
+        user_cemetery_photos.filter(
+            status=CemeteryPhoto.STATUS_REJECTED
+        ).count()
+    )
+
+
+    # -------------------------------------------------
+    # KOMENTARI
+    # -------------------------------------------------
+
+    comment_count = user_comments.count()
+
+    comment_approved = user_comments.filter(
+        status=Comment.STATUS_APPROVED
+    ).count()
+
+    comment_pending = user_comments.filter(
+        status=Comment.STATUS_PENDING
+    ).count()
+
+    comment_rejected = user_comments.filter(
+        status=Comment.STATUS_REJECTED
+    ).count()
+
+
+    # -------------------------------------------------
+    # PRIJEDLOZI IZMJENA
+    # grob + osoba + lokacija
+    # -------------------------------------------------
+
+    suggestion_count = (
+        user_grave_suggestions.count()
+        + user_person_suggestions.count()
+        + user_location_suggestions.count()
+    )
+
+    suggestion_approved = (
+        user_grave_suggestions.filter(
+            status=EditSuggestion.STATUS_APPROVED
+        ).count()
+        +
+        user_person_suggestions.filter(
+            status=PersonEditSuggestion.STATUS_APPROVED
+        ).count()
+        +
+        user_location_suggestions.filter(
+            approved=True
+        ).count()
+    )
+
+    suggestion_pending = (
+        user_grave_suggestions.filter(
+            status=EditSuggestion.STATUS_PENDING
+        ).count()
+        +
+        user_person_suggestions.filter(
+            status=PersonEditSuggestion.STATUS_PENDING
+        ).count()
+        +
+        user_location_suggestions.filter(
+            approved=False
+        ).count()
+    )
+
+    suggestion_rejected = (
+        user_grave_suggestions.filter(
+            status=EditSuggestion.STATUS_REJECTED
+        ).count()
+        +
+        user_person_suggestions.filter(
+            status=PersonEditSuggestion.STATUS_REJECTED
+        ).count()
+    )
+
+
+    # -------------------------------------------------
+    # UKUPNO
+    # -------------------------------------------------
+
+    total_contributions = (
+        grave_count
+        + person_count
+        + photo_count
+        + comment_count
+        + suggestion_count
+    )
+
+
+    return render(
+        request,
+        "graves/profile.html",
+        {
+            "grave_count": grave_count,
+            "grave_approved": grave_approved,
+            "grave_pending": grave_pending,
+            "grave_rejected": grave_rejected,
+
+            "person_count": person_count,
+            "person_approved": person_approved,
+            "person_pending": person_pending,
+            "person_rejected": person_rejected,
+
+            "photo_count": photo_count,
+            "photo_approved": photo_approved,
+            "photo_pending": photo_pending,
+            "photo_rejected": photo_rejected,
+
+            "comment_count": comment_count,
+            "comment_approved": comment_approved,
+            "comment_pending": comment_pending,
+            "comment_rejected": comment_rejected,
+
+            "suggestion_count": suggestion_count,
+            "suggestion_approved": suggestion_approved,
+            "suggestion_pending": suggestion_pending,
+            "suggestion_rejected": suggestion_rejected,
+
+            "total_contributions": total_contributions,
+        },
+    )
+    
 @login_required
 def add_comment(request, pk):
     grave = get_object_or_404(
@@ -610,26 +848,34 @@ def suggest_person_edit(request, pk):
 
 
 def statistics(request):
+
     stats = {
         "cemetery_count": Cemetery.objects.count(),
-        "grave_count": Grave.objects.count(),
-        "approved_grave_count": Grave.objects.filter(
+
+        "grave_count": Grave.objects.filter(
             status=Grave.STATUS_APPROVED
         ).count(),
-        "pending_grave_count": Grave.objects.filter(
-            status=Grave.STATUS_PENDING
+
+        "person_count": Person.objects.filter(
+            status=Person.STATUS_APPROVED,
+            grave__status=Grave.STATUS_APPROVED,
         ).count(),
-        "rejected_grave_count": Grave.objects.filter(
-            status=Grave.STATUS_REJECTED
+
+        "photo_count": Photo.objects.filter(
+            status=Photo.STATUS_APPROVED,
+            grave__status=Grave.STATUS_APPROVED,
         ).count(),
-        "person_count": Person.objects.count(),
-        "photo_count": Photo.objects.count(),
+
         "user_count": User.objects.count(),
-        "edit_suggestion_count": EditSuggestion.objects.count(),
-        "pending_edit_suggestion_count": EditSuggestion.objects.filter(
-            status=EditSuggestion.STATUS_PENDING
-        ).count(),
     }
+
+    return render(
+        request,
+        "graves/statistics.html",
+        {
+            "stats": stats,
+        },
+    )
 
     return render(request, "graves/statistics.html", {
         "stats": stats,
@@ -731,13 +977,31 @@ def surname_list(request):
 
     surnames = surnames.order_by("last_name")
 
-    return render(request, "graves/surname_list.html", {
-        "surnames": surnames,
-        "query": query,
-    })
+    paginator = Paginator(
+        surnames,
+        12,
+    )
+
+    page_number = request.GET.get("page")
+
+    page_obj = paginator.get_page(
+        page_number
+    )
+
+    return render(
+        request,
+        "graves/surname_list.html",
+        {
+            "surnames": page_obj,
+            "page_obj": page_obj,
+            "query": query,
+            "result_count": paginator.count,
+        },
+    )
 
 
 def surname_detail(request, last_name):
+
     persons = (
         Person.objects
         .filter(
@@ -746,26 +1010,49 @@ def surname_detail(request, last_name):
             status=Person.STATUS_APPROVED,
             is_unknown=False,
         )
-        .select_related("grave", "grave__cemetery")
-        .order_by("death_year", "birth_year", "first_name")
+        .select_related(
+            "grave",
+            "grave__cemetery"
+        )
+        .order_by(
+            "death_year",
+            "birth_year",
+            "first_name"
+        )
     )
-    map_graves = []
 
-    for person in persons:
-        if person.grave.location:
-            map_graves.append({
-                "id": person.grave.id,
-                "title": str(person.grave),
-                "lat": person.grave.location.y,
-                "lng": person.grave.location.x,
-                "cemetery": person.grave.cemetery.name,
-            })
+    cemeteries = (
+        persons
+        .values(
+            "grave__cemetery__id",
+            "grave__cemetery__name",
+        )
+        .annotate(
+            person_count=Count("id")
+        )
+        .order_by(
+            "grave__cemetery__name"
+        )
+    )
 
-    return render(request, "graves/surname_detail.html", {
-        "last_name": last_name,
-        "persons": persons,
-        "map_graves": map_graves,
-    })
+    cemetery_list = [
+        {
+            "id": item["grave__cemetery__id"],
+            "name": item["grave__cemetery__name"],
+            "person_count": item["person_count"],
+        }
+        for item in cemeteries
+    ]
+
+    return render(
+        request,
+        "graves/surname_detail.html",
+        {
+            "last_name": last_name,
+            "persons": persons,
+            "cemeteries": cemetery_list,
+        },
+    )
 
 def contributors(request):
 

@@ -4,104 +4,282 @@
 
 {% block content %}
 
-<div class="row justify-content-center">
+<div class="wg-page-header">
 
-    <div class="col-md-8">
+    <div class="wg-page-heading">
+        <span class="wg-page-kicker">
+            Korisnički pregled
+        </span>
 
-        <div class="card shadow-sm">
+        <h1>
+            Moj profil
+        </h1>
 
-            <div class="card-body">
+        <p>
+            Pregled vašeg naloga i doprinosa projektu Wiki Greblje.
+        </p>
+    </div>
 
-                <h2 class="mb-4">
-                    Moj profil
+</div>
+
+
+<section class="card content-card mb-4">
+
+    <div class="card-body">
+
+        <div class="d-flex align-items-start gap-3 flex-wrap">
+
+            <div class="detail-icon">
+                <i class="bi bi-person-circle"></i>
+            </div>
+
+            <div class="flex-grow-1">
+
+                <h2 class="section-title mb-2">
+                    {{ user.username }}
                 </h2>
 
-                <p>
-                    <strong>Korisničko ime:</strong>
-                    {{ user.username }}
+                <p class="text-muted mb-1">
+                    <i class="bi bi-calendar3 me-1"></i>
+                    Član od:
+                    {{ user.date_joined|date:"d.m.Y." }}
                 </p>
 
-                <p>
-                    <strong>Datum registracije:</strong>
-                    {{ user.date_joined }}
+                <p class="text-muted mb-0">
+                    Ukupno evidentiranih doprinosa:
+                    <strong>{{ total_contributions }}</strong>
                 </p>
-
-                <hr>
-
-                <div class="row text-center">
-
-                    <div class="col-md-4">
-
-                        <div class="card bg-dark text-white mb-3">
-
-                            <div class="card-body">
-
-                                <h3>
-                                    {{ total_graves }}
-                                </h3>
-
-                                <p>
-                                    Ukupno grobova
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-                   
-
-                    <div class="col-md-4">
-
-                        <div class="card bg-success text-white mb-3">
-
-                            <div class="card-body">
-
-                                <h3>
-                                    {{ approved_graves }}
-                                </h3>
-
-                                <p>
-                                    Odobreno
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="col-md-4">
-
-                        <div class="card bg-warning text-dark mb-3">
-
-                            <div class="card-body">
-
-                                <h3>
-                                    {{ pending_graves }}
-                                </h3>
-
-                                <p>
-                                    Na čekanju
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-                     <div class="mt-4 text-center">
-                        <a href="{% url 'graves:my_graves' %}" class="btn btn-outline-dark">Moji grobovi</a>
-                        <a href="{% url 'graves:add_grave' %}" class="btn btn-dark">Dodaj novi grob</a>
-                    </div>
-
-                </div>
 
             </div>
 
         </div>
 
     </div>
+
+</section>
+
+
+<div class="wg-page-header mb-3">
+
+    <div class="wg-page-heading">
+
+        <span class="wg-page-kicker">
+            Aktivnost
+        </span>
+
+        <h2>
+            Moji doprinosi
+        </h2>
+
+        <p>
+            Pregled sadržaja i prijedloga koje ste poslali.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="row text-center g-3">
+
+    <div class="col-6 col-lg">
+
+        <div class="card stat-card h-100">
+
+            <div class="card-body">
+
+                <i class="bi bi-map stat-icon"></i>
+
+                <h2>
+                    {{ grave_count }}
+                </h2>
+
+                <p class="mb-0">
+                    Grobovi
+                </p>
+
+                <div class="wg-profile-statuses">
+                    <span class="wg-profile-status wg-profile-status--approved">
+                        {{ grave_approved }} odobreno
+                    </span>
+
+                    <span class="wg-profile-status wg-profile-status--pending">
+                        {{ grave_pending }} čeka
+                    </span>
+
+                    <span class="wg-profile-status wg-profile-status--rejected">
+                        {{ grave_rejected }} odbijeno
+                    </span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-6 col-lg">
+
+        <div class="card stat-card h-100">
+
+            <div class="card-body">
+
+                <i class="bi bi-person stat-icon"></i>
+
+                <h2>
+                    {{ person_count }}
+                </h2>
+
+                <p class="mb-0">
+                    Osobe
+                </p>
+                
+                <div class="wg-profile-statuses">
+                    <span class="wg-profile-status wg-profile-status--approved">
+                        {{ person_approved }} odobreno
+                    </span>
+
+                    <span class="wg-profile-status wg-profile-status--pending">
+                        {{ person_pending }} čeka
+                    </span>
+
+                    <span class="wg-profile-status wg-profile-status--rejected">
+                        {{ person_rejected }} odbijeno
+                    </span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-6 col-lg">
+
+        <div class="card stat-card h-100">
+
+            <div class="card-body">
+
+                <i class="bi bi-camera stat-icon"></i>
+
+                <h2>
+                    {{ photo_count }}
+                </h2>
+
+                <p class="mb-0">
+                    Fotografije
+                </p>
+
+                <div class="wg-profile-statuses">
+                    <span class="wg-profile-status wg-profile-status--approved">
+                        {{ photo_approved }} odobreno
+                    </span>
+
+                    <span class="wg-profile-status wg-profile-status--pending">
+                        {{ photo_pending }} čeka
+                    </span>
+
+                    <span class="wg-profile-status wg-profile-status--rejected">
+                        {{ photo_rejected }} odbijeno
+                    </span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-6 col-lg">
+
+        <div class="card stat-card h-100">
+
+            <div class="card-body">
+
+                <i class="bi bi-chat-left-text stat-icon"></i>
+
+                <h2>
+                    {{ comment_count }}
+                </h2>
+
+                <p class="mb-0">
+                    Komentari
+                </p>
+                <div class="wg-profile-statuses">
+                    <span class="wg-profile-status wg-profile-status--approved">
+                        {{ comment_approved }} odobreno
+                    </span>
+
+                    <span class="wg-profile-status wg-profile-status--pending">
+                        {{ comment_pending }} čeka
+                    </span>
+
+                    <span class="wg-profile-status wg-profile-status--rejected">
+                        {{ comment_rejected }} odbijeno
+                    </span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-12 col-lg">
+
+        <div class="card stat-card h-100">
+
+            <div class="card-body">
+
+                <i class="bi bi-pencil-square stat-icon"></i>
+
+                <h2>
+                    {{ suggestion_count }}
+                </h2>
+
+                <p class="mb-0">
+                    Prijedlozi izmjena
+                </p>
+
+                <div class="wg-profile-statuses">
+                    <span class="wg-profile-status wg-profile-status--approved">
+                        {{ suggestion_approved }} odobreno
+                    </span>
+
+                    <span class="wg-profile-status wg-profile-status--pending">
+                        {{ suggestion_pending }} čeka
+                    </span>
+
+                    <span class="wg-profile-status wg-profile-status--rejected">
+                        {{ suggestion_rejected }} odbijeno
+                    </span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="d-flex flex-wrap gap-2 mt-4">
+
+    <a
+        href="{% url 'graves:my_graves' %}"
+        class="btn wg-card-action"
+    >
+        <i class="bi bi-map me-1"></i>
+        Moji grobovi
+    </a>
+
+    <a
+        href="{% url 'graves:add_grave' %}"
+        class="btn wg-search-button"
+    >
+        <i class="bi bi-plus-circle me-1"></i>
+        Dodaj novi grob
+    </a>
 
 </div>
 

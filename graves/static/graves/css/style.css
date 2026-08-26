@@ -1814,7 +1814,7 @@
 
     padding: 3rem 0;
 
-    background: #212529;
+    background: var(--wg-green-950);
 
     color: rgba(255,255,255,.85);
 
@@ -3927,4 +3927,311 @@ font-size:1rem;
     background: #d6a84b;
     box-shadow: 0 0 0 3px rgba(214, 168, 75, 0.16);
     flex-shrink: 0;
+}
+
+
+/* =========================================================
+   FOOTER BRAND
+   ========================================================= */
+
+.wg-footer-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.wg-footer-brand__logo {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wg-footer-brand__logo img {
+    display: block;
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+}
+
+.wg-footer-brand__content {
+    text-align: left;
+}
+
+.wg-footer-brand__content h5 {
+    margin: 0 0 0.2rem;
+}
+
+.wg-footer-brand__content p {
+    margin: 0 0 0.2rem;
+}
+
+.wg-footer-brand__content small {
+    display: block;
+}
+
+
+/* Mobile */
+@media (max-width: 576px) {
+
+    .wg-footer-brand {
+        gap: 0.75rem;
+    }
+
+    .wg-footer-brand__logo img {
+        width: 58px;
+        height: 58px;
+    }
+
+    .wg-footer-brand__content {
+        font-size: 0.9rem;
+    }
+
+}
+
+/* =====================================================
+   PROFILE CONTRIBUTION STATUS
+===================================================== */
+
+.wg-profile-statuses {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    margin-top: 0.8rem;
+
+    text-align: left;
+}
+
+.wg-profile-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+
+    padding: 0.35rem 0.5rem;
+
+    border-radius: 8px;
+
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.wg-profile-status--approved {
+    background: rgba(40, 95, 72, 0.08);
+    color: var(--wg-green-800);
+}
+
+.wg-profile-status--pending {
+    background: rgba(154, 107, 25, 0.08);
+    color: var(--wg-warning);
+}
+
+.wg-profile-status--rejected {
+    background: rgba(145, 68, 68, 0.07);
+    color: #914444;
+}
+
+.stat-card .wg-profile-statuses {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 150px;
+}
+
+/* =====================================================
+   SURNAME CARDS
+===================================================== */
+
+.surname-card-link {
+    color: inherit;
+    cursor: pointer;
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.surname-card-link:hover {
+    transform: translateY(-2px);
+
+    border-color: rgba(40, 95, 72, 0.22);
+
+    box-shadow: 0 8px 22px rgba(22, 60, 47, 0.10);
+}
+
+.surname-card-title {
+    color: var(--wg-green-800);
+}
+
+.surname-card-link:hover .surname-card-title {
+    color: var(--wg-green-950);
+}
+
+.surname-card-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 34px;
+    height: 34px;
+
+    flex-shrink: 0;
+
+    border: 1px solid var(--wg-green-100);
+    border-radius: 8px;
+
+    color: var(--wg-green-700);
+
+    transition:
+        background-color 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.surname-card-link:hover .surname-card-arrow {
+    background: var(--wg-green-800);
+    border-color: var(--wg-green-800);
+    color: #fff;
+}
+
+/* =====================================================
+   WG BACK LINK
+===================================================== */
+
+.wg-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    margin-bottom: 1rem;
+
+    color: var(--wg-green-700);
+    font-weight: 600;
+    text-decoration: none;
+
+    transition: color 0.18s ease;
+}
+
+.wg-back-link:hover {
+    color: var(--wg-green-950);
+    text-decoration: none;
+}
+
+.wg-back-link i {
+    transition: transform 0.18s ease;
+}
+
+.wg-back-link:hover i {
+    transform: translateX(-3px);
+}
+
+.surname-cemetery-link {
+    color: var(--wg-green-800);
+    transition:
+        background-color 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.surname-cemetery-link:hover {
+    background: var(--wg-green-100) !important;
+    border-color: var(--wg-green-700) !important;
+    color: var(--wg-green-950);
+}
+
+/* =====================================================
+   WG PAGINATION
+===================================================== */
+
+.pagination .page-link {
+    color: var(--wg-green-800);
+    background-color: #fff;
+    border-color: var(--wg-green-100);
+
+    box-shadow: none;
+
+    transition:
+        background-color 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.pagination .page-link:hover {
+    color: var(--wg-green-950);
+    background-color: var(--wg-green-100);
+    border-color: var(--wg-green-700);
+}
+
+.pagination .page-item.active .page-link {
+    color: #fff;
+    background-color: var(--wg-green-800);
+    border-color: var(--wg-green-800);
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #8a938e;
+    background-color: #f5f6f5;
+    border-color: var(--wg-green-100);
+}
+
+.pagination .page-link:focus {
+    color: var(--wg-green-950);
+    background-color: var(--wg-green-100);
+    border-color: var(--wg-green-700);
+
+    box-shadow: 0 0 0 0.2rem rgba(40, 95, 72, 0.12);
+}
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+#search-map {
+    width: 100%;
+    height: 520px;
+    min-height: 520px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--wg-green-100);
+    background: #f3f5f3;
+    z-index: 1;
+}
+
+.wg-search-map-card {
+    position: sticky;
+    top: 1.5rem;
+}
+
+.wg-search-map-empty {
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 0.75rem;
+    border: 1px dashed var(--wg-green-100);
+    border-radius: 12px;
+    color: #6c757d;
+}
+
+.wg-search-map-empty i {
+    font-size: 2rem;
+}
+
+.wg-search-map-empty p {
+    max-width: 360px;
+    margin: 0;
+}
+
+.wg-search-result-title {
+    color: var(--wg-green-700);
+    transition: color 0.2s ease;
+}
+
+.wg-search-result-title:hover {
+    color: var(--wg-green-900);
 }
