@@ -92,79 +92,7 @@
             </div>
         </div>
     </section>
-<!-- ==========================================
-     Location Card
-========================================== -->
 
-<section class="content-card location-card">
-    <header class="wg-card__header">
-        <h2 class="wg-card__title">
-            <i class="bi bi-geo-alt"></i>
-            Lokacija groba
-        </h2>
-
-        <p class="wg-card__description">
-            Označite tačnu lokaciju groba klikom na kartu.
-            Ukoliko fotografije sadrže GPS podatke, lokacija će se moći automatski popuniti.
-        </p>
-    </header>
-
-    <div class="location-card__body">
-
-        <div class="location-card__map">
-            <!-- postojeći Leaflet container -->
-            <div id="map"></div>
-        </div>
-
-        <div class="location-card__info">
-
-            <div class="status-box">
-                <span class="status-box__label">
-                    Status lokacije
-                </span>
-
-                <span id="locationStatus" class="status waiting">
-                    ○ Lokacija nije određena
-                </span>
-            </div>
-
-            <div class="coordinate-box">
-                <label>Latitude</label>
-                <input
-                    type="text"
-                    id="latitude_display"
-                    readonly
-                    placeholder="—"
-                >
-            </div>
-
-            <div class="coordinate-box">
-                <label>Longitude</label>
-                <input
-                    type="text"
-                    id="longitude_display"
-                    readonly
-                    placeholder="—"
-                >
-            </div>
-
-            <button
-                type="button"
-                id="useCurrentLocation"
-                class="btn wg-card-action w-100"
-            >
-                <i class="bi bi-crosshair"></i>
-                Preuzmi trenutnu GPS lokaciju
-            </button>
-
-        </div>
-
-    </div>
-</section>
-
-
-    <!-- Privremeno zadržavamo postojeći sadržaj forme.
-         U narednim koracima svaka cjelina postaje zasebna Content Card. -->
 
 <!-- ==========================================
      Gallery Card
@@ -250,6 +178,88 @@
     </div>
 
 </section>
+
+
+<!-- ==========================================
+     Location Card
+========================================== -->
+
+<section class="content-card location-card">
+    <header class="wg-card__header">
+        <h2 class="wg-card__title">
+            <i class="bi bi-geo-alt"></i>
+            Lokacija groba
+        </h2>
+
+        <p class="wg-card__description">
+           Ako odabrana fotografija sadrži GPS podatke, lokacija groba automatski će biti prikazana na mapi. 
+           Po potrebi je možete korigovati klikom na tačnu poziciju groba.
+        </p>
+    </header>
+
+    <div class="location-card__body">
+
+        <div class="location-card__map">
+            <!-- postojeći Leaflet container -->
+            <div id="map"></div>
+        </div>
+
+      
+        <div class="location-card__info">
+              
+            <div class="status-box">
+                <span class="status-box__label">
+                    Status lokacije
+                </span>
+
+                <span id="locationStatus" class="status waiting">
+                    ○ Lokacija nije određena
+                </span>
+            </div>
+            <div class="location-map-hint">
+                    <i class="bi bi-info-circle"></i>
+                    <span>
+                        Za promjenu lokacije kliknite na tačnu poziciju groba na mapi.
+                    </span>
+               </div>
+               
+            <div class="coordinate-box">
+                <label>Latitude</label>
+                <input
+                    type="text"
+                    id="latitude_display"
+                    readonly
+                    placeholder="—"
+                >
+            </div>
+
+            <div class="coordinate-box">
+                <label>Longitude</label>
+                <input
+                    type="text"
+                    id="longitude_display"
+                    readonly
+                    placeholder="—"
+                >
+            </div>
+
+            <button
+                type="button"
+                id="useCurrentLocation"
+                class="btn wg-card-action w-100"
+            >
+                <i class="bi bi-crosshair"></i>
+                Preuzmi trenutnu GPS lokaciju
+            </button>
+
+        </div>
+
+    </div>
+</section>
+
+
+    <!-- Privremeno zadržavamo postojeći sadržaj forme.
+         U narednim koracima svaka cjelina postaje zasebna Content Card. -->
 
 <!-- ==========================================
      Person Card
@@ -652,7 +662,7 @@
 
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
+<script src="https://unpkg.com/exifr/dist/lite.umd.js"></script>
 
 <script>
     var map = L.map('map').setView([44.2, 17.9], 8);
@@ -737,6 +747,68 @@
 
 const photoInput = document.getElementById("{{ form.photos.id_for_label }}");
 const galleryPreview = document.getElementById("gallery-preview");
+
+async function applyPhotoGps(files) {
+
+    if (!files || !files.length) {
+        return;
+    }
+
+    for (const file of files) {
+
+        if (!file.type.startsWith("image/")) {
+            continue;
+        }
+
+        try {
+
+            const gps = await exifr.gps(file);
+
+            if (
+                gps &&
+                Number.isFinite(gps.latitude) &&
+                Number.isFinite(gps.longitude)
+            ) {
+
+                setMarker(
+                    gps.latitude,
+                    gps.longitude
+                );
+
+                map.setView(
+                    [gps.latitude, gps.longitude],
+                    19
+                );
+
+                if (locationStatus) {
+                    locationStatus.textContent =
+                        "Lokacija preuzeta iz fotografije";
+                }
+
+                const cardStatus =
+                    document.getElementById("locationStatus");
+
+                if (cardStatus) {
+                    cardStatus.textContent =
+                        "✔ Lokacija preuzeta iz fotografije";
+                }
+
+                return;
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "Nije moguće pročitati GPS iz fotografije:",
+                error
+            );
+
+        }
+
+    }
+}
+
+
 
 function formatFileSize(bytes) {
     if (!Number.isFinite(bytes) || bytes <= 0) {
@@ -842,12 +914,33 @@ function renderGalleryPreview(files) {
 }
 
 if (photoInput) {
-    photoInput.addEventListener("change", function () {
-        renderGalleryPreview(this.files);
-    });
 
-    if (photoInput.files && photoInput.files.length) {
-        renderGalleryPreview(photoInput.files);
+    photoInput.addEventListener(
+        "change",
+        async function () {
+
+            renderGalleryPreview(this.files);
+
+            await applyPhotoGps(
+                this.files
+            );
+
+            updateDigitalizationChecklist();
+        }
+    );
+
+    if (
+        photoInput.files &&
+        photoInput.files.length
+    ) {
+
+        renderGalleryPreview(
+            photoInput.files
+        );
+
+        applyPhotoGps(
+            photoInput.files
+        );
     }
 }
 

@@ -1,62 +1,301 @@
 {% extends "graves/base.html" %}
 
+{% load static %}
+
 {% block title %}Doprinosi{% endblock %}
 
 {% block content %}
 
-<h1 class="mb-4">
-    Najaktivniji korisnici
-</h1>
+<div class="container pt-2 pb-4">
 
-<div class="card shadow-sm">
+    <div class="wg-contributors-hero">
 
-    <div class="card-body">
+        <div class="wg-page-kicker">
+            ZAJEDNICA
+        </div>
 
-        <table class="table">
+        <h1 class="wg-contributors-hero-title">
+            Doprinosi
+        </h1>
 
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Korisnik</th>
-                    <th>Grobovi</th>
-                    <th>Komentari</th>
-                    <th>Ukupno</th>
-                </tr>
-            </thead>
+        <p class="wg-contributors-hero-text">
+            Ljudi koji svojim radom pomažu očuvanju i digitalizaciji
+            podataka projekta Wiki Greblje.
+        </p>
 
-            <tbody>
+        <div class="wg-contributors-hero-divider"></div>
+
+    </div>
+
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-lg-3">
+            <div class="wg-contribution-stat-card">
+
+                <div class="wg-contribution-stat-value">
+                    {{ total_contributions }}
+                </div>
+
+                <div class="wg-contribution-stat-label">
+                    Odobrenih doprinosa
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="col-6 col-lg-3">
+            <div class="wg-contribution-stat-card">
+
+                <div class="wg-contribution-stat-value">
+                    {{ total_graves }}
+                </div>
+
+                <div class="wg-contribution-stat-label">
+                    Evidentiranih grobova
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="col-6 col-lg-3">
+            <div class="wg-contribution-stat-card">
+
+                <div class="wg-contribution-stat-value">
+                    {{ total_persons }}
+                </div>
+
+                <div class="wg-contribution-stat-label">
+                    Evidentiranih osoba
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="col-6 col-lg-3">
+            <div class="wg-contribution-stat-card">
+
+                <div class="wg-contribution-stat-value">
+                    {{ total_photos }}
+                </div>
+
+                <div class="wg-contribution-stat-label">
+                    Fotografija
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    {% if users %}
+
+        <div class="wg-contributors-section">
+
+            <div class="wg-contributors-section-header mb-3">
+
+                <div>
+                    <div class="wg-page-kicker">
+                        ZAJEDNICA
+                    </div>
+
+                    <h2 class="wg-contributors-title mb-0">
+                        Najaktivniji doprinositelji
+                    </h2>
+                </div>
+
+                <div class="wg-contributors-count">
+                    {{ users|length }} korisnika
+                </div>
+
+            </div>
+
+
+            <div class="wg-contributors-list">
 
                 {% for user in users %}
 
-                <tr>
+                    <div class="wg-contributor-card">
 
-                    <td>{{ forloop.counter }}</td>
+                        <div class="wg-contributor-rank">
 
-                    <td>
-                        {{ user.username }}
-                    </td>
+                            {% if forloop.counter < 10 %}
+                                0{{ forloop.counter }}
+                            {% else %}
+                                {{ forloop.counter }}
+                            {% endif %}
 
-                    <td>
-                        {{ user.grave_count }}
-                    </td>
+                        </div>
 
-                    <td>
-                        {{ user.comment_count }}
-                    </td>
 
-                    <td>
-                        {{ user.grave_count|add:user.comment_count }}
-                    </td>
+                        <div class="wg-contributor-main">
 
-                </tr>
+                            <div class="wg-contributor-header{% if not user.contribution_level %} wg-contributor-header--no-medal{% endif %}">
+
+                                <div class="wg-contributor-identity">
+
+                                    <div class="wg-contributor-name">
+                                        {{ user.username }}
+                                    </div>
+
+                                    <div class="wg-contributor-handle">
+                                        @{{ user.username }}
+                                    </div>
+
+                                </div>
+
+
+                                {% if user.contribution_level %}
+
+                                    <div class="wg-contributor-medal">
+
+                                        {% if user.contribution_level == "gold" %}
+
+                                            <img
+                                                src="{% static 'graves/images/branding/wiki-greblje-logo-zlatna.png' %}"
+                                                alt="Zlatni doprinositelj"
+                                                class="wg-contributor-medal-logo"
+                                            >
+
+                                            <span class="wg-contributor-medal-label wg-contributor-medal-label--gold">
+                                                Zlatni doprinositelj
+                                            </span>
+
+                                        {% elif user.contribution_level == "silver" %}
+
+                                            <img
+                                                src="{% static 'graves/images/branding/wiki-greblje-logo-srebrena.png' %}"
+                                                alt="Srebreni doprinositelj"
+                                                class="wg-contributor-medal-logo"
+                                            >
+
+                                            <span class="wg-contributor-medal-label wg-contributor-medal-label--silver">
+                                                Srebreni doprinositelj
+                                            </span>
+
+                                        {% elif user.contribution_level == "bronze" %}
+
+                                            <img
+                                                src="{% static 'graves/images/branding/wiki-greblje-logo-bronzana.png' %}"
+                                                alt="Bronzani doprinositelj"
+                                                class="wg-contributor-medal-logo"
+                                            >
+
+                                            <span class="wg-contributor-medal-label wg-contributor-medal-label--bronze">
+                                                Bronzani doprinositelj
+                                            </span>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                {% endif %}
+
+
+                                <div class="wg-contributor-total">
+
+                                    <strong>
+                                        {{ user.contribution_count }}
+                                    </strong>
+
+                                    <span>
+                                        doprinosa
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="wg-contributor-stats">
+
+                                <div class="wg-contributor-stat">
+
+                                    <strong>
+                                        {{ user.grave_count }}
+                                    </strong>
+
+                                    <span>
+                                        Grobovi
+                                    </span>
+
+                                </div>
+
+
+                                <div class="wg-contributor-stat">
+
+                                    <strong>
+                                        {{ user.person_count }}
+                                    </strong>
+
+                                    <span>
+                                        Osobe
+                                    </span>
+
+                                </div>
+
+
+                                <div class="wg-contributor-stat">
+
+                                    <strong>
+                                        {{ user.photo_count }}
+                                    </strong>
+
+                                    <span>
+                                        Fotografije
+                                    </span>
+
+                                </div>
+
+
+                                <div class="wg-contributor-stat">
+
+                                    <strong>
+                                        {{ user.edit_count }}
+                                    </strong>
+
+                                    <span>
+                                        Izmjene
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
 
                 {% endfor %}
 
-            </tbody>
+            </div>
 
-        </table>
+        </div>
 
-    </div>
+
+    {% else %}
+
+        <div class="wg-contributors-empty">
+
+            <div class="wg-contributors-empty-icon">
+                <i class="bi bi-people"></i>
+            </div>
+
+            <h5>
+                Još nema evidentiranih doprinosa
+            </h5>
+
+            <p class="mb-0">
+                Odobreni doprinosi korisnika bit će prikazani ovdje.
+            </p>
+
+        </div>
+
+    {% endif %}
 
 </div>
 

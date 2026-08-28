@@ -69,9 +69,24 @@
                     </p>
 
                     {% if cemetery.description %}
-                        <p class="cemetery-description">
-                            {{ cemetery.description }}
-                        </p>
+
+                        <div class="cemetery-description-wrapper">
+
+                            <p class="cemetery-description">
+                                {{ cemetery.description }}
+                            </p>
+
+                            <button
+                                type="button"
+                                class="cemetery-description-toggle"
+                                aria-expanded="false"
+                            >
+                                Prikaži više
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+
+                        </div>
+
                     {% endif %}
 
                     <div class="mt-auto pt-3">
@@ -139,5 +154,55 @@
     {% endfor %}
 
 </div>
+    
+{% endblock %}
+{% block extra_js %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    document
+        .querySelectorAll(".cemetery-description-wrapper")
+        .forEach(function (wrapper) {
+
+            const description =
+                wrapper.querySelector(".cemetery-description");
+
+            const toggle =
+                wrapper.querySelector(".cemetery-description-toggle");
+
+            if (!description || !toggle) {
+                return;
+            }
+
+            if (description.scrollHeight > description.clientHeight + 1) {
+                toggle.style.display = "inline-flex";
+            }
+
+            toggle.addEventListener("click", function () {
+
+                const expanded =
+                    description.classList.toggle("is-expanded");
+
+                toggle.classList.toggle(
+                    "is-expanded",
+                    expanded
+                );
+
+                toggle.setAttribute(
+                    "aria-expanded",
+                    expanded ? "true" : "false"
+                );
+
+                toggle.innerHTML = expanded
+                    ? 'Prikaži manje <i class="bi bi-chevron-up"></i>'
+                    : 'Prikaži više <i class="bi bi-chevron-down"></i>';
+
+            });
+
+        });
+
+});
+</script>
 
 {% endblock %}

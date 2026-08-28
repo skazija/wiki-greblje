@@ -4235,3 +4235,17 @@ font-size:1rem;
 .wg-search-result-title:hover {
     color: var(--wg-green-900);
 }
+
+.location-map-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.location-map-hint i {
+    color: var(--wg-green-700);
+    flex-shrink: 0;
+}

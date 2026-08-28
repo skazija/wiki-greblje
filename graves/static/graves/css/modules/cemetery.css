@@ -114,6 +114,52 @@
 
     line-height: 1.65;
 }
+
+.cemetery-description {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 5;
+
+    overflow: hidden;
+}
+
+.cemetery-description.is-expanded {
+    display: block;
+    overflow: visible;
+}
+
+.cemetery-description-toggle {
+    display: none;
+    align-items: center;
+    gap: .35rem;
+
+    margin-top: .45rem;
+    padding: 0;
+
+    border: 0;
+    background: transparent;
+
+    color: var(--wg-green-700);
+
+    font-size: .88rem;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.cemetery-description-toggle:hover {
+    color: var(--wg-green-950);
+}
+
+.cemetery-description-toggle i {
+    font-size: .75rem;
+    transition: transform .2s ease;
+}
+
+.cemetery-description-toggle.is-expanded i {
+    transform: rotate(180deg);
+}
+
 /* =====================================================
    CEMETERY FALLBACK ICON
 ===================================================== */

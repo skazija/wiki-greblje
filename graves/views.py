@@ -1056,23 +1056,149 @@ def surname_detail(request, last_name):
 
 def contributors(request):
 
-    users = User.objects.annotate(
-        grave_count=Count("grave", distinct=True),
-        comment_count=Count("comment", distinct=True),
+    users = (
+        User.objects
+        .annotate(
+            grave_count=Count(
+                "grave",
+                filter=Q(
+                    grave__status=Grave.STATUS_APPROVED
+                ),
+                distinct=True,
+            ),
+
+            person_count=Count(
+                "created_persons",
+                filter=Q(
+                    created_persons__status=Person.STATUS_APPROVED
+                ),
+                distinct=True,
+            ),
+
+            grave_photo_count=Count(
+                "photo",
+                filter=Q(
+                    photo__status=Photo.STATUS_APPROVED
+                ),
+                distinct=True,
+            ),
+
+            cemetery_photo_count=Count(
+                "cemeteryphoto",
+                filter=Q(
+                    cemeteryphoto__status=CemeteryPhoto.STATUS_APPROVED
+                ),
+                distinct=True,
+            ),
+
+            grave_edit_count=Count(
+                "editsuggestion",
+                filter=Q(
+                    editsuggestion__status=EditSuggestion.STATUS_APPROVED
+                ),
+                distinct=True,
+            ),
+
+            person_edit_count=Count(
+                "personeditsuggestion",
+                filter=Q(
+                    personeditsuggestion__status=
+                    PersonEditSuggestion.STATUS_APPROVED
+                ),
+                distinct=True,
+            ),
+
+            location_suggestion_count=Count(
+                "locationsuggestion",
+                filter=Q(
+                    locationsuggestion__approved=True
+                ),
+                distinct=True,
+            ),
+        )
     )
 
-    users = users.order_by(
-        "-grave_count",
-        "-comment_count",
-        "username",
+    for user in users:
+
+        user.photo_count = (
+            user.grave_photo_count +
+            user.cemetery_photo_count
+        )
+
+        user.edit_count = (
+            user.grave_edit_count +
+            user.person_edit_count +
+            user.location_suggestion_count
+        )
+
+        user.contribution_count = (
+            user.grave_count +
+            user.person_count +
+            user.photo_count +
+            user.edit_count
+        )
+
+        if user.contribution_count >= 100:
+            user.contribution_level = "gold"
+
+        elif user.contribution_count >= 50:
+            user.contribution_level = "silver"
+
+        elif user.contribution_count >= 10:
+            user.contribution_level = "bronze"
+
+        else:
+            user.contribution_level = None
+            
+    users = [
+        user
+        for user in users
+        if user.contribution_count > 0
+    ]
+
+    users.sort(
+        key=lambda user: user.contribution_count,
+        reverse=True,
     )
+
+    total_graves = sum(
+        user.grave_count
+        for user in users
+    )
+
+    total_persons = sum(
+        user.person_count
+        for user in users
+    )
+
+    total_photos = sum(
+        user.photo_count
+        for user in users
+    )
+
+    total_edits = sum(
+        user.edit_count
+        for user in users
+    )
+
+    total_contributions = sum(
+        user.contribution_count
+        for user in users
+    )
+
+    context = {
+        "users": users,
+        "total_graves": total_graves,
+        "total_persons": total_persons,
+        "total_photos": total_photos,
+        "total_edits": total_edits,
+        "total_contributions": total_contributions
+    }
 
     return render(
         request,
         "graves/contributors.html",
-        {
-            "users": users,
-        }
+        context,
     )
 
 @login_required
