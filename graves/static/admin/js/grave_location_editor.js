@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const osm = L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
+            maxNativeZoom: 19,
             maxZoom: 22,
             attribution: "© OpenStreetMap"
         }
@@ -41,6 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const satellite = L.tileLayer(
         "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
         {
+            maxNativeZoom: 19,
             maxZoom: 22,
             attribution: "Tiles © Esri"
         }

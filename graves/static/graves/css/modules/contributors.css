@@ -479,6 +479,132 @@
     color: var(--wg-muted);
 }
 
+/* =========================================================
+   CONTRIBUTION LEVELS
+   ========================================================= */
+
+.wg-contribution-levels {
+    margin-top: 3rem;
+    padding: 1.5rem;
+
+    border: 1px solid var(--wg-border);
+    border-radius: 16px;
+
+    background: var(--wg-surface);
+    box-shadow: 0 4px 16px rgba(22, 60, 47, 0.06);
+}
+
+
+.wg-contribution-levels-header {
+    max-width: 680px;
+    margin-bottom: 1.5rem;
+}
+
+
+.wg-contribution-levels-title {
+    margin: 0.2rem 0 0;
+
+    color: var(--wg-green-950);
+
+    font-size: 1.35rem;
+    font-weight: 750;
+}
+
+
+.wg-contribution-levels-text {
+    margin: 0.6rem 0 0;
+
+    color: var(--wg-muted);
+
+    font-size: 0.92rem;
+    line-height: 1.6;
+}
+
+
+.wg-contribution-levels-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 1rem;
+}
+
+
+.wg-contribution-level {
+    display: flex;
+    align-items: center;
+
+    gap: 0.9rem;
+
+    min-width: 0;
+
+    padding: 1rem;
+
+    border: 1px solid var(--wg-border);
+    border-radius: 12px;
+
+    background: var(--wg-green-50);
+}
+
+
+.wg-contribution-level-logo {
+    width: 52px;
+    height: 52px;
+
+    flex-shrink: 0;
+
+    object-fit: contain;
+
+    filter: drop-shadow(
+        0 3px 5px rgba(22, 60, 47, 0.12)
+    );
+}
+
+
+.wg-contribution-level-name {
+    color: var(--wg-green-950);
+
+    font-size: 0.9rem;
+    font-weight: 750;
+
+    line-height: 1.3;
+}
+
+
+.wg-contribution-level-requirement {
+    margin-top: 0.2rem;
+
+    color: var(--wg-muted);
+
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+
+.wg-contribution-levels-note {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 0.55rem;
+
+    margin-top: 1rem;
+    padding-top: 1rem;
+
+    border-top: 1px solid var(--wg-border);
+
+    color: var(--wg-muted);
+
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+
+.wg-contribution-levels-note i {
+    margin-top: 0.1rem;
+
+    color: var(--wg-green-700);
+
+    flex-shrink: 0;
+}
 
 /* =====================================================
    Responsive
@@ -565,6 +691,20 @@
         grid-row: 1;
         align-self: center;
         justify-self: end;
+    }
+
+    .wg-contribution-levels {
+        margin-top: 2rem;
+        padding: 1.2rem;
+    }
+
+    .wg-contribution-levels-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .wg-contribution-level-logo {
+        width: 44px;
+        height: 44px;
     }
 
 }

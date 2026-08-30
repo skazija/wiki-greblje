@@ -61,7 +61,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        { maxZoom: 22 }
+        { 
+            maxNativeZoom: 19,
+            maxZoom: 22 
+        }
     ).addTo(map);
 
     let marker = L.marker([lat, lon], {

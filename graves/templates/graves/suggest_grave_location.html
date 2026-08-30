@@ -238,6 +238,7 @@ document.addEventListener("DOMContentLoaded", function () {
     L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
+            maxNativeZoom: 19,
             maxZoom: 22,
             attribution: "&copy; OpenStreetMap contributors"
         }
