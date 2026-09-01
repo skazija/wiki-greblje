@@ -1337,6 +1337,8 @@ class CommentAdmin(admin.ModelAdmin):
     "created_at",
     )
 
+    list_display_links = ("grave",)
+    
     list_filter = (
         "status",
         "created_at",

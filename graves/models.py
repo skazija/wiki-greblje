@@ -6,6 +6,7 @@ from django.contrib.gis.geos import Point
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models as gis_models
+from graves.services.image_processing import (create_archival_image, create_web_image,)
 
 
 class Cemetery(models.Model):
@@ -147,56 +148,37 @@ class CemeteryPhoto(models.Model):
     def save(self, *args, **kwargs):
         if self.image:
             try:
-                # 1. Sačuvaj original netaknut
+                # 1. Sačuvaj original 
                 if not self.image_original:
-                    self.image.seek(0)
+                    archival_image = create_archival_image(
+                        self.image,
+                        max_size=(4000, 4000),
+                        quality=88,
+                    )
 
-                    original_content = ContentFile(
-                        self.image.read()
+                    archival_content = ContentFile(
+                        archival_image.getvalue(),
+                        name=self.image.name,
                     )
 
                     self.image_original.save(
                         self.image.name,
-                        original_content,
-                        save=False
+                        archival_content,
+                        save=False,
                     )
-
-                    self.image.seek(0)
 
                 # 2. Napravi optimizovanu web verziju
-                img = Image.open(self.image)
+                web_image = create_web_image(self.image)
 
-                try:
-                    img = ImageOps.exif_transpose(img)
-                except Exception:
-                    pass
-
-                max_size = (2000, 2000)
-
-                if img.width > 2000 or img.height > 2000:
-                    img.thumbnail(
-                        max_size,
-                        Image.LANCZOS
-                    )
-
-                if img.mode in ("RGBA", "P"):
-                    img = img.convert("RGB")
-
-                buffer = BytesIO()
-
-                img.save(
-                    buffer,
-                    format="JPEG",
-                    quality=90,
-                    optimize=True
+                web_content = ContentFile(
+                    web_image.getvalue(),
+                    name=self.image.name,
                 )
-
-                buffer.seek(0)
 
                 self.image.save(
                     self.image.name,
-                    ContentFile(buffer.read()),
-                    save=False
+                    web_content,
+                    save=False,
                 )
 
             except Exception as e:
@@ -368,9 +350,61 @@ class Person(models.Model):
         null=True,
         verbose_name="Fotografija osobe",
     )
+    
+    photo_original = models.ImageField(
+        upload_to="persons/originals/%Y/%m/",
+        blank=True,
+        null=True,
+        verbose_name="Arhivska fotografija osobe",
+    )
 
     notes = models.TextField(blank=True)
 
+    def save(self, *args, **kwargs):
+        if self.photo:
+            try:
+                # Arhivska verzija
+                if not self.photo_original:
+                    archival_image = create_archival_image(
+                        self.photo,
+                        max_size=(4000, 4000),
+                        quality=88,
+                    )
+
+                    archival_content = ContentFile(
+                        archival_image.getvalue(),
+                        name=self.photo.name,
+                    )
+
+                    self.photo_original.save(
+                        self.photo.name,
+                        archival_content,
+                        save=False,
+                    )
+
+                # Web verzija
+                web_image = create_web_image(
+                    self.photo,
+                    max_size=(2000, 2000),
+                    quality=90,
+                )
+
+                web_content = ContentFile(
+                    web_image.getvalue(),
+                    name=self.photo.name,
+                )
+
+                self.photo.save(
+                    self.photo.name,
+                    web_content,
+                    save=False,
+                )
+
+            except Exception as e:
+                print(f"Person image processing error: {e}")
+
+        super().save(*args, **kwargs)
+    
     def __str__(self):
         if self.is_unknown:
             return "Nepoznata osoba"
@@ -511,57 +545,35 @@ class Photo(models.Model):
 
         if self.image:
             try:
-                # Ako original još nije sačuvan, sačuvaj upload netaknut
                 if not self.image_original:
-                    self.image.seek(0)
+                    archival_image = create_archival_image(
+                        self.image,
+                        max_size=(4000, 4000),
+                        quality=88,
+                    )
 
-                    original_content = ContentFile(
-                        self.image.read()
+                    archival_content = ContentFile(
+                        archival_image.getvalue(),
+                        name=self.image.name,
                     )
 
                     self.image_original.save(
                         self.image.name,
-                        original_content,
-                        save=False
+                        archival_content,
+                        save=False,
                     )
 
-                    self.image.seek(0)
+                web_image = create_web_image(self.image)
 
-                # Web verzija
-                img = Image.open(self.image)
-
-                try:
-                    from PIL import ImageOps
-                    img = ImageOps.exif_transpose(img)
-                except Exception:
-                    pass
-
-                MAX_SIZE = (2000, 2000)
-
-                if img.width > 2000 or img.height > 2000:
-                    img.thumbnail(
-                        MAX_SIZE,
-                        Image.LANCZOS
-                    )
-
-                if img.mode in ("RGBA", "P"):
-                    img = img.convert("RGB")
-
-                buffer = BytesIO()
-
-                img.save(
-                    buffer,
-                    format="JPEG",
-                    quality=90,
-                    optimize=True
+                web_content = ContentFile(
+                    web_image.getvalue(),
+                    name=self.image.name,
                 )
-
-                buffer.seek(0)
 
                 self.image.save(
                     self.image.name,
-                    ContentFile(buffer.read()),
-                    save=False
+                    web_content,
+                    save=False,
                 )
 
             except Exception as e:
@@ -737,6 +749,31 @@ class Comment(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self.photo:
+            try:
+                web_image = create_web_image(
+                    self.photo,
+                    max_size=(2000, 2000),
+                    quality=90,
+                )
+
+                web_content = ContentFile(
+                    web_image.getvalue(),
+                    name=self.photo.name,
+                )
+
+                self.photo.save(
+                    self.photo.name,
+                    web_content,
+                    save=False,
+                )
+
+            except Exception as e:
+                print(f"Comment image processing error: {e}")
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Komentar za {self.grave}"

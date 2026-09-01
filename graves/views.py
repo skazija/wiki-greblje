@@ -17,6 +17,7 @@ from django.shortcuts import redirect
 
 from .forms import PublicGraveForm, PersonForm, EditSuggestionForm, PersonEditSuggestionForm, LocationSuggestionForm, CommentForm, ProblemReportForm
 from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 from django.db.models import Count
 from django.http import Http404
@@ -26,6 +27,7 @@ from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.measure import D
 
 from django.contrib.admin.views.decorators import staff_member_required
+from .services.ocr.engine import recognize_inscription
 
 from PIL import Image
 from .models import Photo
@@ -1268,3 +1270,39 @@ def photo_ocr(request, pk):
         "photo": photo,
         "text": text,
     })
+    
+@require_POST
+def ocr_inscription(request):
+    image = request.FILES.get("image")
+
+    if not image:
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "Fotografija nije poslana.",
+            },
+            status=400,
+        )
+
+    try:
+        text = recognize_inscription(image)
+
+        return JsonResponse(
+            {
+                "success": True,
+                "text": text,
+            }
+        )
+
+    except Exception as exc:
+        print(f"OCR error: {exc}")
+
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "Fotografiju nije bilo moguće obraditi.",
+            },
+            status=500,
+        )
+        
+        

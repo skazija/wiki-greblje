@@ -18,6 +18,7 @@
     {% csrf_token %}
     {{ form.latitude }}
     {{ form.longitude }}
+    {{ form.primary_photo_index }}
 
 
     <section class="grave-entry-hero" aria-labelledby="grave-entry-title">
@@ -114,6 +115,108 @@
 
     <div class="gallery-card__body">
 
+        <div class="mb-4">
+            <label
+                for="{{ form.ocr_photo.id_for_label }}"
+                class="gallery-upload"
+            >
+                <span class="gallery-upload__icon">
+                    <i class="bi bi-camera-fill"></i>
+                </span>
+
+                <span class="gallery-upload__content">
+                    <strong>Fotografija natpisa</strong>
+
+                    <span>
+                        Fotografirajte ili odaberite natpis izbliza radi prepoznavanja teksta.
+                        Fotografija se neće sačuvati.
+                    </span>
+                </span>
+
+                <span class="gallery-upload__action">
+                    Odaberi fotografiju
+                </span>
+
+                <span class="gallery-upload__input">
+                    {{ form.ocr_photo }}
+                </span>
+            </label>
+
+            {% if form.ocr_photo.errors %}
+                <div class="gallery-card__errors">
+                    {{ form.ocr_photo.errors }}
+                </div>
+            {% endif %}
+
+            <div
+                id="primary-photo-preview"
+                class="gallery-preview mt-3"
+                aria-live="polite"
+            ></div>
+            
+            <div id="ocr-crop-tools" class="mt-3" hidden>
+                <button
+                    type="button"
+                    id="start-ocr-crop"
+                    class="btn wg-card-action"
+                >
+                    <i class="bi bi-crop"></i>
+                    Označi područje natpisa
+                </button>
+
+                <div
+                    id="ocr-crop-status"
+                    class="small text-muted mt-2"
+                    aria-live="polite"
+                ></div>
+            </div>
+            <div id="ocr-actions" class="mt-3" hidden>
+                <button
+                    type="button"
+                    id="recognize-inscription"
+                    class="btn wg-card-action"
+                >
+                    <i class="bi bi-text-paragraph"></i>
+                    Prepoznaj natpis
+                </button>
+
+                <div
+                    id="ocr-status"
+                    class="small text-muted mt-2"
+                    aria-live="polite"
+                ></div>
+                
+                <div id="ocr-result-wrap" class="mt-3" hidden>
+                    <label
+                        for="ocr-result"
+                        class="form-label fw-semibold"
+                    >
+                        Prepoznati natpis
+                    </label>
+
+                    <textarea
+                        id="ocr-result"
+                        class="form-control"
+                        rows="6"
+                        placeholder="Prepoznati tekst će se pojaviti ovdje."
+                    ></textarea>
+
+                    <div class="small text-muted mt-2">
+                        Provjerite i ispravite tekst prije korištenja.
+                    </div>
+
+                    <button
+                        type="button"
+                        id="use-ocr-result"
+                        class="btn wg-card-action mt-3"
+                    >
+                        <i class="bi bi-check2-circle"></i>
+                        Koristi kao natpis
+                    </button>
+                </div>
+
+            </div>
+        </div>
         <label
             for="{{ form.photos.id_for_label }}"
             class="gallery-upload"
@@ -123,10 +226,10 @@
             </span>
 
             <span class="gallery-upload__content">
-                <strong>Odaberite fotografije</strong>
+                <strong>Fotografije groba</strong>
 
                 <span>
-                    Možete odabrati više fotografija odjednom.
+                    Dodajte jednu ili više fotografija groba. Nakon dodavanja možete odabrati glavnu fotografiju.
                 </span>
             </span>
 
@@ -667,6 +770,10 @@
 <script>
     var map = L.map('map').setView([44.2, 17.9], 8);
     var locationStatus = document.getElementById("hero-location-status");
+    const ocrResultWrap = document.getElementById("ocr-result-wrap");
+    const ocrResult = document.getElementById("ocr-result");
+    const useOcrResultButton = document.getElementById("use-ocr-result");
+    const inscriptionInput = document.getElementById("{{ form.inscription.id_for_label }}");
 
     L.tileLayer(
         'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -745,6 +852,300 @@
    Gallery preview
 ========================================== */
 
+const primaryPhotoInput = document.getElementById(
+    "{{ form.ocr_photo.id_for_label }}"
+);
+
+const primaryPhotoPreview = document.getElementById(
+    "primary-photo-preview"
+);
+
+const ocrActions = document.getElementById("ocr-actions");
+const ocrCropTools = document.getElementById("ocr-crop-tools");
+
+const startOcrCropButton = document.getElementById("start-ocr-crop");
+const ocrCropStatus = document.getElementById("ocr-crop-status");
+
+const recognizeInscriptionButton = document.getElementById(
+    "recognize-inscription"
+);
+
+const ocrStatus = document.getElementById("ocr-status");
+
+let primaryPhotoObjectUrl = null;
+let ocrCropActive = false;
+let ocrCropStartX = 0;
+let ocrCropStartY = 0;
+let ocrCropSelection = null;
+let ocrCropData = null;
+
+async function createOcrCropBlob(file) {
+    if (!ocrCropData) {
+        return file;
+    }
+
+    const bitmap = await createImageBitmap(file);
+
+    const sourceX = Math.round(
+        ocrCropData.x * bitmap.width
+    );
+
+    const sourceY = Math.round(
+        ocrCropData.y * bitmap.height
+    );
+
+    const sourceWidth = Math.round(
+        ocrCropData.width * bitmap.width
+    );
+
+    const sourceHeight = Math.round(
+        ocrCropData.height * bitmap.height
+    );
+
+    const canvas = document.createElement("canvas");
+
+    canvas.width = sourceWidth;
+    canvas.height = sourceHeight;
+
+    const context = canvas.getContext("2d");
+
+    context.drawImage(
+        bitmap,
+        sourceX,
+        sourceY,
+        sourceWidth,
+        sourceHeight,
+        0,
+        0,
+        sourceWidth,
+        sourceHeight
+    );
+
+    bitmap.close();
+
+    return new Promise((resolve, reject) => {
+        canvas.toBlob(
+            (blob) => {
+                if (blob) {
+                    resolve(blob);
+                } else {
+                    reject(
+                        new Error(
+                            "Nije moguće napraviti OCR crop."
+                        )
+                    );
+                }
+            },
+            "image/jpeg",
+            0.95
+        );
+    });
+}
+
+function renderPrimaryPhotoPreview(file) {
+    ocrCropData = null;
+    if (!primaryPhotoPreview) {
+        return;
+    }
+
+    if (primaryPhotoObjectUrl) {
+        URL.revokeObjectURL(primaryPhotoObjectUrl);
+        primaryPhotoObjectUrl = null;
+    }
+
+    primaryPhotoPreview.innerHTML = "";
+
+    if (!file || !file.type.startsWith("image/")) {
+        if (ocrActions) {
+            ocrActions.hidden = true;
+        }
+
+        return;
+    }
+
+ 
+    if (ocrActions) {
+        ocrActions.hidden = false;
+    }
+
+    if (ocrCropTools) {
+        ocrCropTools.hidden = false;
+    }
+
+    if (ocrStatus) {
+        ocrStatus.textContent = "";
+    }
+
+    const grid = document.createElement("div");
+    grid.className = "ocr-primary-preview";
+
+    const item = document.createElement("div");
+    item.className = "ocr-primary-preview__image-wrap";
+
+    const image = document.createElement("img");
+    image.alt = "Pregled fotografije natpisa";
+
+    image.id = "ocr-primary-image";
+    image.draggable = false;
+
+    primaryPhotoObjectUrl = URL.createObjectURL(file);
+    image.src = primaryPhotoObjectUrl;
+
+    item.appendChild(image);
+    const selection = document.createElement("div");
+    selection.id = "ocr-selection";
+    selection.hidden = true;
+
+    item.appendChild(selection);
+    grid.appendChild(item);
+
+    primaryPhotoPreview.appendChild(grid);
+}
+
+if (recognizeInscriptionButton) {
+    recognizeInscriptionButton.addEventListener(
+        "click",
+        async function () {
+            if (
+                !primaryPhotoInput ||
+                !primaryPhotoInput.files ||
+                !primaryPhotoInput.files.length
+            ) {
+                return;
+            }
+
+            const imageFile = primaryPhotoInput.files[0];
+
+            if (!ocrCropData) {
+                if (ocrStatus) {
+                    ocrStatus.textContent =
+                        "Prvo označite područje natpisa.";
+                }
+
+                return;
+            }
+
+            const croppedImage = await createOcrCropBlob(imageFile);
+   
+            const formData = new FormData();
+
+            formData.append(
+                "image",
+                croppedImage,
+                "inscription-crop.jpg"
+            );
+
+            recognizeInscriptionButton.disabled = true;
+
+            recognizeInscriptionButton.innerHTML = `
+                <span
+                    class="spinner-border spinner-border-sm me-2"
+                    aria-hidden="true"
+                ></span>
+                Prepoznajem natpis...
+            `;
+
+            if (ocrStatus) {
+                ocrStatus.textContent =
+                    "Fotografija se analizira...";
+            }
+
+            try {
+                const response = await fetch(
+                    "{% url 'graves:ocr_inscription' %}",
+                    {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken":
+                                document.querySelector(
+                                    "[name=csrfmiddlewaretoken]"
+                                ).value,
+                        },
+                        body: formData,
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(
+                        data.error ||
+                        "OCR obrada nije uspjela."
+                    );
+                }
+
+                if (data.text) {
+                    if (ocrStatus) {
+                        ocrStatus.textContent =
+                            "Natpis je prepoznat. Provjerite rezultat.";
+                    }
+
+                    if (ocrResult) {
+                        ocrResult.value = data.text;
+                    }
+
+                    if (ocrResultWrap) {
+                        ocrResultWrap.hidden = false;
+                    }
+
+                } else {
+                    if (ocrStatus) {
+                        ocrStatus.textContent =
+                            "OCR nije pronašao čitljiv tekst.";
+                    }
+
+                    if (ocrResult) {
+                        ocrResult.value = "";
+                    }
+
+                    if (ocrResultWrap) {
+                        ocrResultWrap.hidden = true;
+                    }
+                }
+
+              
+
+            } catch (error) {
+                console.error("OCR greška:", error);
+
+                if (ocrStatus) {
+                    ocrStatus.textContent =
+                        "Natpis nije bilo moguće prepoznati.";
+                }
+
+            } finally {
+                recognizeInscriptionButton.disabled = false;
+
+                recognizeInscriptionButton.innerHTML = `
+                    <i class="bi bi-text-paragraph"></i>
+                    Prepoznaj natpis
+                `;
+            }
+        }
+    );
+}
+
+const primaryPhotoIndexInput = document.getElementById(
+    "{{ form.primary_photo_index.id_for_label }}"
+);
+
+if (primaryPhotoInput) {
+    primaryPhotoInput.addEventListener(
+        "change",
+        async function () {
+            const selectedFile = this.files?.[0] || null;
+
+            renderPrimaryPhotoPreview(selectedFile);
+
+            if (selectedFile) {
+                await applyPhotoGps([selectedFile]);
+            }
+
+            updateDigitalizationChecklist();
+        }
+    );
+}
+
 const photoInput = document.getElementById("{{ form.photos.id_for_label }}");
 const galleryPreview = document.getElementById("gallery-preview");
 
@@ -807,6 +1208,170 @@ async function applyPhotoGps(files) {
 
     }
 }
+
+
+if (startOcrCropButton) {
+    startOcrCropButton.addEventListener("click", function () {
+        const image = document.getElementById("ocr-primary-image");
+        const selection = document.getElementById("ocr-selection");
+
+        if (!image || !selection) {
+            return;
+        }
+
+        ocrCropActive = true;
+        ocrCropSelection = selection;
+
+        if (ocrCropStatus) {
+            ocrCropStatus.textContent =
+                "Mišem povucite pravougaonik preko natpisa.";
+        }
+
+        image.style.cursor = "crosshair";
+    });
+}
+
+document.addEventListener("mousedown", function (event) {
+    if (!ocrCropActive) {
+        return;
+    }
+
+    const image = document.getElementById("ocr-primary-image");
+    const selection = document.getElementById("ocr-selection");
+
+    if (!image || !selection || event.target !== image) {
+        return;
+    }
+
+    event.preventDefault();
+
+    const imageRect = image.getBoundingClientRect();
+
+    ocrCropStartX = event.clientX - imageRect.left;
+    ocrCropStartY = event.clientY - imageRect.top;
+
+    selection.style.left = `${ocrCropStartX}px`;
+    selection.style.top = `${ocrCropStartY}px`;
+    selection.style.width = "0px";
+    selection.style.height = "0px";
+    selection.hidden = false;
+
+    ocrCropSelection = selection;
+});
+
+document.addEventListener("mousemove", function (event) {
+    if (
+        !ocrCropActive ||
+        !ocrCropSelection ||
+        ocrCropSelection.hidden
+    ) {
+        return;
+    }
+
+    const image = document.getElementById("ocr-primary-image");
+
+    if (!image) {
+        return;
+    }
+
+    const imageRect = image.getBoundingClientRect();
+
+    let currentX = event.clientX - imageRect.left;
+    let currentY = event.clientY - imageRect.top;
+
+    currentX = Math.max(
+        0,
+        Math.min(currentX, imageRect.width)
+    );
+
+    currentY = Math.max(
+        0,
+        Math.min(currentY, imageRect.height)
+    );
+
+    const left = Math.min(ocrCropStartX, currentX);
+    const top = Math.min(ocrCropStartY, currentY);
+
+    const width = Math.abs(currentX - ocrCropStartX);
+    const height = Math.abs(currentY - ocrCropStartY);
+
+    ocrCropSelection.style.left = `${left}px`;
+    ocrCropSelection.style.top = `${top}px`;
+    ocrCropSelection.style.width = `${width}px`;
+    ocrCropSelection.style.height = `${height}px`;
+});
+
+document.addEventListener("mouseup", function () {
+    if (
+        !ocrCropActive ||
+        !ocrCropSelection ||
+        ocrCropSelection.hidden
+    ) {
+        return;
+    }
+
+    const width = parseFloat(
+        ocrCropSelection.style.width
+    );
+
+    const height = parseFloat(
+        ocrCropSelection.style.height
+    );
+
+    if (width < 20 || height < 20) {
+        ocrCropSelection.hidden = true;
+
+        if (ocrCropStatus) {
+            ocrCropStatus.textContent =
+                "Označeno područje je premalo. Pokušajte ponovo.";
+        }
+
+        return;
+    }
+
+    const image = document.getElementById("ocr-primary-image");
+
+    if (image) {
+        const imageRect = image.getBoundingClientRect();
+
+        const left = parseFloat(
+            ocrCropSelection.style.left
+        );
+
+        const top = parseFloat(
+            ocrCropSelection.style.top
+        );
+
+        const width = parseFloat(
+            ocrCropSelection.style.width
+        );
+
+        const height = parseFloat(
+            ocrCropSelection.style.height
+        );
+
+        ocrCropData = {
+            x: left / imageRect.width,
+            y: top / imageRect.height,
+            width: width / imageRect.width,
+            height: height / imageRect.height,
+        };
+    }
+
+    ocrCropActive = false;
+
+
+
+    if (image) {
+        image.style.cursor = "";
+    }
+
+    if (ocrCropStatus) {
+        ocrCropStatus.textContent =
+            "Područje natpisa je označeno.";
+    }
+});
+
 
 
 
@@ -873,6 +1438,14 @@ function renderGalleryPreview(files) {
 
         const objectUrl = URL.createObjectURL(file);
 
+        const primaryButton = document.createElement("button");
+
+        primaryButton.type = "button";
+        primaryButton.className = "gallery-primary-button";
+        primaryButton.dataset.photoIndex = index;
+
+        primaryButton.innerHTML = `<i class="bi bi-star"></i><span>Postavi kao glavnu</span>`;
+
         image.src = objectUrl;
 
         image.addEventListener(
@@ -882,11 +1455,54 @@ function renderGalleryPreview(files) {
             },
             { once: true }
         );
+        if (index === 0) {
+            primaryButton.classList.add("is-primary");
 
+            primaryButton.innerHTML = `
+                <i class="bi bi-star-fill"></i>
+                <span>Glavna fotografija</span>
+            `;
+
+            if (primaryPhotoIndexInput) {
+                primaryPhotoIndexInput.value = "0";
+            }
+        }
+        primaryButton.addEventListener("click", function () {
+            const buttons = document.querySelectorAll(
+                ".gallery-primary-button"
+            );
+
+            buttons.forEach((button) => {
+                button.classList.remove("is-primary");
+
+                button.innerHTML = `
+                    <i class="bi bi-star"></i>
+                    <span>Postavi kao glavnu</span>
+                `;
+            });
+
+            this.classList.add("is-primary");
+
+            this.innerHTML = `
+                <i class="bi bi-star-fill"></i>
+                <span>Glavna fotografija</span>
+            `;
+
+            if (primaryPhotoIndexInput) {
+                primaryPhotoIndexInput.value =
+                    this.dataset.photoIndex;
+            }
+        });
+        item.appendChild(primaryButton);
         item.appendChild(image);
         item.appendChild(number);
         item.appendChild(name);
         grid.appendChild(item);
+        
+
+
+
+
     });
 
     const totalSize = Array.from(files).reduce(
@@ -1048,6 +1664,7 @@ if (personGenderSelect) {
 const checklistFields = {
     latitude: document.getElementById("id_latitude"),
     longitude: document.getElementById("id_longitude"),
+    primaryPhoto: document.getElementById("{{ form.ocr_photo.id_for_label }}"),
     photos: document.getElementById("{{ form.photos.id_for_label }}"),
     firstName: document.getElementById("{{ form.first_name.id_for_label }}"),
     lastName: document.getElementById("{{ form.last_name.id_for_label }}"),
@@ -1247,6 +1864,39 @@ if (useCurrentLocationButton) {
     });
 }
 
+if (useOcrResultButton) {
+    useOcrResultButton.addEventListener("click", function () {
+        if (
+            !ocrResult ||
+            !inscriptionInput ||
+            !ocrResult.value.trim()
+        ) {
+            return;
+        }
+
+        inscriptionInput.value = ocrResult.value.trim();
+
+        inscriptionInput.dispatchEvent(
+            new Event("input", {
+                bubbles: true,
+            })
+        );
+
+        inscriptionInput.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+        });
+
+        inscriptionInput.focus();
+
+        if (ocrStatus) {
+            ocrStatus.textContent =
+                "Prepoznati tekst je prenesen u polje za natpis.";
+        }
+
+        updateDigitalizationChecklist();
+    });
+}
 
 </script>
 {% endblock %}

@@ -2858,6 +2858,67 @@
     transform: translateY(0);
 }
 
+/* dodano za ocr */
+.ocr-primary-preview {
+    width: 100%;
+}
+
+.ocr-primary-preview__image-wrap {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #f3f7f4;
+}
+
+.ocr-primary-preview__image-wrap img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: none;
+    object-fit: contain;
+}
+
+.ocr-primary-preview__image-wrap {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #f3f7f4;
+    user-select: none;
+}
+
+#ocr-selection {
+    position: absolute;
+    border: 2px solid #ffffff;
+    outline: 2px solid #163c2f;
+    background: rgba(22, 60, 47, 0.15);
+    pointer-events: none;
+    z-index: 5;
+}
+
+.gallery-primary-button {
+    width: 100%;
+    border: 0;
+    border-top: 1px solid var(--wg-border);
+    padding: 0.55rem 0.7rem;
+    background: var(--wg-surface);
+    color: var(--wg-muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.gallery-primary-button:hover {
+    background: var(--wg-green-50);
+    color: var(--wg-green-900);
+}
+
+.gallery-primary-button.is-primary {
+    background: var(--wg-green-100);
+    color: var(--wg-green-950);
+}
+
+/* dodano za ocr */
 
 /* Završna poruka */
 

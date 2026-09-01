@@ -22,11 +22,27 @@ class MultipleFileField(forms.FileField):
 class PublicGraveForm(forms.ModelForm):
     latitude = forms.FloatField(required=False,widget=forms.HiddenInput())
     longitude = forms.FloatField(required=False,widget=forms.HiddenInput())
+    
+    ocr_photo = forms.ImageField(
+        required=False,
+        label="Fotografija natpisa",
+        widget=forms.ClearableFileInput(
+            attrs={
+                "accept": "image/*",
+            }
+        ),
+    )
+    
     photos = MultipleFileField(
         required=False,
-        label="Fotografije"
+        label="Fotografije groba"
     )
 
+    primary_photo_index = forms.IntegerField(
+        required=False,
+        widget=forms.HiddenInput(),
+    )
+    
     first_name = forms.CharField(
         max_length=100,
         required=False,
@@ -106,10 +122,22 @@ class PublicGraveForm(forms.ModelForm):
             
         if commit:
             grave.save()
-
+            
             photos = self.cleaned_data.get("photos", [])
 
-            for photo in photos:
+            primary_photo_index = self.cleaned_data.get(
+                "primary_photo_index"
+            )
+
+            if photos:
+                if (
+                    primary_photo_index is None
+                    or primary_photo_index < 0
+                    or primary_photo_index >= len(photos)
+                ):
+                    primary_photo_index = 0
+
+            for index, photo in enumerate(photos):
                 photo_status = (
                     Photo.STATUS_APPROVED
                     if user and user.is_staff
@@ -119,6 +147,7 @@ class PublicGraveForm(forms.ModelForm):
                 Photo.objects.create(
                     grave=grave,
                     image=photo,
+                    is_primary=(index == primary_photo_index),
                     uploaded_by=user if user else None,
                     status=photo_status,
                 )

@@ -26,4 +26,5 @@ urlpatterns = [
     path("fotografije/<int:pk>/ocr/",views.photo_ocr,name="photo_ocr",),
     path("persons/add/", views.choose_grave_for_person, name="choose_grave_for_person",),
     path("grob/<int:pk>/predlozi-lokaciju/", views.suggest_grave_location, name="suggest_grave_location", ),
+    path("ocr/inscription/",views.ocr_inscription,name="ocr_inscription",),
 ]

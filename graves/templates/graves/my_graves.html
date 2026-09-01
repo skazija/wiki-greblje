@@ -38,16 +38,16 @@
 
         <article class="my-grave-card">
 
-            {% with first_photo=grave.photos.first %}
+            {% with primary_photo=grave.primary_photo %}
 
-                {% if first_photo %}
+                {% if primary_photo %}
 
                     <a
                         href="{% url 'graves:grave_detail' grave.id %}"
                         class="my-grave-card__media"
                     >
                         <img
-                            src="{{ first_photo.image.url }}"
+                            src="{{ primary_photo.image.url }}"
                             alt="{{ grave.title|default:'Fotografija groba' }}"
                             class="my-grave-card__image"
                             loading="lazy"
