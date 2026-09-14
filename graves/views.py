@@ -14,6 +14,7 @@ from .models import Cemetery, Grave, Person, Photo, EditSuggestion, PersonEditSu
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
+from django.conf import settings
 
 from .forms import PublicGraveForm, PersonForm, EditSuggestionForm, PersonEditSuggestionForm, LocationSuggestionForm, CommentForm, ProblemReportForm
 from django.http import JsonResponse
@@ -89,6 +90,7 @@ def cemetery_detail(request, pk):
         "graves": graves,
         "cemetery_photos": cemetery_photos,
         "primary_photo": primary_photo,
+        "maptiler_api_key": settings.MAPTILER_API_KEY,
     })
 
 
@@ -189,6 +191,7 @@ def grave_detail(request, pk):
         "comments": comments,
         "comment_form": comment_form,
         "nearby_graves": nearby_graves,
+        "maptiler_api_key": settings.MAPTILER_API_KEY,
     })
 
 

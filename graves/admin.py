@@ -4,7 +4,27 @@ from django import forms
 from django.contrib import admin
 from django.contrib.gis.admin import GISModelAdmin
 from django.contrib.gis.geos import Point
-from .models import Cemetery, Grave, Person, Photo, EditHistory, LocationSuggestion, EditSuggestion, PersonEditSuggestion, Comment, ProblemReport, CemeteryPhoto
+from django.conf import settings
+from .models import (
+    Cemetery,
+    CemeteryPhoto,
+    Grave,
+    Person,
+    Photo,
+    EditHistory,
+    LocationSuggestion,
+    EditSuggestion,
+    PersonEditSuggestion,
+    Comment,
+    ProblemReport,
+    MonumentMacroType,
+    MonumentTradition,
+    MonumentType,
+    Motif,
+    MonumentCondition,
+    DeteriorationPattern,
+    MonumentPosition,
+)
 from django.db.models import Case, When, Value, IntegerField
 import json
 from django.contrib.gis.geos import Polygon
@@ -26,6 +46,10 @@ class CemeteryAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.fields["boundary_geojson"].widget.attrs["data-maptiler-key"] = (
+            settings.MAPTILER_API_KEY
+        )
+                
         if self.instance and self.instance.location:
             self.fields["latitude"].initial = self.instance.location.y
             self.fields["longitude"].initial = self.instance.location.x
@@ -68,20 +92,115 @@ class CemeteryAdminForm(forms.ModelForm):
             cemetery.save()
 
         return cemetery
-
 class GraveAdminForm(forms.ModelForm):
-    latitude = forms.FloatField(required=False, label="Latitude")
-    longitude = forms.FloatField(required=False, label="Longitude")
+    """
+    Admin forma za unos groba/spomenika.
+
+    Zadržava GIS unos koordinata i pruža praktični ADMIN
+    prikaz najčešćih pojava degradacije.
+    """
+
+    latitude = forms.FloatField(
+        required=False,
+        label="Latitude",
+    )
+
+    longitude = forms.FloatField(
+        required=False,
+        label="Longitude",
+    )
+
+    ADMIN_DETERIORATION_CODES = [
+        "CRK-CRA",  # Pukotina
+        "LOS-MIS",  # Nedostajući dio
+        "LOS-ERO",  # Erozija
+        "DET-PEE",  # Ljuštenje
+        "LOS-MEC",  # Mehaničko oštećenje
+        "DIS-DEP",  # Naslaga
+        "DIS-COL",  # Promjena boje
+        "BIO-LIC",  # Lišajevi
+        "BIO-MOS",  # Mahovina
+        "BIO-PLT",  # Biljke / vegetacija
+    ]
 
     class Meta:
         model = Grave
         fields = "__all__"
-       
-        widgets = {"location": forms.HiddenInput(),}
+
+        widgets = {
+            "location": forms.HiddenInput(),
+            "deterioration_patterns": forms.CheckboxSelectMultiple,
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        self.fields["latitude"].widget.attrs["data-maptiler-key"] = (
+            settings.MAPTILER_API_KEY
+        )
+
+       
+        # ----------------------------------------------------
+        # KONTROLISANI ŠIFRARNICI
+        # ----------------------------------------------------
+        # Vrijednosti se biraju iz postojećih šifrarnika.
+        # Novi termini se ne kreiraju tokom običnog unosa groba.
+
+        controlled_fields = (
+            "macro_type",
+            "tradition",
+            "monument_type",
+            "motifs",
+            "condition_classification",
+            "deterioration_patterns",
+            "monument_position",
+        )
+
+        for field_name in controlled_fields:
+            field = self.fields.get(field_name)
+
+            if field and hasattr(field.widget, "can_add_related"):
+                field.widget.can_add_related = False
+                field.widget.can_change_related = False
+                field.widget.can_delete_related = False
+
+        # ----------------------------------------------------
+        # STANJE / DEGRADACIJA
+        # ----------------------------------------------------
+
+        field = self.fields.get("deterioration_patterns")
+
+        if field:
+            codes = list(self.ADMIN_DETERIORATION_CODES)
+
+            # Ako zapis već sadrži stručnije klasifikacije koje
+            # nisu dio osnovnog ADMIN skupa, ipak ih prikazujemo
+            # kako postojeći podatak ne bi bio izgubljen.
+            if self.instance and self.instance.pk:
+                existing_codes = (
+                    self.instance.deterioration_patterns
+                    .values_list("code", flat=True)
+                )
+                codes.extend(existing_codes)
+
+            field.queryset = (
+                DeteriorationPattern.objects
+                .filter(
+                    code__in=set(codes),
+                    is_active=True,
+                )
+                .order_by("sort_order")
+            )
+
+        # ----------------------------------------------------
+        # GROBLJE
+        # ----------------------------------------------------
+
         self.fields["cemetery"].queryset = Cemetery.objects.all()
+
+        # ----------------------------------------------------
+        # GIS / KOORDINATE
+        # ----------------------------------------------------
 
         if self.instance and self.instance.location:
             self.fields["latitude"].initial = self.instance.location.y
@@ -230,6 +349,7 @@ class PersonInline(admin.StackedInline):
 @admin.register(Grave)
 class GraveAdmin(GISModelAdmin):
     form = GraveAdminForm
+    
     actions = ["approve_graves"]
     list_display = (
         "thumbnail",
@@ -244,12 +364,16 @@ class GraveAdmin(GISModelAdmin):
         "approve_link",
         "edit_link",
         "location_warning",
+        "macro_type",
+        "tradition",
+        "monument_type",
     )
 
     search_fields = ("title", "inscription", "notes")
     list_filter = ("cemetery", "condition", "status")
     inlines = [PersonInline, PhotoInline]
-
+    autocomplete_fields = ("cemetery","macro_type","tradition","monument_type","condition_classification","monument_position",)
+    filter_horizontal = ("motifs",)
     fieldsets = (
         (None, {
             "fields": (
@@ -268,6 +392,29 @@ class GraveAdmin(GISModelAdmin):
                 "longitude",
             )
         }),
+        (
+            "Klasifikacija spomenika — Wiki Greblje V1.0",
+            {
+                "fields": ((
+                    "macro_type",
+                    "tradition",
+                    "monument_type",),
+                    "motifs",
+                )
+            },
+        ),
+        
+        (
+            "Stanje spomenika — Condition V1.0",
+            {
+                "fields": (
+                    "condition_classification",
+                    "deterioration_patterns",
+                    "monument_position",
+                    "condition_notes",
+                ),
+            },
+        ),
     )
 
     def get_urls(self):
@@ -441,7 +588,10 @@ class GraveAdmin(GISModelAdmin):
 
     class Media:
         css = {
-            "all": ("https://unpkg.com/leaflet/dist/leaflet.css",)
+            "all": (
+                "https://unpkg.com/leaflet/dist/leaflet.css",
+                "graves/css/admin_catalog.css",
+            )
         }
         js = (
             "https://unpkg.com/leaflet/dist/leaflet.js",
@@ -1455,7 +1605,148 @@ class ProblemReportAdmin(admin.ModelAdmin):
     def mark_rejected(self, request, queryset):
         queryset.update(status=ProblemReport.STATUS_REJECTED)
         
-        
+@admin.register(MonumentMacroType)
+class MonumentMacroTypeAdmin(admin.ModelAdmin):
+    list_display = (
+        "code",
+        "name",
+        "is_active",
+        "sort_order",
+    )
+    list_filter = ("is_active",)
+    search_fields = ("code", "name", "description")
+    ordering = ("sort_order", "code")
+
+
+@admin.register(MonumentTradition)
+class MonumentTraditionAdmin(admin.ModelAdmin):
+    list_display = (
+        "code",
+        "name",
+        "is_active",
+        "sort_order",
+    )
+    list_filter = ("is_active",)
+    search_fields = ("code", "name", "description")
+    ordering = ("sort_order", "code")
+
+
+@admin.register(MonumentType)
+class MonumentTypeAdmin(admin.ModelAdmin):
+    @admin.display(description="Hijerarhija")
+    def hierarchy(self, obj):
+        return obj.full_path
+    list_display = (
+        "code",
+        "name",
+        "hierarchy",
+        "level",
+        "parent",
+        "is_active",
+        "sort_order",
+    )
+
+    list_filter = (
+        "level",
+        "is_active",
+    )
+
+    search_fields = (
+        "code",
+        "name",
+        "description",
+        "identification_notes",
+    )
+
+    ordering = (
+        "sort_order",
+        "code",
+    )
+
+    autocomplete_fields = (
+        "parent",
+    )
+
+
+@admin.register(Motif)
+class MotifAdmin(admin.ModelAdmin):
+    list_display = (
+        "code",
+        "name",
+        "category",
+        "is_active",
+        "sort_order",
+    )
+
+    list_filter = (
+        "category",
+        "is_active",
+    )
+
+    search_fields = (
+        "code",
+        "name",
+        "category",
+        "description",
+    )
+
+    ordering = (
+        "sort_order",
+        "code",
+    )
+
+@admin.register(MonumentCondition)
+class MonumentConditionAdmin(admin.ModelAdmin):
+    list_display = (
+        "code",
+        "name",
+        "public_label",
+        "is_active",
+        "sort_order",
+    )
+    list_filter = ("is_active",)
+    search_fields = ("code", "name", "public_label", "description")
+    ordering = ("sort_order", "code")
+
+
+@admin.register(DeteriorationPattern)
+class DeteriorationPatternAdmin(admin.ModelAdmin):
+    list_display = (
+        "code",
+        "name",
+        "group",
+        "admin_label",
+        "is_active",
+        "sort_order",
+    )
+    list_filter = (
+        "group",
+        "is_active",
+    )
+    search_fields = (
+        "code",
+        "name",
+        "admin_label",
+        "public_label",
+        "description",
+    )
+    ordering = ("sort_order", "code")
+
+
+@admin.register(MonumentPosition)
+class MonumentPositionAdmin(admin.ModelAdmin):
+    list_display = (
+        "code",
+        "name",
+        "public_label",
+        "is_active",
+        "sort_order",
+    )
+    list_filter = ("is_active",)
+    search_fields = ("code", "name", "public_label", "description")
+    ordering = ("sort_order", "code")
+
+       
 # =========================================================
 # Wiki Greblje - Admin dashboard
 # =========================================================

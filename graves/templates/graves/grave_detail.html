@@ -5,6 +5,7 @@
 ============================================================ -->
 
 {% extends "graves/base.html" %}
+{% load l10n %}
 
 {% block title %}{{ grave.title|default:"Grob" }} - Wiki Greblje{% endblock %}
 
@@ -1257,12 +1258,21 @@
 <script>
     var map = L.map('graveMap');
 
+    const maptilerKey = "{{ maptiler_api_key|escapejs }}";
+
     var osm = L.tileLayer(
-        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        `https://api.maptiler.com/maps/streets-v4/256/{z}/{x}/{y}.png?key=${maptilerKey}`,
         {
+            minZoom: 1,
             maxNativeZoom: 19,
             maxZoom: 22,
-            attribution: '© OpenStreetMap'
+            attribution:
+                '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> ' +
+                '<a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
+            crossOrigin: true,
+            updateWhenIdle: true,
+            keepBuffer: 0,
+            detectRetina: false
         }
     );
 
@@ -1283,7 +1293,10 @@
     }).addTo(map);
 
     {% if grave.location %}
-        var graveLocation = [{{ grave.location.y }}, {{ grave.location.x }}];
+        var graveLocation = [
+            {{ grave.location.y|unlocalize }},
+            {{ grave.location.x|unlocalize }}
+        ];
 
         map.setView(graveLocation, 18);
 

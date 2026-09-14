@@ -2,6 +2,8 @@
 
 {% block title %}{{ cemetery.name }} - Wiki Greblje{% endblock %}
 
+{% load l10n %}
+
 {% block extra_head %}
 <link
     rel="stylesheet"
@@ -449,14 +451,34 @@
         const mapElement = document.getElementById("map");
 
         if (mapElement) {
-            const map = L.map("map");
+
+            {% if cemetery.location %}
+                const cemeteryCenter = [
+                    {{ cemetery.location.y|unlocalize }},
+                    {{ cemetery.location.x|unlocalize }}
+                ];
+
+                const map = L.map("map").setView(cemeteryCenter, 18);
+            {% else %}
+                const cemeteryCenter = null;
+                const map = L.map("map").setView([43.9889, 18.1781], 15);
+            {% endif %}
+
+            const maptilerKey = "{{ maptiler_api_key|escapejs }}";
 
             const osm = L.tileLayer(
-                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                `https://api.maptiler.com/maps/streets-v4/256/{z}/{x}/{y}.png?key=${maptilerKey}`,
                 {
+                    minZoom: 1,
                     maxNativeZoom: 19,
                     maxZoom: 22,
-                    attribution: "© OpenStreetMap"
+                    attribution:
+                        '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> ' +
+                        '<a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
+                    crossOrigin: true,
+                    updateWhenIdle: true,
+                    keepBuffer: 0,
+                    detectRetina: false,
                 }
             );
 
@@ -465,7 +487,12 @@
                 {
                     maxNativeZoom: 19,
                     maxZoom: 22,
-                    attribution: "Tiles © Esri"
+                    attribution: "Tiles © Esri",
+
+                    updateWhenIdle: true,
+                    keepBuffer: 0,
+                    detectRetina: false,
+
                 }
             );
 
@@ -477,18 +504,11 @@
             }).addTo(map);
 
             {% if cemetery.location %}
-                const cemeteryCenter = [
-                    {{ cemetery.location.y }},
-                    {{ cemetery.location.x }}
-                ];
-
-                map.setView(cemeteryCenter, 18);
-
                 L.marker(cemeteryCenter)
                     .addTo(map)
                     .bindPopup("{{ cemetery.name|escapejs }}");
             {% else %}
-                map.setView([43.9889, 18.1781], 15);
+               
             {% endif %}
 
             {% if cemetery.boundary %}

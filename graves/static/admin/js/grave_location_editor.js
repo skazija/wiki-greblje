@@ -6,6 +6,13 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
+    const maptilerKey = latInput.dataset.maptilerKey;
+
+    if (!maptilerKey) {
+        console.error("MapTiler API key nije pronađen.");
+        return;
+    }
+
     const mapDiv = document.createElement("div");
     mapDiv.id = "custom-grave-map";
     mapDiv.style.height = "420px";
@@ -20,8 +27,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     locationFieldset.appendChild(mapDiv);
 
-    let startLat = parseFloat(latInput.value);
-    let startLon = parseFloat(lonInput.value);
+    function parseCoordinate(value) {
+        return parseFloat(String(value).replace(",", "."));
+    }
+
+    let startLat = parseCoordinate(latInput.value);
+    let startLon = parseCoordinate(lonInput.value);
 
     if (isNaN(startLat) || isNaN(startLon)) {
         startLat = 43.9889;
@@ -30,12 +41,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const map = L.map("custom-grave-map").setView([startLat, startLon], 18);
     const cemeterySelect = document.getElementById("id_cemetery");
-    const osm = L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    
+    const streets = L.tileLayer(
+        `https://api.maptiler.com/maps/streets-v4/256/{z}/{x}/{y}.png?key=${maptilerKey}`,
         {
+            minZoom: 1,
             maxNativeZoom: 19,
             maxZoom: 22,
-            attribution: "© OpenStreetMap"
+            attribution:
+                '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> ' +
+                '<a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
+            crossOrigin: true,
+            updateWhenIdle: true,
+            keepBuffer: 0,
+            detectRetina: false
         }
     );
 
@@ -44,14 +63,17 @@ document.addEventListener("DOMContentLoaded", function () {
         {
             maxNativeZoom: 19,
             maxZoom: 22,
-            attribution: "Tiles © Esri"
+            attribution: "Tiles © Esri",
+            updateWhenIdle: true,
+            keepBuffer: 0,
+            detectRetina: false
         }
     );
 
-    osm.addTo(map);
+    streets.addTo(map);
 
     L.control.layers({
-        "Mapa": osm,
+        "Mapa": streets,
         "Satelit": satellite
     }).addTo(map);
 
@@ -110,13 +132,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 const data = await response.json();
 
-                if (data.lat && data.lng) {
+                const cemeteryLat = parseCoordinate(data.lat);
+                const cemeteryLon = parseCoordinate(data.lng);
 
-                    map.setView([data.lat, data.lng], 19);
+                if (
+                    Number.isFinite(cemeteryLat) &&
+                    Number.isFinite(cemeteryLon)
+                ) {
+
+                    const cemeteryPosition = L.latLng(
+                        cemeteryLat,
+                        cemeteryLon
+                    );
+
+                    map.setView(cemeteryPosition, 19, {
+                        animate: false
+                    });
 
                     if (!marker) {
 
-                        marker = L.marker([data.lat, data.lng], {
+                        marker = L.marker(cemeteryPosition, {
                             draggable: true
                         }).addTo(map);
 
@@ -125,13 +160,17 @@ document.addEventListener("DOMContentLoaded", function () {
                         });
 
                     } else {
-                        marker.setLatLng([data.lat, data.lng]);
+                        marker.setLatLng(cemeteryPosition);
                     }
 
-                    updateInputs({
-                        lat: data.lat,
-                        lng: data.lng
-                    });
+                    updateInputs(cemeteryPosition);
+
+                } else {
+                    console.error(
+                        "Neispravne koordinate groblja:",
+                        data.lat,
+                        data.lng
+                    );
                 }
 
             } catch (e) {

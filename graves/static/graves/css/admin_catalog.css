@@ -1,0 +1,302 @@
+/* =========================================================
+   WIKI GREBLJE - ADMIN KATALOGIZACIJA
+   Očišćena verzija
+   ========================================================= */
+
+
+/* =========================================================
+   1. KLASIFIKACIJA SPOMENIKA
+   Desktop: 3 kolone
+   Mobile: 1 kolona
+   ========================================================= */
+
+.form-row.field-macro_type.field-tradition.field-monument_type
+> .flex-container.form-multiline {
+    display: grid;
+    grid-template-columns: 0.9fr 1.25fr 1.45fr;
+    gap: 24px;
+    width: 100%;
+}
+
+.form-row.field-macro_type.field-tradition.field-monument_type
+> .flex-container.form-multiline > div {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.form-row.field-macro_type.field-tradition.field-monument_type
+.fieldBox {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.form-row.field-macro_type.field-tradition.field-monument_type
+.fieldBox > label {
+    display: block !important;
+    width: auto !important;
+    margin: 0 0 6px 0 !important;
+    padding: 0 !important;
+}
+
+.form-row.field-macro_type.field-tradition.field-monument_type
+.related-widget-wrapper {
+    display: flex !important;
+    align-items: center;
+    width: 100% !important;
+    gap: 6px;
+}
+
+.form-row.field-macro_type.field-tradition.field-monument_type
+.related-widget-wrapper .select2-container {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+}
+
+.form-row.field-macro_type.field-tradition.field-monument_type
+.select2-selection {
+    width: 100% !important;
+}
+
+.form-row.field-macro_type.field-tradition.field-monument_type
+.related-widget-wrapper-link {
+    flex: 0 0 auto;
+}
+
+
+/* =========================================================
+   2. MOTIVI / ORNAMENTIKA
+   ========================================================= */
+
+.field-motifs .selector {
+    width: 100%;
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+}
+
+.field-motifs .selector-available,
+.field-motifs .selector-chosen {
+    flex: 1 1 0;
+    width: calc(50% - 30px);
+    min-width: 0;
+}
+
+.field-motifs .selector select {
+    width: 100% !important;
+    min-width: 0;
+}
+
+.field-motifs .selector-chooser {
+    flex: 0 0 40px;
+    margin: auto 0;
+}
+
+.field-motifs .selector h2 {
+    white-space: nowrap;
+}
+
+/* Uskladi oba zaglavlja s Wiki Greblje bojom */
+.field-motifs .selector-available h2,
+.field-motifs .selector-chosen h2 {
+    background: #164b3b !important;
+    color: #fff !important;
+}
+
+
+/* =========================================================
+   3. MOBILNI ADMIN - KOMPAKTNI REDOVI
+   Važno: ne preuređujemo globalno related-widget-wrapper.
+   Django zadržava svoj default za ikonice i relacijska polja.
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    /* Opći redovi neka se skupljaju prema sadržaju */
+    .change-form .form-row,
+    .change-form .form-row > div,
+    .change-form .form-row .flex-container,
+    .change-form .form-row .fieldBox {
+        min-height: 0 !important;
+        height: auto !important;
+    }
+
+    .change-form .form-row {
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+
+    /* Label direktno iznad kontrole */
+    .change-form .form-row label,
+    .change-form .form-row .fieldBox > label,
+    .change-form .form-row .flex-container > label {
+        display: block !important;
+        float: none !important;
+        width: auto !important;
+        height: auto !important;
+        min-height: 0 !important;
+        flex: 0 0 auto !important;
+        margin: 0 0 6px 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Standardna polja koriste dostupnu širinu */
+    .change-form .form-row input[type="text"],
+    .change-form .form-row input[type="number"],
+    .change-form .form-row input[type="email"],
+    .change-form .form-row input[type="url"],
+    .change-form .form-row textarea {
+        width: 100% !important;
+        max-width: none !important;
+        box-sizing: border-box;
+    }
+
+    .change-form .form-row .flex-container {
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+    }
+
+    /*
+     * Klasifikacija: na mobitelu svaki izbor ide u svoj red.
+     * Ovo je namjerno specifično samo za naša tri polja.
+     */
+    .form-row.field-macro_type.field-tradition.field-monument_type
+    > .flex-container.form-multiline {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+
+    .form-row.field-macro_type.field-tradition.field-monument_type
+    > .flex-container.form-multiline > div {
+        width: 100%;
+        min-height: 0 !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .form-row.field-macro_type.field-tradition.field-monument_type
+    .fieldBox {
+        min-height: 0 !important;
+        height: auto !important;
+    }
+
+    /*
+     * Motivi: umjesto dvije kolone, liste idu jedna ispod druge.
+     */
+    .field-motifs .selector {
+        display: block;
+    }
+
+    .field-motifs .selector-available,
+    .field-motifs .selector-chosen {
+        width: 100%;
+    }
+
+    .field-motifs .selector-chooser {
+        margin: 8px auto;
+    }
+
+    .field-motifs .selector h2 {
+        white-space: normal;
+    }
+}
+
+
+/* =========================================================
+   4. MOBILE - RELACIJSKA POLJA BEZ ADMIN IKONICA
+   Na malom ekranu prioritet je puno, čitljivo polje.
+   Add/change/delete/view akcije ostaju dostupne kroz admin
+   stranice, ali se ne guraju uz select na telefonu.
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .change-form .related-widget-wrapper {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .change-form .related-widget-wrapper > .select2-container,
+    .change-form .related-widget-wrapper > select:not(.select2-hidden-accessible) {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .change-form .related-widget-wrapper-link {
+        display: none !important;
+    }
+
+    /* Klasifikacijska polja također koriste punu širinu */
+    .form-row.field-macro_type.field-tradition.field-monument_type
+    .related-widget-wrapper {
+        display: block !important;
+    }
+
+    .form-row.field-macro_type.field-tradition.field-monument_type
+    .related-widget-wrapper .select2-container {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+
+/* =========================================================
+   DJANGO MOBILE 767px FIX
+   Django koristi calc(100vw - 30px), što prelazi stvarnu
+   širinu Wiki Greblje admin kartice.
+   ========================================================= */
+
+@media (max-width: 767px) {
+
+    .change-form .aligned .form-row,
+    .change-form .aligned .form-row > div {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+}
+
+/* =========================================================
+   WIKI GREBLJE - FIX ZA 801–900px
+   Desktop flex layout u ovom rasponu ostavlja premalo
+   prostora kontrolama, pa polja kolabiraju.
+   ========================================================= */
+
+@media (min-width: 801px) and (max-width: 900px) {
+
+    .change-form .form-row > div {
+        display: block !important;
+    }
+
+    .change-form .form-row label {
+        display: block !important;
+        width: auto !important;
+        flex: none !important;
+        padding-top: 0 !important;
+        margin-bottom: 6px !important;
+    }
+
+    .change-form .form-row input[type="text"],
+    .change-form .form-row input[type="email"],
+    .change-form .form-row input[type="url"],
+    .change-form .form-row input[type="number"],
+    .change-form .form-row select,
+    .change-form .form-row textarea,
+    .change-form .related-widget-wrapper,
+    .change-form .select2-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+}
+

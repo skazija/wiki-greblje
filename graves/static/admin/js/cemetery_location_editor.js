@@ -58,15 +58,29 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const map = L.map("cemetery-map").setView([lat, lon], 16);
+    const maptilerKey = boundaryField.dataset.maptilerKey;
+
+    if (!maptilerKey) {
+        console.error("MapTiler API key nije dostupan.");
+        return;
+    }
 
     L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        { 
+        `https://api.maptiler.com/maps/streets-v4/256/{z}/{x}/{y}.png?key=${maptilerKey}`,
+        {
+            minZoom: 1,
             maxNativeZoom: 19,
-            maxZoom: 22 
+            maxZoom: 22,
+            attribution:
+                '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> ' +
+                '<a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
+            crossOrigin: true,
+            updateWhenIdle: true,
+            keepBuffer: 0,
+            detectRetina: false,
         }
+        
     ).addTo(map);
-
     let marker = L.marker([lat, lon], {
         draggable: true
     }).addTo(map);

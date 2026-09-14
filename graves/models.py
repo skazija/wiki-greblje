@@ -198,6 +198,414 @@ class CemeteryPhoto(models.Model):
 
 
 
+# ============================================================
+# WIKI GREBLJE - SIFRARNIK TIPOVA SPOMENIKA V1.0
+# ============================================================
+
+
+class MonumentMacroType(models.Model):
+    """
+    Najvisi nivo klasifikacije spomenika.
+    Primjeri: nadgrobnik, grobnica/funerarna arhitektura, memorijal.
+    """
+
+    code = models.CharField(
+        max_length=20,
+        unique=True,
+        verbose_name="Kod",
+    )
+
+    name = models.CharField(
+        max_length=150,
+        verbose_name="Naziv",
+    )
+
+    description = models.TextField(
+        blank=True,
+        verbose_name="Opis",
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Aktivan",
+    )
+
+    sort_order = models.PositiveIntegerField(
+        default=0,
+        verbose_name="Redoslijed",
+    )
+
+    class Meta:
+        ordering = ["sort_order", "code"]
+        verbose_name = "Makro-tip spomenika"
+        verbose_name_plural = "Makro-tipovi spomenika"
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+
+class MonumentTradition(models.Model):
+    """
+    Tradicija ili historijski/kulturni kontekst spomenika.
+    Ne predstavlja fizicki oblik spomenika.
+    """
+
+    code = models.CharField(
+        max_length=20,
+        unique=True,
+        verbose_name="Kod",
+    )
+
+    name = models.CharField(
+        max_length=150,
+        verbose_name="Naziv",
+    )
+
+    description = models.TextField(
+        blank=True,
+        verbose_name="Opis",
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Aktivna",
+    )
+
+    sort_order = models.PositiveIntegerField(
+        default=0,
+        verbose_name="Redoslijed",
+    )
+
+    class Meta:
+        ordering = ["sort_order", "code"]
+        verbose_name = "Tradicija spomenika"
+        verbose_name_plural = "Tradicije spomenika"
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+
+class MonumentType(models.Model):
+    """
+    Hijerarhijski sifrarnik fizickih i morfoloskih tipova.
+
+    Primjer:
+        Nisan
+          -> Nisan sa turbanom
+               -> Aginski turban
+
+    Parent omogucava proizvoljnu dubinu bez promjene strukture baze.
+    """
+
+    LEVEL_PHYSICAL = "physical"
+    LEVEL_MORPHOLOGICAL = "morphological"
+    LEVEL_DETAILED = "detailed"
+    LEVEL_FUNCTIONAL = "functional"
+    LEVEL_LOCAL = "local"
+    LEVEL_RESERVE = "reserve"
+    LEVEL_EXPERT = "expert"
+
+    LEVEL_CHOICES = [
+        (LEVEL_PHYSICAL, "Fizički tip"),
+        (LEVEL_MORPHOLOGICAL, "Morfološki podtip"),
+        (LEVEL_DETAILED, "Detaljni morfološki podtip"),
+        (LEVEL_FUNCTIONAL, "Funkcionalni tip"),
+        (LEVEL_LOCAL, "Detaljni / lokalni tip"),
+        (LEVEL_RESERVE, "Rezervni kod"),
+        (LEVEL_EXPERT, "Funkcionalna / stručna oznaka"),
+    ]
+
+    code = models.CharField(
+        max_length=40,
+        unique=True,
+        verbose_name="Kod",
+    )
+
+    name = models.CharField(
+        max_length=200,
+        verbose_name="Naziv",
+    )
+
+    parent = models.ForeignKey(
+        "self",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="children",
+        verbose_name="Nadređeni tip",
+    )
+
+    level = models.CharField(
+        max_length=20,
+        choices=LEVEL_CHOICES,
+        default=LEVEL_PHYSICAL,
+        verbose_name="Nivo klasifikacije",
+    )
+
+    description = models.TextField(
+        blank=True,
+        verbose_name="Opis",
+    )
+
+    identification_notes = models.TextField(
+        blank=True,
+        verbose_name="Kako prepoznati",
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Aktivan",
+    )
+
+    sort_order = models.PositiveIntegerField(
+        default=0,
+        verbose_name="Redoslijed",
+    )
+
+    class Meta:
+        ordering = ["sort_order", "code"]
+        verbose_name = "Tip spomenika"
+        verbose_name_plural = "Tipovi spomenika"
+
+    @property
+    def full_path(self):
+        parts = [self.name]
+        parent = self.parent
+
+        while parent:
+            parts.insert(0, parent.name)
+            parent = parent.parent
+
+        return " → ".join(parts)
+    
+    def __str__(self):
+        return f"{self.code} - {self.full_path}"
+
+
+class Motif(models.Model):
+    """
+    Sifrarnik ornamentike, simbola i vidljivih motiva.
+
+    Motiv opisuje ono sto je evidentirano na spomeniku.
+    Interpretacija znacenja motiva nije dio ovog modela.
+    """
+
+    code = models.CharField(
+        max_length=40,
+        unique=True,
+        verbose_name="Kod",
+    )
+
+    name = models.CharField(
+        max_length=150,
+        verbose_name="Naziv",
+    )
+
+    category = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name="Kategorija",
+    )
+
+    description = models.TextField(
+        blank=True,
+        verbose_name="Opis",
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Aktivan",
+    )
+
+    sort_order = models.PositiveIntegerField(
+        default=0,
+        verbose_name="Redoslijed",
+    )
+
+    class Meta:
+        ordering = ["sort_order", "code"]
+        verbose_name = "Motiv / ornament"
+        verbose_name_plural = "Motivi / ornamenti"
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+    
+# ============================================================
+# WIKI GREBLJE - STANJE I DEGRADACIJA SPOMENIKA V1.0
+# ============================================================
+
+
+class MonumentCondition(models.Model):
+    """
+    Opća ocjena stanja očuvanosti spomenika.
+
+    Ovo je praktična Wiki Greblje klasifikacija, a ne
+    detaljna konzervatorska dijagnoza.
+    """
+
+    code = models.CharField(
+        max_length=20,
+        unique=True,
+        verbose_name="Kod",
+    )
+
+    name = models.CharField(
+        max_length=150,
+        verbose_name="Naziv",
+    )
+
+    public_label = models.CharField(
+        max_length=150,
+        blank=True,
+        verbose_name="Naziv za javni unos",
+    )
+
+    description = models.TextField(
+        blank=True,
+        verbose_name="Opis",
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Aktivno",
+    )
+
+    sort_order = models.PositiveIntegerField(
+        default=0,
+        verbose_name="Redoslijed",
+    )
+
+    class Meta:
+        ordering = ["sort_order", "code"]
+        verbose_name = "Stanje spomenika"
+        verbose_name_plural = "Stanja spomenika"
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+
+class DeteriorationPattern(models.Model):
+    """
+    Kontrolisani šifrarnik vidljivih pojava degradacije.
+
+    Stručni nivo može pratiti ICOMOS-ISCS terminologiju,
+    dok admin_label i public_label omogućavaju jednostavniji
+    prikaz bez izlaganja korisnika stručnoj terminologiji.
+    """
+
+    GROUP_CRACK = "crack"
+    GROUP_DETACHMENT = "detachment"
+    GROUP_LOSS = "loss"
+    GROUP_DISCOLORATION = "discoloration"
+    GROUP_BIOLOGICAL = "biological"
+
+    GROUP_CHOICES = [
+        (GROUP_CRACK, "Pukotine i deformacije"),
+        (GROUP_DETACHMENT, "Odvajanje materijala"),
+        (GROUP_LOSS, "Gubitak materijala"),
+        (GROUP_DISCOLORATION, "Promjene boje i naslage"),
+        (GROUP_BIOLOGICAL, "Biološka kolonizacija"),
+    ]
+
+    code = models.CharField(
+        max_length=20,
+        unique=True,
+        verbose_name="Kod",
+    )
+
+    name = models.CharField(
+        max_length=150,
+        verbose_name="Stručni naziv",
+    )
+
+    group = models.CharField(
+        max_length=20,
+        choices=GROUP_CHOICES,
+        verbose_name="Grupa",
+    )
+
+    admin_label = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name="Prikaz administratoru",
+    )
+
+    public_label = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name="Prikaz korisniku",
+    )
+
+    description = models.TextField(
+        blank=True,
+        verbose_name="Opis",
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Aktivno",
+    )
+
+    sort_order = models.PositiveIntegerField(
+        default=0,
+        verbose_name="Redoslijed",
+    )
+
+    class Meta:
+        ordering = ["sort_order", "code"]
+        verbose_name = "Pojava degradacije"
+        verbose_name_plural = "Pojave degradacije"
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+
+class MonumentPosition(models.Model):
+    """
+    Položaj spomenika evidentira se odvojeno od njegovog
+    fizičkog stanja i pojava degradacije.
+    """
+
+    code = models.CharField(
+        max_length=20,
+        unique=True,
+        verbose_name="Kod",
+    )
+
+    name = models.CharField(
+        max_length=150,
+        verbose_name="Naziv",
+    )
+
+    public_label = models.CharField(
+        max_length=150,
+        blank=True,
+        verbose_name="Naziv za javni unos",
+    )
+
+    description = models.TextField(
+        blank=True,
+        verbose_name="Opis",
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Aktivno",
+    )
+
+    sort_order = models.PositiveIntegerField(
+        default=0,
+        verbose_name="Redoslijed",
+    )
+
+    class Meta:
+        ordering = ["sort_order", "code"]
+        verbose_name = "Položaj spomenika"
+        verbose_name_plural = "Položaji spomenika"
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
 class Grave(models.Model):
     cemetery = models.ForeignKey(
         Cemetery,
@@ -205,6 +613,44 @@ class Grave(models.Model):
         related_name="graves"
     )
 
+    # ========================================================
+    # KLASIFIKACIJA SPOMENIKA - WIKI GREBLJE STANDARD V1.0
+    # ========================================================
+
+    macro_type = models.ForeignKey(
+        MonumentMacroType,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="graves",
+        verbose_name="Makro-tip",
+    )
+
+    tradition = models.ForeignKey(
+        MonumentTradition,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="graves",
+        verbose_name="Tradicija / kontekst",
+    )
+
+    monument_type = models.ForeignKey(
+        MonumentType,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="graves",
+        verbose_name="Tip spomenika",
+    )
+
+    motifs = models.ManyToManyField(
+        Motif,
+        blank=True,
+        related_name="graves",
+        verbose_name="Motivi / ornamentika",
+    )
+    
     title = models.CharField(max_length=255, blank=True)
     inscription = models.TextField(blank=True)
 
@@ -216,6 +662,44 @@ class Grave(models.Model):
         help_text="Example: good, damaged, unreadable"
     )
 
+    # ========================================================
+    # STANJE SPOMENIKA - WIKI GREBLJE CONDITION STANDARD V1.0
+    # ========================================================
+
+    condition_classification = models.ForeignKey(
+        MonumentCondition,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="graves",
+        verbose_name="Opće stanje spomenika",
+    )
+
+    deterioration_patterns = models.ManyToManyField(
+        DeteriorationPattern,
+        blank=True,
+        related_name="graves",
+        verbose_name="Uočene pojave degradacije",
+    )
+
+    monument_position = models.ForeignKey(
+        MonumentPosition,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="graves",
+        verbose_name="Položaj spomenika",
+    )
+
+    condition_notes = models.TextField(
+        blank=True,
+        verbose_name="Opis stanja",
+        help_text=(
+            "Kratak opis vidljivog stanja, oštećenja i drugih "
+            "zapažanja koja nisu dovoljno obuhvaćena šifrarnikom."
+        ),
+    )
+    
     STATUS_PENDING = "pending"
     STATUS_APPROVED = "approved"
     STATUS_REJECTED = "rejected"

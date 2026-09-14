@@ -1571,3 +1571,74 @@ div.breadcrumbs a:hover {
     display: none !important;
 }
 
+/* =========================================================
+   WIKI GREBLJE - GLOBALNI MOBILE ADMIN FIX
+   Primjenjuje se na sve Django admin change forme.
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    /* Desktop flex layout se na užim ekranima gasi ranije. */
+    .change-form .form-row > div {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Redovi ne smiju zadržavati desktop visinu. */
+    .change-form .form-row,
+    .change-form .form-row .flex-container,
+    .change-form .form-row .fieldBox {
+        height: auto !important;
+        min-height: 0 !important;
+    }
+
+    /* Labela direktno iznad kontrole. */
+    .change-form .form-row label,
+    .change-form .form-row .fieldBox > label,
+    .change-form .form-row .flex-container > label {
+        display: block !important;
+        float: none !important;
+        width: auto !important;
+        height: auto !important;
+        min-height: 0 !important;
+
+        flex: none !important;
+
+        padding: 0 !important;
+        margin: 0 0 6px 0 !important;
+    }
+
+    /* Standardna polja koriste cijelu raspoloživu širinu. */
+    .change-form .form-row input[type="text"],
+    .change-form .form-row input[type="email"],
+    .change-form .form-row input[type="url"],
+    .change-form .form-row input[type="number"],
+    .change-form .form-row select,
+    .change-form .form-row textarea {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .change-form .form-row .flex-container {
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+    }
+}
+
+
+/* Django na <=767px koristi calc(100vw - 30px).
+   U našem admin layoutu to izlazi iz stvarne širine kartice. */
+@media (max-width: 767px) {
+
+    .change-form .aligned .form-row,
+    .change-form .aligned .form-row > div {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+}

@@ -31,10 +31,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const map = L.map("custom-grave-map").setView([startLat, startLon], 18);
     const cemeterySelect = document.getElementById("id_cemetery");
     const osm = L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
-            maxZoom: 22,
-            attribution: "© OpenStreetMap"
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
         }
     );
 
