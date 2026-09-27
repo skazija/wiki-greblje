@@ -270,6 +270,7 @@ def search(request):
             "graves": graves_page,
             "persons": persons_page,
             "map_graves": map_graves,
+            "maptiler_api_key": settings.MAPTILER_API_KEY,
         },
     )
 
@@ -342,6 +343,7 @@ def add_grave(request):
 
     return render(request, "graves/add_grave.html", {
         "form": form,
+        "maptiler_api_key": settings.MAPTILER_API_KEY,
     })
 
 @login_required
@@ -788,6 +790,7 @@ def suggest_grave_location(request, pk):
         {
             "form": form,
             "grave": grave,
+            "maptiler_api_key": settings.MAPTILER_API_KEY,
         },
     )
 

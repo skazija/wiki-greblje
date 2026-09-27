@@ -775,12 +775,18 @@
     const useOcrResultButton = document.getElementById("use-ocr-result");
     const inscriptionInput = document.getElementById("{{ form.inscription.id_for_label }}");
 
+    const maptilerKey = "{{ maptiler_api_key|escapejs }}";
+
     L.tileLayer(
-        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        `https://api.maptiler.com/maps/streets-v4/256/{z}/{x}/{y}.png?key=${maptilerKey}`,
         {
+            minZoom: 1,
             maxNativeZoom: 19,
             maxZoom: 22,
-            attribution: "&copy; OpenStreetMap contributors"
+            crossOrigin: true,
+            attribution:
+                '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> ' +
+                '<a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
         }
     ).addTo(map);
 
