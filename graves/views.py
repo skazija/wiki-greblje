@@ -331,7 +331,8 @@ def add_grave(request):
     if request.method == "POST":
         form = PublicGraveForm(
             request.POST,
-            request.FILES
+            request.FILES,
+            user=request.user,
         )
 
         if form.is_valid():
@@ -339,7 +340,9 @@ def add_grave(request):
 
             return redirect("graves:grave_detail",pk=grave.pk,)
     else:
-        form = PublicGraveForm()
+        form = PublicGraveForm(
+            user=request.user,
+        )
 
     return render(request, "graves/add_grave.html", {
         "form": form,

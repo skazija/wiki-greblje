@@ -92,6 +92,45 @@ class PublicGraveForm(forms.ModelForm):
         widget=forms.Textarea(attrs={"rows": 3})
     )
 
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.user = user
+
+        is_editor = bool(
+            user
+            and user.is_authenticated
+            and user.groups.filter(name="Urednici").exists()
+        )
+
+        is_expert = bool(
+            user
+            and user.is_authenticated
+            and user.groups.filter(name="Stručnjaci").exists()
+        )
+
+        basic_classification_fields = (
+            "macro_type",
+            "tradition",
+            "monument_type",
+            "condition_classification",
+            "monument_position",
+            "condition_notes",
+        )
+
+        expert_classification_fields = (
+            "motifs",
+            "deterioration_patterns",
+        )
+
+        if not is_editor:
+            for field_name in basic_classification_fields:
+                self.fields.pop(field_name, None)
+
+        if not (is_editor and is_expert):
+            for field_name in expert_classification_fields:
+                self.fields.pop(field_name, None)
+
     class Meta:
         model = Grave
         fields = [
@@ -100,6 +139,14 @@ class PublicGraveForm(forms.ModelForm):
             "inscription",
             "condition",
             "notes",
+            "macro_type",
+            "tradition",
+            "monument_type",
+            "motifs",
+            "condition_classification",
+            "deterioration_patterns",
+            "monument_position",
+            "condition_notes",
         ]
 
     def save(self, user=None, commit=True):

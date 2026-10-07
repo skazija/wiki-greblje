@@ -417,6 +417,48 @@ class GraveAdmin(GISModelAdmin):
         ),
     )
 
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = super().get_fieldsets(request, obj)
+
+        is_expert = request.user.groups.filter(
+            name="Stručnjaci"
+        ).exists()
+
+        if is_expert:
+            return fieldsets
+
+        filtered_fieldsets = []
+
+        for title, options in fieldsets:
+            options = options.copy()
+            fields = options.get("fields", ())
+
+            filtered_fields = []
+
+            for field in fields:
+                if isinstance(field, (list, tuple)):
+                    filtered_group = tuple(
+                        item
+                        for item in field
+                        if item not in (
+                            "motifs",
+                            "deterioration_patterns",
+                        )
+                    )
+
+                    if filtered_group:
+                        filtered_fields.append(filtered_group)
+
+                elif field not in (
+                    "motifs",
+                    "deterioration_patterns",
+                ):
+                    filtered_fields.append(field)
+
+            options["fields"] = tuple(filtered_fields)
+            filtered_fieldsets.append((title, options))
+
+        return tuple(filtered_fieldsets)
     def get_urls(self):
         urls = super().get_urls()
 

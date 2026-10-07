@@ -696,6 +696,122 @@
     </div>
 
 </section>
+
+{% if form.macro_type %}
+<section class="wg-card wg-card--spaced record-card">
+
+    <header class="wg-card__header">
+        <h2 class="wg-card__title">
+            <i class="bi bi-diagram-3"></i>
+            Klasifikacija spomenika
+        </h2>
+
+        <p class="wg-card__description">
+            Odaberite osnovne karakteristike spomenika prema
+            Wiki Greblje klasifikaciji.
+        </p>
+    </header>
+
+    <div class="record-card__body">
+
+        <div class="person-field">
+            <label for="{{ form.macro_type.id_for_label }}">
+                {{ form.macro_type.label }}
+            </label>
+            {{ form.macro_type }}
+            {{ form.macro_type.errors }}
+        </div>
+
+        <div class="person-field">
+            <label for="{{ form.tradition.id_for_label }}">
+                {{ form.tradition.label }}
+            </label>
+            {{ form.tradition }}
+            {{ form.tradition.errors }}
+        </div>
+
+        <div class="person-field">
+            <label for="{{ form.monument_type.id_for_label }}">
+                {{ form.monument_type.label }}
+            </label>
+            {{ form.monument_type }}
+            {{ form.monument_type.errors }}
+        </div>
+
+        <div class="person-field">
+            <label for="{{ form.condition_classification.id_for_label }}">
+                {{ form.condition_classification.label }}
+            </label>
+            {{ form.condition_classification }}
+            {{ form.condition_classification.errors }}
+        </div>
+
+        <div class="person-field">
+            <label for="{{ form.monument_position.id_for_label }}">
+                {{ form.monument_position.label }}
+            </label>
+            {{ form.monument_position }}
+            {{ form.monument_position.errors }}
+        </div>
+
+        <div class="person-field person-field--full">
+            <label for="{{ form.condition_notes.id_for_label }}">
+                {{ form.condition_notes.label }}
+            </label>
+            {{ form.condition_notes }}
+
+            {% if form.condition_notes.help_text %}
+                <span class="person-field__helper">
+                    {{ form.condition_notes.help_text }}
+                </span>
+            {% endif %}
+
+            {{ form.condition_notes.errors }}
+        </div>
+
+    </div>
+</section>
+{% endif %}
+
+
+{% if form.motifs %}
+<section class="wg-card wg-card--spaced record-card">
+
+    <header class="wg-card__header">
+        <h2 class="wg-card__title">
+            <i class="bi bi-search"></i>
+            Stručna klasifikacija
+        </h2>
+
+        <p class="wg-card__description">
+            Stručna obilježja spomenika dostupna su korisnicima
+            sa stručnom ulogom.
+        </p>
+    </header>
+
+    <div class="record-card__body">
+
+        <div class="person-field person-field--full">
+            <label for="{{ form.motifs.id_for_label }}">
+                {{ form.motifs.label }}
+            </label>
+            {{ form.motifs }}
+            {{ form.motifs.errors }}
+        </div>
+
+        <div class="person-field person-field--full">
+            <label for="{{ form.deterioration_patterns.id_for_label }}">
+                {{ form.deterioration_patterns.label }}
+            </label>
+            {{ form.deterioration_patterns }}
+            {{ form.deterioration_patterns.errors }}
+        </div>
+
+    </div>
+</section>
+{% endif %}
+
+
  <!-- ==========================================
      Submit card
 ========================================== -->
