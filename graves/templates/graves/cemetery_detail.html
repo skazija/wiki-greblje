@@ -536,8 +536,8 @@
                 {% if grave.location %}
 
                     const graveMarker{{ grave.id }} = L.marker([
-                        {{ grave.location.y }},
-                        {{ grave.location.x }}
+                        {{ grave.location.y|unlocalize}},
+                        {{ grave.location.x|unlocalize }}
                     ]).addTo(map);
 
                     graveMarker{{ grave.id }}.bindPopup(`
