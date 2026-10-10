@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.conf import settings
 
-from .forms import PublicGraveForm, PersonForm, EditSuggestionForm, PersonEditSuggestionForm, LocationSuggestionForm, CommentForm, ProblemReportForm
+from .forms import PublicGraveForm, PersonForm, EditSuggestionForm, PersonEditSuggestionForm, LocationSuggestionForm, CommentForm, ProblemReportForm, CemeteryProposalForm
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
@@ -26,6 +26,7 @@ from django.http import Http404
 from django.contrib.auth.models import User
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.measure import D
+from django.contrib.gis.geos import Point
 
 from django.contrib.admin.views.decorators import staff_member_required
 from .services.ocr.engine import recognize_inscription
@@ -37,6 +38,7 @@ from .models import Photo
 def cemetery_list(request):
     cemeteries = (
         Cemetery.objects
+        .filter(status=Cemetery.STATUS_APPROVED)
         .prefetch_related("photos")
         .order_by("name")
     )
@@ -47,7 +49,7 @@ def cemetery_list(request):
 
 
 def cemetery_detail(request, pk):
-    cemetery = get_object_or_404(Cemetery, pk=pk)
+    cemetery = get_object_or_404(Cemetery,pk=pk,status=Cemetery.STATUS_APPROVED,)
 
     graves = cemetery.graves.filter(
         status=Grave.STATUS_APPROVED
@@ -98,6 +100,15 @@ def grave_detail(request, pk):
 
     grave = get_object_or_404(Grave, pk=pk)
 
+    if grave.cemetery.status != Cemetery.STATUS_APPROVED:
+        if (
+            not request.user.is_authenticated
+            or (
+                request.user != grave.cemetery.created_by
+                and not request.user.has_perm("graves.change_cemetery")
+            )
+        ):
+            raise Http404()
     if grave.status != Grave.STATUS_APPROVED:
 
         if request.user != grave.created_by and not request.user.is_staff:
@@ -213,6 +224,7 @@ def search(request):
                 Q(inscription__icontains=query) |
                 Q(cemetery__name__icontains=query),
                 status=Grave.STATUS_APPROVED,
+                cemetery__status=Cemetery.STATUS_APPROVED,
             )
             .select_related("cemetery")
             .order_by("id")
@@ -222,6 +234,7 @@ def search(request):
             Person.objects
             .filter(
                 grave__status=Grave.STATUS_APPROVED,
+                grave__cemetery__status=Cemetery.STATUS_APPROVED,
                 status=Person.STATUS_APPROVED,
             )
             .filter(
@@ -275,16 +288,16 @@ def search(request):
     )
 
 def home(request):
-    cemetery_count = Cemetery.objects.count()
-    grave_count = Grave.objects.filter(status=Grave.STATUS_APPROVED).count()
-    person_count = Person.objects.filter( status=Person.STATUS_APPROVED, grave__status=Grave.STATUS_APPROVED,).count()
-    photo_count = Photo.objects.filter(status=Photo.STATUS_APPROVED, grave__status=Grave.STATUS_APPROVED,).count()
+    cemetery_count = Cemetery.objects.filter(status=Cemetery.STATUS_APPROVED).count()
+    grave_count = Grave.objects.filter(status=Grave.STATUS_APPROVED,cemetery__status=Cemetery.STATUS_APPROVED,).count()
+    person_count = Person.objects.filter( status=Person.STATUS_APPROVED, grave__cemetery__status=Cemetery.STATUS_APPROVED, grave__status=Grave.STATUS_APPROVED,).count()
+    photo_count = Photo.objects.filter(status=Photo.STATUS_APPROVED, grave__cemetery__status=Cemetery.STATUS_APPROVED, grave__status=Grave.STATUS_APPROVED,).count()
     user_count = User.objects.count()
 
     latest_graves = (
         Grave.objects
         .filter(
-            status=Grave.STATUS_APPROVED
+            status=Grave.STATUS_APPROVED, cemetery__status=Cemetery.STATUS_APPROVED,
         )
         .prefetch_related(
             Prefetch(
@@ -311,6 +324,7 @@ def home(request):
     latest_photos = Photo.objects.filter(
         status=Photo.STATUS_APPROVED,
         grave__status=Grave.STATUS_APPROVED,
+        grave__cemetery__status=Cemetery.STATUS_APPROVED,
     ).select_related(
         "grave",
         "grave__cemetery"
@@ -325,6 +339,65 @@ def home(request):
         "latest_photos": latest_photos,
         "user_count": user_count,
     })
+
+@login_required
+def propose_cemetery(request):
+    if request.method == "POST":
+        form = CemeteryProposalForm(
+            request.POST,
+            request.FILES,
+        )
+
+        if form.is_valid():
+            cemetery = form.save(commit=False)
+
+            cemetery.created_by = request.user
+            cemetery.status = Cemetery.STATUS_PENDING
+
+            latitude = form.cleaned_data.get("latitude")
+            longitude = form.cleaned_data.get("longitude")
+
+            if latitude is not None and longitude is not None:
+                cemetery.latitude = latitude
+                cemetery.longitude = longitude
+                cemetery.location = Point(
+                    longitude,
+                    latitude,
+                    srid=4326,
+                )
+
+            cemetery.save()
+
+            for uploaded_photo in form.cleaned_data["photos"]:
+                CemeteryPhoto.objects.create(
+                    cemetery=cemetery,
+                    image=uploaded_photo,
+                    uploaded_by=request.user,
+                    status=CemeteryPhoto.STATUS_PENDING,
+                )
+
+            return redirect(
+                "graves:cemetery_proposal_success"
+            )
+
+    else:
+        form = CemeteryProposalForm()
+
+    return render(
+        request,
+        "graves/propose_cemetery.html",
+        {
+            "form": form,
+            "maptiler_api_key": settings.MAPTILER_API_KEY,
+        },
+    )
+
+@login_required
+def cemetery_proposal_success(request):
+    return render(
+        request,
+        "graves/cemetery_proposal_success.html",
+    )
 
 @login_required
 def add_grave(request):
@@ -405,7 +478,7 @@ def add_person(request, pk):
 @login_required
 def choose_grave_for_person(request):
 
-    cemeteries = Cemetery.objects.all().order_by("name")
+    cemeteries = Cemetery.objects.filter(status=Cemetery.STATUS_APPROVED).order_by("name")
 
     selected_cemetery_id = request.GET.get("cemetery")
     selected_grave_id = request.GET.get("grave")
@@ -415,6 +488,7 @@ def choose_grave_for_person(request):
     if selected_cemetery_id:
         graves = Grave.objects.filter(
             cemetery_id=selected_cemetery_id,
+            cemetery__status=Cemetery.STATUS_APPROVED,
             status=Grave.STATUS_APPROVED,
         ).order_by("title", "id")
 
@@ -423,6 +497,7 @@ def choose_grave_for_person(request):
             Grave,
             pk=selected_grave_id,
             status=Grave.STATUS_APPROVED,
+            cemetery__status=Cemetery.STATUS_APPROVED,
         )
 
         return redirect(
@@ -454,7 +529,7 @@ def my_graves(request):
     })
 
 def cemetery_location_api(request, pk):
-    cemetery = get_object_or_404(Cemetery, pk=pk)
+    cemetery = get_object_or_404(Cemetery,pk=pk,status=Cemetery.STATUS_APPROVED,)
 
     if not cemetery.location:
         return JsonResponse({})
@@ -861,20 +936,23 @@ def suggest_person_edit(request, pk):
 def statistics(request):
 
     stats = {
-        "cemetery_count": Cemetery.objects.count(),
+        "cemetery_count": Cemetery.objects.filter(status=Cemetery.STATUS_APPROVED).count(),
 
         "grave_count": Grave.objects.filter(
-            status=Grave.STATUS_APPROVED
+            status=Grave.STATUS_APPROVED,
+            cemetery__status=Cemetery.STATUS_APPROVED,
         ).count(),
 
         "person_count": Person.objects.filter(
             status=Person.STATUS_APPROVED,
             grave__status=Grave.STATUS_APPROVED,
+            grave__cemetery__status=Cemetery.STATUS_APPROVED,
         ).count(),
 
         "photo_count": Photo.objects.filter(
             status=Photo.STATUS_APPROVED,
             grave__status=Grave.STATUS_APPROVED,
+            grave__cemetery__status=Cemetery.STATUS_APPROVED,
         ).count(),
 
         "user_count": User.objects.count(),
@@ -915,6 +993,7 @@ def person_list(request):
             "grave__cemetery"
         ).filter(
             grave__status=Grave.STATUS_APPROVED,
+            grave__cemetery__status=Cemetery.STATUS_APPROVED,
             status=Person.STATUS_APPROVED,
         )
 
@@ -966,6 +1045,7 @@ def surname_list(request):
     surnames = (
         Person.objects
         .filter(grave__status=Grave.STATUS_APPROVED,
+            grave__cemetery__status=Cemetery.STATUS_APPROVED,
             status=Person.STATUS_APPROVED, 
             is_unknown=False,)
         .exclude(last_name="")
@@ -1018,6 +1098,7 @@ def surname_detail(request, last_name):
         .filter(
             last_name__iexact=last_name,
             grave__status=Grave.STATUS_APPROVED,
+            grave__cemetery__status=Cemetery.STATUS_APPROVED,
             status=Person.STATUS_APPROVED,
             is_unknown=False,
         )

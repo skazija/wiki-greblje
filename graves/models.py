@@ -10,6 +10,32 @@ from graves.services.image_processing import (create_archival_image, create_web_
 
 
 class Cemetery(models.Model):
+    STATUS_PENDING = "pending"
+    STATUS_APPROVED = "approved"
+    STATUS_REJECTED = "rejected"
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, "Čeka odobrenje"),
+        (STATUS_APPROVED, "Odobreno"),
+        (STATUS_REJECTED, "Odbijeno"),
+    ]
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_APPROVED,
+        db_index=True,
+        verbose_name="Status odobravanja",
+    )
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="proposed_cemeteries",
+        verbose_name="Predložio korisnik",
+    )
     name = models.CharField(max_length=255)
     city = models.CharField(max_length=100, blank=True)
     village = models.CharField(max_length=100, blank=True)
@@ -80,14 +106,16 @@ class Cemetery(models.Model):
     
     @property
     def primary_photo(self):
-        primary = self.photos.filter(
-            is_primary=True
-        ).first()
+        approved_photos = self.photos.filter(
+            status=CemeteryPhoto.STATUS_APPROVED
+        )
+
+        primary = approved_photos.filter(is_primary=True).first()
 
         if primary:
             return primary
 
-        return self.photos.first()
+        return approved_photos.first()
     
     @property
     def fallback_icon(self):

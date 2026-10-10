@@ -268,6 +268,7 @@ class CemeteryPhotoInline(admin.TabularInline):
         "image_preview",
         "image",
         "caption",
+        "status",
         "is_primary",
     )
 
@@ -296,11 +297,16 @@ class CemeteryPhotoInline(admin.TabularInline):
 class CemeteryAdmin(admin.ModelAdmin):
     form = CemeteryAdminForm
     inlines = [CemeteryPhotoInline]
-    
+    actions = [
+        "approve_cemeteries",
+        "reject_cemeteries",
+    ]
     fieldsets = (
         ("Osnovni podaci", {
             "fields": (
                 "name",
+                "status",
+                "created_by",
                 "cemetery_type",
                 "city",
                 "village",
@@ -312,10 +318,35 @@ class CemeteryAdmin(admin.ModelAdmin):
         }),
 
     )
-    list_display = ("name", "cemetery_type", "city", "village", "created_at")
+    list_display = (
+        "name",
+        "status",
+        "cemetery_type",
+        "city",
+        "village",
+        "created_by",
+        "created_at",
+    )
     search_fields = ("name", "city", "village")
-    list_filter = ("cemetery_type",)
+    list_filter = ("status","cemetery_type",)
     
+    @admin.action(
+        description="Odobri odabrana groblja",
+        permissions=["change"],
+    )
+    def approve_cemeteries(self, request, queryset):
+        queryset.update(
+            status=Cemetery.STATUS_APPROVED
+        )
+
+    @admin.action(
+        description="Odbij odabrana groblja",
+        permissions=["change"],
+    )
+    def reject_cemeteries(self, request, queryset):
+        queryset.update(
+            status=Cemetery.STATUS_REJECTED
+        )
 class PersonInline(admin.StackedInline):
     model = Person
     extra = 0

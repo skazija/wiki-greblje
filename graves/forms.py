@@ -1,7 +1,8 @@
 from django import forms
+from django.conf import settings
 from django.contrib.gis.geos import Point
 
-from .models import Grave, Photo, Person, EditSuggestion, PersonEditSuggestion, Comment, ProblemReport, LocationSuggestion
+from .models import Grave, Photo, Person, EditSuggestion, PersonEditSuggestion, Comment, ProblemReport, LocationSuggestion, Cemetery
 
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
@@ -96,6 +97,11 @@ class PublicGraveForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         self.user = user
+        # Samo odobrena groblja mogu se birati
+        # prilikom javnog predlaganja groba.
+        self.fields["cemetery"].queryset = Cemetery.objects.filter(
+            status=Cemetery.STATUS_APPROVED
+        ).order_by("name")
 
         is_editor = bool(
             user
@@ -512,3 +518,63 @@ class ProblemReportForm(forms.ModelForm):
             "problem_type": "Vrsta problema",
             "description": "Opis problema",
         }
+
+class CemeteryProposalForm(forms.ModelForm):
+    latitude = forms.FloatField(
+        required=False,
+        label="Geografska širina",
+        widget=forms.HiddenInput(),
+    )
+
+    longitude = forms.FloatField(
+        required=False,
+        label="Geografska dužina",
+        widget=forms.HiddenInput(),
+    )
+
+    photos = MultipleFileField(
+        required=False,
+        label="Fotografije groblja",
+        widget=MultipleFileInput(attrs={
+            "accept": "image/*",
+        }),
+    )
+
+    class Meta:
+        model = Cemetery
+        fields = [
+            "name",
+            "cemetery_type",
+            "city",
+            "village",
+            "description",
+        ]
+        labels = {
+            "name": "Naziv groblja",
+            "cemetery_type": "Vrsta groblja",
+            "city": "Grad",
+            "village": "Naselje / selo",
+            "description": "Opis groblja",
+        }
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 4}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["latitude"].widget.attrs["data-maptiler-key"] = (
+            settings.MAPTILER_API_KEY
+        )
+    def clean(self):
+        cleaned_data = super().clean()
+
+        latitude = cleaned_data.get("latitude")
+        longitude = cleaned_data.get("longitude")
+
+        if (latitude is None) != (longitude is None):
+            raise forms.ValidationError(
+                "Potrebno je unijeti obje koordinate ili nijednu."
+            )
+
+        return cleaned_data

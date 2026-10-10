@@ -530,3 +530,126 @@
 
     box-shadow: 0 0 0 .15rem rgba(59, 114, 88, .10);
 }
+
+/* =========================================
+   PREDLAGANJE NOVOG GROBLJA
+   ========================================= */
+
+.cemetery-proposal {
+    max-width: 1100px;
+}
+
+.cemetery-proposal .wg-page-header {
+    margin-bottom: 1.5rem;
+}
+
+.cemetery-proposal-form {
+    border: 1px solid #e2e9e4;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.cemetery-proposal-form .card-body {
+    padding: 2rem !important;
+}
+
+.cemetery-proposal-form .form-label {
+    display: block;
+    margin-bottom: 0.45rem;
+    color: #244d3c;
+    font-weight: 600;
+}
+
+.cemetery-proposal-form input[type="text"],
+.cemetery-proposal-form input[type="number"],
+.cemetery-proposal-form select,
+.cemetery-proposal-form textarea,
+.cemetery-proposal-form input[type="file"] {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid #cfdcd4;
+    border-radius: 9px;
+    background: #fff;
+    color: #263b31;
+    font-size: 0.95rem;
+}
+
+.cemetery-proposal-form textarea {
+    min-height: 125px;
+    resize: vertical;
+}
+
+.cemetery-proposal-form input:focus,
+.cemetery-proposal-form select:focus,
+.cemetery-proposal-form textarea:focus {
+    outline: none;
+    border-color: #277453;
+    box-shadow: 0 0 0 3px rgba(39, 116, 83, 0.12);
+}
+
+.cemetery-proposal-map {
+    width: 100%;
+    height: 420px;
+    border: 1px solid #d6e2da;
+    border-radius: 12px;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.cemetery-proposal-form h5 {
+    color: #204b38;
+    font-weight: 700;
+}
+
+.cemetery-proposal-form .btn-primary {
+    background: #246448;
+    border-color: #246448;
+    padding: 0.7rem 1.3rem;
+    border-radius: 9px;
+    font-weight: 600;
+}
+
+.cemetery-proposal-form .btn-primary:hover {
+    background: #194c36;
+    border-color: #194c36;
+}
+
+.cemetery-proposal-form .btn-outline-secondary {
+    padding: 0.7rem 1.3rem;
+    border-radius: 9px;
+}
+
+@media (max-width: 767px) {
+    .cemetery-proposal-form .card-body {
+        padding: 1.2rem !important;
+    }
+
+    .cemetery-proposal-map {
+        height: 320px;
+    }
+
+    .cemetery-proposal-form .d-flex.gap-2 {
+        flex-wrap: wrap;
+    }
+}
+
+/* Zelene tipke za predlaganje groblja */
+.btn-cemetery-green {
+    background-color: #246448;
+    border: 1px solid #246448;
+    color: #ffffff;
+}
+
+.btn-cemetery-green:hover,
+.btn-cemetery-green:focus {
+    background-color: #194c36;
+    border-color: #194c36;
+    color: #ffffff;
+}
+
+.btn-cemetery-green:focus-visible {
+    box-shadow: 0 0 0 0.25rem rgba(36, 100, 72, 0.25);
+}

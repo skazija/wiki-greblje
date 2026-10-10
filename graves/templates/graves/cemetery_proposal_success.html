@@ -1,0 +1,27 @@
+{% extends "graves/base.html" %}
+
+{% block title %}Prijedlog poslan - Wiki Greblje{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-sm mx-auto" style="max-width: 650px;">
+        <div class="card-body text-center p-5">
+            <i class="bi bi-check-circle text-success"
+               style="font-size: 3rem;"></i>
+
+            <h2 class="mt-3">Prijedlog je uspješno poslan!</h2>
+
+            <p class="text-muted mt-3">
+                Hvala na doprinosu Wiki Greblju.
+                Vaš prijedlog novog groblja čeka pregled
+                i odobrenje urednika.
+            </p>
+
+            <a href="{% url 'graves:cemetery_list' %}"
+               class="btn btn-cemetery-green mt-3">
+                Nazad na groblja
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
