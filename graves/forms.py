@@ -225,12 +225,20 @@ class PublicGraveForm(forms.ModelForm):
                 last_name = ""
 
             is_unknown = not first_name and not last_name
-
+            has_person_data = any([
+                first_name,
+                last_name,
+                self.cleaned_data.get("birth_year") is not None,
+                self.cleaned_data.get("death_year") is not None,
+                self.cleaned_data.get("person_gender"),
+                self.cleaned_data.get("person_photo"),
+                (self.cleaned_data.get("person_notes") or "").strip(),
+            ])
             if not grave.title and (first_name or last_name):
                 grave.title = f"{first_name} {last_name}".strip()
                 grave.save(update_fields=["title"])
 
-            if first_name or last_name or is_unknown:
+            if has_person_data:
                 Person.objects.create(
                     grave=grave,
                     first_name=first_name,
