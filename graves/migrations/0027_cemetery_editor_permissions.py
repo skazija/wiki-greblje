@@ -12,18 +12,22 @@ def grant_editor_permissions(apps, schema_editor):
         name="Urednici"
     )
 
-    content_type = ContentType.objects.using(db_alias).get(
+    content_type, _ = ContentType.objects.using(db_alias).get_or_create(
         app_label="graves",
         model="cemetery",
     )
 
-    permissions = Permission.objects.using(db_alias).filter(
-        content_type=content_type,
-        codename__in=[
-            "view_cemetery",
-            "change_cemetery",
-        ],
-    )
+    permissions = []
+    for codename, name in [
+        ("view_cemetery", "Can view cemetery"),
+        ("change_cemetery", "Can change cemetery"),
+    ]:
+        permission, _ = Permission.objects.using(db_alias).get_or_create(
+            content_type=content_type,
+            codename=codename,
+            defaults={"name": name},
+        )
+        permissions.append(permission)
 
     group.permissions.add(*permissions)
 

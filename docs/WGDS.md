@@ -160,3 +160,7 @@ Occupation
 Awards
 
 Documents
+
+## Napomena o statusu — oktobar 2026.
+
+Dokumentacija ove komponente ostaje referentna specifikacija. Status **In Development** nije automatski promijenjen u **Completed**, jer potpuna vizuelna/verifikacijska potvrda nije zabilježena. Isto važi za pojedinačni dokument `WGDS/WG-PERSON-001.md`.

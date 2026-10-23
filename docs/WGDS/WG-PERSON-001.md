@@ -160,3 +160,7 @@ Occupation
 Awards
 
 Documents
+
+## Status provjere — 14.10.2026.
+
+Komponenta ostaje **In Development**. Potrebno je potvrditi da stvarni prikaz u aplikaciji odgovara svim navedenim stanjima (originalna fotografija, heritage portret, bez fotografije, bez bilješki) i responsive pravilima.

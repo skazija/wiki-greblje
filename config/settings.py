@@ -86,6 +86,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+TEST_DB_NAME = os.environ.get("TEST_DB_NAME", "test_wiki_groblje").strip()
+if not TEST_DB_NAME.lower().startswith("test_"):
+    raise ValueError("TEST_DB_NAME must start with 'test_' to protect non-test databases.")
+if TEST_DB_NAME == os.environ.get("DB_NAME"):
+    raise ValueError("TEST_DB_NAME must differ from DB_NAME.")
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
@@ -94,6 +100,9 @@ DATABASES = {
         'PASSWORD': os.environ.get("DB_PASSWORD"),
         'HOST': os.environ.get("DB_HOST", "localhost"),
         'PORT': os.environ.get("DB_PORT", "5432"),
+        'TEST': {
+            'NAME': TEST_DB_NAME,
+        },
     }
 }
 

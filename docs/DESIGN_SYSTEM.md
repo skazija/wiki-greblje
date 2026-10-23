@@ -106,3 +106,13 @@ Sprint 3.1
 □ Location Card
 
 □ Login Card
+
+## Status dopuna — oktobar 2026.
+
+- `Cemetery Proposal Form`: implementiran javni obrazac za prijavljene korisnike, sa Leaflet/MapTiler mapom, opcionalnim koordinatama i uploadom fotografija.
+- `Cemetery List`: dodano zeleno dugme za prijedlog novog groblja.
+- `Cemetery Detail` i liste: odobreni zapisi i fotografije; statusi moderacije ne izlaze u javni prikaz.
+- `Grave Entry`: jedinstveni obrazac, sa sekcijama za fotografije, osobe i lokaciju; polje groblja ograničeno na odobrene zapise.
+- `WG-PERSON-001`: specifikacija ostaje označena **In Development** dok se ne potvrdi potpuna implementacija i vizuelni pregled.
+
+Napomena: gore navedeno je status funkcionalnosti; ne znači da je svaka planirana WGDS komponenta završena.

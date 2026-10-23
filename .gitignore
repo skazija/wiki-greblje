@@ -22,3 +22,6 @@ media/
 .DS_Store
 Thumbs.db
 staticfiles/
+
+# Local safety archives and database exports
+backups/

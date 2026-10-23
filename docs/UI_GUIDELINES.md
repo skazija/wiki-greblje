@@ -100,3 +100,7 @@ Uvijek: > Za ovaj grob još nema fotografija. ili > Natpis još nije evidentiran
 ## Naš moto
 
 "Ne digitalizujemo podatke. Digitalizujemo sjećanja."
+
+## Prijedlozi i moderacija
+
+Obrasci za javne prijedloge trebaju imati jasno objašnjenje da se sadržaj pregledava prije objave i jednostavnu stranicu potvrde. Neodobreni sadržaj ne smije se pojavljivati na javnim karticama ili u galerijama. Dugmad zadržavaju diskretan tamnozeleni identitet.

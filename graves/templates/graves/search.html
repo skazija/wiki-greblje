@@ -54,7 +54,7 @@
         <input
             type="text"
             name="q"
-            value="{{ query }}"
+            value="{{ search_form.q.value|default_if_none:'' }}"
             class="form-control"
             placeholder="Ime, prezime, grob, natpis, groblje..."
         >
@@ -68,10 +68,248 @@
 
     </div>
 
+
+    <details
+        class="wg-search-filters"
+        {% if filters_active or search_form.errors %}open{% endif %}
+    >
+
+        <summary>
+            <span>
+                <i class="bi bi-funnel me-1"></i>
+                Napredni filteri
+            </span>
+
+            {% if active_filter_count %}
+                <span class="badge rounded-pill text-bg-light border">
+                    {{ active_filter_count }} aktivno
+                </span>
+            {% endif %}
+        </summary>
+
+
+        <div class="wg-search-filter-body">
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label
+                        class="form-label"
+                        for="{{ search_form.cemetery.id_for_label }}"
+                    >
+                        {{ search_form.cemetery.label }}
+                    </label>
+                    {{ search_form.cemetery }}
+                    {% for error in search_form.cemetery.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="col-md-6">
+                    <label
+                        class="form-label"
+                        for="{{ search_form.location.id_for_label }}"
+                    >
+                        {{ search_form.location.label }}
+                    </label>
+                    {{ search_form.location }}
+                    {% for error in search_form.location.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="col-12">
+                    <div class="wg-search-filter-group-label">
+                        Godine osobe
+                    </div>
+                </div>
+
+
+                <div class="col-sm-6 col-xl-3">
+                    <label
+                        class="form-label"
+                        for="{{ search_form.birth_year_from.id_for_label }}"
+                    >
+                        {{ search_form.birth_year_from.label }}
+                    </label>
+                    {{ search_form.birth_year_from }}
+                    {% for error in search_form.birth_year_from.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="col-sm-6 col-xl-3">
+                    <label
+                        class="form-label"
+                        for="{{ search_form.birth_year_to.id_for_label }}"
+                    >
+                        {{ search_form.birth_year_to.label }}
+                    </label>
+                    {{ search_form.birth_year_to }}
+                    {% for error in search_form.birth_year_to.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="col-sm-6 col-xl-3">
+                    <label
+                        class="form-label"
+                        for="{{ search_form.death_year_from.id_for_label }}"
+                    >
+                        {{ search_form.death_year_from.label }}
+                    </label>
+                    {{ search_form.death_year_from }}
+                    {% for error in search_form.death_year_from.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="col-sm-6 col-xl-3">
+                    <label
+                        class="form-label"
+                        for="{{ search_form.death_year_to.id_for_label }}"
+                    >
+                        {{ search_form.death_year_to.label }}
+                    </label>
+                    {{ search_form.death_year_to }}
+                    {% for error in search_form.death_year_to.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="col-12">
+                    <div class="wg-search-filter-group-label">
+                        Osnovna klasifikacija spomenika
+                    </div>
+                </div>
+
+
+                <div class="col-md-6 col-xl-4">
+                    <label
+                        class="form-label"
+                        for="{{ search_form.macro_type.id_for_label }}"
+                    >
+                        {{ search_form.macro_type.label }}
+                    </label>
+                    {{ search_form.macro_type }}
+                    {% for error in search_form.macro_type.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="col-md-6 col-xl-4">
+                    <label
+                        class="form-label"
+                        for="{{ search_form.tradition.id_for_label }}"
+                    >
+                        {{ search_form.tradition.label }}
+                    </label>
+                    {{ search_form.tradition }}
+                    {% for error in search_form.tradition.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="col-md-6 col-xl-4">
+                    <label
+                        class="form-label"
+                        for="{{ search_form.monument_type.id_for_label }}"
+                    >
+                        {{ search_form.monument_type.label }}
+                    </label>
+                    {{ search_form.monument_type }}
+                    {% for error in search_form.monument_type.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="col-md-6 col-xl-4">
+                    <label
+                        class="form-label"
+                        for="{{ search_form.condition_classification.id_for_label }}"
+                    >
+                        {{ search_form.condition_classification.label }}
+                    </label>
+                    {{ search_form.condition_classification }}
+                    {% for error in search_form.condition_classification.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="col-md-6 col-xl-4">
+                    <label
+                        class="form-label"
+                        for="{{ search_form.monument_position.id_for_label }}"
+                    >
+                        {{ search_form.monument_position.label }}
+                    </label>
+                    {{ search_form.monument_position }}
+                    {% for error in search_form.monument_position.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+
+            <div class="d-flex flex-wrap gap-2 mt-4">
+
+                <button
+                    type="submit"
+                    class="btn wg-search-button"
+                >
+                    Primijeni filtere
+                </button>
+
+                <a
+                    href="{% url 'graves:search' %}"
+                    class="btn wg-card-action"
+                >
+                    Očisti pretragu
+                </a>
+
+            </div>
+
+        </div>
+
+    </details>
+
 </form>
 
 
-{% if query %}
+{% if has_search %}
 
 
 <div class="card content-card mb-4">
@@ -93,11 +331,17 @@
             <div>
 
                 <h2 class="section-title mb-1">
-                    Rezultati za „{{ query }}“
+                    {% if query %}
+                        Rezultati za „{{ query }}“
+                    {% else %}
+                        Rezultati prema odabranim filterima
+                    {% endif %}
                 </h2>
 
                 <p class="text-muted mb-0">
                     Pronađeno
+                    <strong>{{ cemeteries.paginator.count }}</strong>
+                    groblja,
                     <strong>{{ persons.paginator.count }}</strong>
                     osoba i
                     <strong>{{ graves.paginator.count }}</strong>
@@ -123,9 +367,221 @@
     <div class="col-lg-5">
 
 
-        <!-- OSOBE -->
+        <!-- GROBLJA -->
 
         <div class="wg-search-result-section">
+
+            <div class="wg-home-section-heading">
+
+                <div>
+
+                    <span class="wg-home-section-kicker">
+                        Groblja
+                    </span>
+
+                    <h2>
+                        Pronađena groblja
+                    </h2>
+
+                </div>
+
+                <span class="badge rounded-pill text-bg-light border">
+                    {{ cemeteries.paginator.count }}
+                </span>
+
+            </div>
+
+
+            <div class="d-flex flex-column gap-3">
+
+                {% for cemetery in cemeteries %}
+
+                    <article class="card content-card mb-0">
+
+                        <div class="card-body">
+
+                            <div class="d-flex align-items-start gap-3">
+
+                                <div class="detail-icon">
+                                    <i class="bi bi-signpost-2"></i>
+                                </div>
+
+
+                                <div class="flex-grow-1">
+
+                                    <h3 class="section-title mb-1">
+
+                                        <a
+                                            href="{% url 'graves:cemetery_detail' cemetery.id %}"
+                                            class="text-decoration-none wg-search-result-title"
+                                        >
+                                            {{ cemetery.name }}
+                                        </a>
+
+                                    </h3>
+
+
+                                    {% if cemetery.city or cemetery.village %}
+
+                                        <p class="text-muted small mb-3">
+
+                                            <i class="bi bi-geo-alt me-1"></i>
+
+                                            {% if cemetery.city %}
+                                                {{ cemetery.city }}
+                                            {% endif %}
+
+                                            {% if cemetery.city and cemetery.village %}
+                                                ·
+                                            {% endif %}
+
+                                            {% if cemetery.village %}
+                                                {{ cemetery.village }}
+                                            {% endif %}
+
+                                        </p>
+
+                                    {% endif %}
+
+
+                                    <div class="d-flex flex-wrap gap-2">
+
+                                        <a
+                                            href="{% url 'graves:cemetery_detail' cemetery.id %}"
+                                            class="btn btn-sm wg-card-action"
+                                        >
+                                            Otvori groblje
+                                            <i class="bi bi-arrow-right ms-1"></i>
+                                        </a>
+
+
+                                        {% if cemetery.location %}
+
+                                            <button
+                                                type="button"
+                                                class="btn btn-sm wg-map-action"
+                                                onclick="focusCemetery({{ cemetery.id }})"
+                                            >
+                                                <i class="bi bi-crosshair me-1"></i>
+                                                Prikaži na mapi
+                                            </button>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                {% empty %}
+
+                    <div class="card content-card mb-0">
+
+                        <div class="card-body text-center py-4">
+
+                            <i class="bi bi-signpost-2 fs-3 text-muted"></i>
+
+                            <p class="text-muted mt-2 mb-0">
+                                Nema pronađenih grobalja.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            {% if cemeteries.has_other_pages %}
+
+                <nav
+                    class="mt-3"
+                    aria-label="Stranice grobalja"
+                >
+
+                    <ul class="pagination pagination-sm flex-wrap">
+
+                        {% if cemeteries.has_previous %}
+
+                            <li class="page-item">
+
+                                <a
+                                    class="page-link"
+                                    href="?{{ pagination_query }}&cemeteries_page={{ cemeteries.previous_page_number }}{% if persons.number %}&persons_page={{ persons.number }}{% endif %}{% if graves.number %}&graves_page={{ graves.number }}{% endif %}"
+                                >
+                                    Prethodna
+                                </a>
+
+                            </li>
+
+                        {% endif %}
+
+
+                        {% for num in cemeteries.paginator.page_range %}
+
+                            {% if num == cemeteries.number %}
+
+                                <li
+                                    class="page-item active"
+                                    aria-current="page"
+                                >
+                                    <span class="page-link">
+                                        {{ num }}
+                                    </span>
+                                </li>
+
+                            {% elif num >= cemeteries.number|add:"-2" and num <= cemeteries.number|add:"2" %}
+
+                                <li class="page-item">
+
+                                    <a
+                                        class="page-link"
+                                        href="?{{ pagination_query }}&cemeteries_page={{ num }}{% if persons.number %}&persons_page={{ persons.number }}{% endif %}{% if graves.number %}&graves_page={{ graves.number }}{% endif %}"
+                                    >
+                                        {{ num }}
+                                    </a>
+
+                                </li>
+
+                            {% endif %}
+
+                        {% endfor %}
+
+
+                        {% if cemeteries.has_next %}
+
+                            <li class="page-item">
+
+                                <a
+                                    class="page-link"
+                                    href="?{{ pagination_query }}&cemeteries_page={{ cemeteries.next_page_number }}{% if persons.number %}&persons_page={{ persons.number }}{% endif %}{% if graves.number %}&graves_page={{ graves.number }}{% endif %}"
+                                >
+                                    Sljedeća
+                                </a>
+
+                            </li>
+
+                        {% endif %}
+
+                    </ul>
+
+                </nav>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- OSOBE -->
+
+        <div class="wg-search-result-section mt-5">
 
             <div class="wg-home-section-heading">
 
@@ -267,7 +723,7 @@
 
                                 <a
                                     class="page-link"
-                                    href="?q={{ query|urlencode }}&persons_page={{ persons.previous_page_number }}{% if graves.number %}&graves_page={{ graves.number }}{% endif %}"
+                                    href="?{{ pagination_query }}&persons_page={{ persons.previous_page_number }}{% if cemeteries.number %}&cemeteries_page={{ cemeteries.number }}{% endif %}{% if graves.number %}&graves_page={{ graves.number }}{% endif %}"
                                 >
                                     Prethodna
                                 </a>
@@ -296,7 +752,7 @@
 
                                     <a
                                         class="page-link"
-                                        href="?q={{ query|urlencode }}&persons_page={{ num }}{% if graves.number %}&graves_page={{ graves.number }}{% endif %}"
+                                        href="?{{ pagination_query }}&persons_page={{ num }}{% if cemeteries.number %}&cemeteries_page={{ cemeteries.number }}{% endif %}{% if graves.number %}&graves_page={{ graves.number }}{% endif %}"
                                     >
                                         {{ num }}
                                     </a>
@@ -314,7 +770,7 @@
 
                                 <a
                                     class="page-link"
-                                    href="?q={{ query|urlencode }}&persons_page={{ persons.next_page_number }}{% if graves.number %}&graves_page={{ graves.number }}{% endif %}"
+                                    href="?{{ pagination_query }}&persons_page={{ persons.next_page_number }}{% if cemeteries.number %}&cemeteries_page={{ cemeteries.number }}{% endif %}{% if graves.number %}&graves_page={{ graves.number }}{% endif %}"
                                 >
                                     Sljedeća
                                 </a>
@@ -474,7 +930,7 @@
 
                                 <a
                                     class="page-link"
-                                    href="?q={{ query|urlencode }}&graves_page={{ graves.previous_page_number }}{% if persons.number %}&persons_page={{ persons.number }}{% endif %}"
+                                    href="?{{ pagination_query }}&graves_page={{ graves.previous_page_number }}{% if cemeteries.number %}&cemeteries_page={{ cemeteries.number }}{% endif %}{% if persons.number %}&persons_page={{ persons.number }}{% endif %}"
                                 >
                                     Prethodna
                                 </a>
@@ -503,7 +959,7 @@
 
                                     <a
                                         class="page-link"
-                                        href="?q={{ query|urlencode }}&graves_page={{ num }}{% if persons.number %}&persons_page={{ persons.number }}{% endif %}"
+                                        href="?{{ pagination_query }}&graves_page={{ num }}{% if cemeteries.number %}&cemeteries_page={{ cemeteries.number }}{% endif %}{% if persons.number %}&persons_page={{ persons.number }}{% endif %}"
                                     >
                                         {{ num }}
                                     </a>
@@ -521,7 +977,7 @@
 
                                 <a
                                     class="page-link"
-                                    href="?q={{ query|urlencode }}&graves_page={{ graves.next_page_number }}{% if persons.number %}&persons_page={{ persons.number }}{% endif %}"
+                                    href="?{{ pagination_query }}&graves_page={{ graves.next_page_number }}{% if cemeteries.number %}&cemeteries_page={{ cemeteries.number }}{% endif %}{% if persons.number %}&persons_page={{ persons.number }}{% endif %}"
                                 >
                                     Sljedeća
                                 </a>
@@ -565,7 +1021,7 @@
                 </p>
 
 
-                {% if map_graves %}
+                {% if map_cemeteries or map_graves %}
 
                     <div id="search-map"></div>
 
@@ -605,7 +1061,8 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 
-{% if query and map_graves %}
+{% if has_search %}
+{% if map_cemeteries or map_graves %}
 
 <script>
 
@@ -652,32 +1109,50 @@ document.addEventListener("DOMContentLoaded", function () {
     }).addTo(map);
 
 
-    var markers = {};
+    var cemeteryMarkers = {};
+    var graveMarkers = {};
     var markerGroup = [];
+
+
+    {% for cemetery in map_cemeteries %}
+
+        var cemeteryMarker{{ cemetery.id }} = L.marker([
+            {{ cemetery.location.y|unlocalize }},
+            {{ cemetery.location.x|unlocalize }}
+        ]).addTo(map);
+
+
+        cemeteryMarker{{ cemetery.id }}.bindPopup(
+            "<strong>{{ cemetery.name|escapejs }}</strong>" +
+            {% if cemetery.city or cemetery.village %}
+                "<br>{% if cemetery.city %}{{ cemetery.city|escapejs }}{% endif %}{% if cemetery.city and cemetery.village %} · {% endif %}{% if cemetery.village %}{{ cemetery.village|escapejs }}{% endif %}" +
+            {% endif %}
+            "<br><br><a href=\"{% url 'graves:cemetery_detail' cemetery.id %}\">Otvori groblje</a>"
+        );
+
+
+        cemeteryMarkers[{{ cemetery.id }}] = cemeteryMarker{{ cemetery.id }};
+        markerGroup.push(cemeteryMarker{{ cemetery.id }});
+
+    {% endfor %}
 
 
     {% for grave in map_graves %}
 
-       var marker{{ grave.id }} = L.marker([
+        var marker{{ grave.id }} = L.marker([
             {{ grave.location.y|unlocalize }},
             {{ grave.location.x|unlocalize }}
         ]).addTo(map);
 
 
-        marker{{ grave.id }}.bindPopup(`
-            <strong>
-                {{ grave.title|default:"Grob"|escapejs }}
-            </strong>
-            <br>
-            {{ grave.cemetery.name|escapejs }}
-            <br><br>
-            <a href="{% url 'graves:grave_detail' grave.id %}">
-                Otvori detalje
-            </a>
-        `);
+        marker{{ grave.id }}.bindPopup(
+            "<strong>{{ grave.title|default:'Grob'|escapejs }}</strong>" +
+            "<br>{{ grave.cemetery.name|escapejs }}" +
+            "<br><br><a href=\"{% url 'graves:grave_detail' grave.id %}\">Otvori detalje</a>"
+        );
 
 
-        markers[{{ grave.id }}] = marker{{ grave.id }};
+        graveMarkers[{{ grave.id }}] = marker{{ grave.id }};
         markerGroup.push(marker{{ grave.id }});
 
     {% endfor %}
@@ -703,9 +1178,39 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 300);
 
 
+    window.focusCemetery = function (id) {
+
+        var marker = cemeteryMarkers[id];
+
+        if (!marker) {
+            return;
+        }
+
+        map.setView(
+            marker.getLatLng(),
+            18
+        );
+
+        marker.openPopup();
+
+        document
+            .getElementById("search-map")
+            .scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+
+
+        setTimeout(function () {
+            map.invalidateSize();
+        }, 200);
+
+    };
+
+
     window.focusGrave = function (id) {
 
-        var marker = markers[id];
+        var marker = graveMarkers[id];
 
         if (!marker) {
             return;
@@ -736,6 +1241,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </script>
 
+{% endif %}
 {% endif %}
 
 

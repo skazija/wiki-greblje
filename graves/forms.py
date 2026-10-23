@@ -2,7 +2,22 @@ from django import forms
 from django.conf import settings
 from django.contrib.gis.geos import Point
 
-from .models import Grave, Photo, Person, EditSuggestion, PersonEditSuggestion, Comment, ProblemReport, LocationSuggestion, Cemetery
+from .models import (
+    Cemetery,
+    Comment,
+    EditSuggestion,
+    Grave,
+    LocationSuggestion,
+    MonumentCondition,
+    MonumentMacroType,
+    MonumentPosition,
+    MonumentTradition,
+    MonumentType,
+    Person,
+    PersonEditSuggestion,
+    Photo,
+    ProblemReport,
+)
 
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
@@ -19,6 +34,154 @@ class MultipleFileField(forms.FileField):
             return [super(MultipleFileField, self).clean(d, initial) for d in data]
 
         return [super().clean(data, initial)]
+
+
+class SearchFilterForm(forms.Form):
+    q = forms.CharField(
+        required=False,
+        label="Pojam za pretragu",
+    )
+    cemetery = forms.ModelChoiceField(
+        queryset=Cemetery.objects.none(),
+        required=False,
+        empty_label="Sva groblja",
+        label="Groblje",
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    location = forms.CharField(
+        required=False,
+        max_length=100,
+        label="Grad ili selo",
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Npr. Visoko ili Rostovo",
+            }
+        ),
+    )
+    birth_year_from = forms.IntegerField(
+        required=False,
+        min_value=0,
+        max_value=9999,
+        label="Rođeni od",
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "placeholder": "Od"}
+        ),
+    )
+    birth_year_to = forms.IntegerField(
+        required=False,
+        min_value=0,
+        max_value=9999,
+        label="Rođeni do",
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "placeholder": "Do"}
+        ),
+    )
+    death_year_from = forms.IntegerField(
+        required=False,
+        min_value=0,
+        max_value=9999,
+        label="Umrli od",
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "placeholder": "Od"}
+        ),
+    )
+    death_year_to = forms.IntegerField(
+        required=False,
+        min_value=0,
+        max_value=9999,
+        label="Umrli do",
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "placeholder": "Do"}
+        ),
+    )
+    macro_type = forms.ModelChoiceField(
+        queryset=MonumentMacroType.objects.none(),
+        required=False,
+        empty_label="Svi makro-tipovi",
+        label="Makro-tip",
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    tradition = forms.ModelChoiceField(
+        queryset=MonumentTradition.objects.none(),
+        required=False,
+        empty_label="Sve tradicije",
+        label="Tradicija",
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    monument_type = forms.ModelChoiceField(
+        queryset=MonumentType.objects.none(),
+        required=False,
+        empty_label="Svi tipovi spomenika",
+        label="Tip spomenika",
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    condition_classification = forms.ModelChoiceField(
+        queryset=MonumentCondition.objects.none(),
+        required=False,
+        empty_label="Sva stanja",
+        label="Stanje spomenika",
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    monument_position = forms.ModelChoiceField(
+        queryset=MonumentPosition.objects.none(),
+        required=False,
+        empty_label="Svi položaji",
+        label="Položaj spomenika",
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        public_graves = {
+            "graves__status": Grave.STATUS_APPROVED,
+            "graves__cemetery__status": Cemetery.STATUS_APPROVED,
+        }
+
+        self.fields["cemetery"].queryset = Cemetery.objects.filter(
+            status=Cemetery.STATUS_APPROVED,
+        ).order_by("name")
+
+        classification_models = {
+            "macro_type": MonumentMacroType,
+            "tradition": MonumentTradition,
+            "monument_type": MonumentType,
+            "condition_classification": MonumentCondition,
+            "monument_position": MonumentPosition,
+        }
+
+        for field_name, model in classification_models.items():
+            self.fields[field_name].queryset = (
+                model.objects
+                .filter(is_active=True, **public_graves)
+                .distinct()
+                .order_by("sort_order", "code")
+            )
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        year_ranges = (
+            ("birth_year_from", "birth_year_to"),
+            ("death_year_from", "death_year_to"),
+        )
+
+        for start_name, end_name in year_ranges:
+            start_year = cleaned_data.get(start_name)
+            end_year = cleaned_data.get(end_name)
+
+            if (
+                start_year is not None
+                and end_year is not None
+                and start_year > end_year
+            ):
+                self.add_error(
+                    end_name,
+                    "Završna godina mora biti jednaka ili veća od početne.",
+                )
+
+        return cleaned_data
 
 class PublicGraveForm(forms.ModelForm):
     latitude = forms.FloatField(required=False,widget=forms.HiddenInput())

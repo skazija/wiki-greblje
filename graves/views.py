@@ -1,4 +1,6 @@
 import os
+from unicodedata import combining, normalize
+
 import easyocr
 import pytesseract
 if os.name == "nt":
@@ -8,7 +10,8 @@ if os.name == "nt":
 from django.db.models import Prefetch
 from .models import EditSuggestion    
 from django.shortcuts import render, get_object_or_404
-from django.db.models import Q
+from django.db.models import Case, IntegerField, Q, TextField, Value, When
+from django.db.models.functions import Concat, Lower, Replace
 from django.core.paginator import Paginator
 from .models import Cemetery, Grave, Person, Photo, EditSuggestion, PersonEditSuggestion, Comment, ProblemReport, CemeteryPhoto, LocationSuggestion
 
@@ -16,7 +19,17 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.conf import settings
 
-from .forms import PublicGraveForm, PersonForm, EditSuggestionForm, PersonEditSuggestionForm, LocationSuggestionForm, CommentForm, ProblemReportForm, CemeteryProposalForm
+from .forms import (
+    CemeteryProposalForm,
+    CommentForm,
+    EditSuggestionForm,
+    LocationSuggestionForm,
+    PersonEditSuggestionForm,
+    PersonForm,
+    ProblemReportForm,
+    PublicGraveForm,
+    SearchFilterForm,
+)
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
@@ -206,29 +219,212 @@ def grave_detail(request, pk):
     })
 
 
-def search(request):
-    query = request.GET.get("q", "").strip()
+SEARCH_CHARACTER_REPLACEMENTS = (
+    ("č", "c"),
+    ("ć", "c"),
+    ("š", "s"),
+    ("ž", "z"),
+    ("đ", "dj"),
+    ("\u0301", ""),
+    ("\u030c", ""),
+)
 
-    graves = Grave.objects.none()
-    persons = Person.objects.none()
-    map_graves = []
 
-    graves_page = None
-    persons_page = None
+def _normalize_search_text(value):
+    normalized_value = normalize(
+        "NFKD",
+        value.casefold().replace("đ", "dj"),
+    )
+    return "".join(
+        character
+        for character in normalized_value
+        if not combining(character)
+    )
 
+
+def _normalized_search_expression(field_name):
+    expression = Lower(field_name)
+
+    for source, replacement in SEARCH_CHARACTER_REPLACEMENTS:
+        expression = Replace(
+            expression,
+            Value(source),
+            Value(replacement),
+            output_field=TextField(),
+        )
+
+    return expression
+
+
+def _person_search_token_query(token):
+    token_query = (
+        Q(search_first_name__contains=token) |
+        Q(search_last_name__contains=token) |
+        Q(search_birth_date__contains=token) |
+        Q(search_death_date__contains=token)
+    )
+
+    if token.isascii() and token.isdigit() and len(token) <= 4:
+        year = int(token)
+        token_query |= (
+            Q(birth_year=year) |
+            Q(death_year=year)
+        )
+
+    # Support a common Bosnian name form such as "Rasima" when the
+    # stored nominative form is "Rasim", without enabling broad fuzzy
+    # matching for unrelated names.
+    if len(token) >= 5 and token.casefold().endswith("a"):
+        nominative_candidate = token[:-1]
+        token_query |= (
+            Q(search_first_name=nominative_candidate) |
+            Q(search_last_name=nominative_candidate)
+        )
+
+    return token_query
+
+
+def _person_name_query_variants(tokens):
+    if not tokens:
+        return ()
+
+    variants = {" ".join(tokens)}
+    stripped_tokens = list(tokens)
+
+    for index, token in enumerate(tokens):
+        if len(token) >= 5 and token.endswith("a"):
+            variant_tokens = list(tokens)
+            variant_tokens[index] = token[:-1]
+            stripped_tokens[index] = token[:-1]
+            variants.add(" ".join(variant_tokens))
+
+    variants.add(" ".join(stripped_tokens))
+    return tuple(variants)
+
+
+def _text_search_querysets(query):
     if query:
+        query_tokens = [
+            _normalize_search_text(token)
+            for token in query.split()
+        ]
+        normalized_query = " ".join(query_tokens)
+
+        cemeteries = (
+            Cemetery.objects
+            .filter(status=Cemetery.STATUS_APPROVED)
+            .annotate(
+                search_name=_normalized_search_expression("name"),
+                search_city=_normalized_search_expression("city"),
+                search_village=_normalized_search_expression("village"),
+            )
+        )
+
+        for token in query_tokens:
+            cemeteries = cemeteries.filter(
+                Q(search_name__contains=token) |
+                Q(search_city__contains=token) |
+                Q(search_village__contains=token)
+            )
+
+        cemeteries = cemeteries.annotate(
+            search_rank=Case(
+                When(search_name=normalized_query, then=Value(0)),
+                When(
+                    search_name__startswith=normalized_query,
+                    then=Value(1),
+                ),
+                When(
+                    search_name__contains=normalized_query,
+                    then=Value(2),
+                ),
+                When(
+                    Q(search_city=normalized_query) |
+                    Q(search_village=normalized_query),
+                    then=Value(3),
+                ),
+                When(
+                    Q(search_city__startswith=normalized_query) |
+                    Q(search_village__startswith=normalized_query),
+                    then=Value(4),
+                ),
+                When(
+                    Q(search_city__contains=normalized_query) |
+                    Q(search_village__contains=normalized_query),
+                    then=Value(5),
+                ),
+                default=Value(6),
+                output_field=IntegerField(),
+            )
+        ).order_by("search_rank", "name", "id")
+
         graves = (
             Grave.objects
             .filter(
-                Q(title__icontains=query) |
-                Q(inscription__icontains=query) |
-                Q(cemetery__name__icontains=query),
                 status=Grave.STATUS_APPROVED,
                 cemetery__status=Cemetery.STATUS_APPROVED,
             )
             .select_related("cemetery")
-            .order_by("id")
+            .annotate(
+                search_title=_normalized_search_expression("title"),
+                search_inscription=_normalized_search_expression(
+                    "inscription"
+                ),
+                search_cemetery_name=_normalized_search_expression(
+                    "cemetery__name"
+                ),
+            )
         )
+
+        for token in query_tokens:
+            graves = graves.filter(
+                Q(search_title__contains=token) |
+                Q(search_inscription__contains=token) |
+                Q(search_cemetery_name__contains=token)
+            )
+
+        grave_content_conditions = [
+            Q(search_title__contains=token) |
+            Q(search_inscription__contains=token)
+            for token in query_tokens
+        ]
+        grave_content_match = grave_content_conditions[0]
+
+        for condition in grave_content_conditions[1:]:
+            grave_content_match |= condition
+
+        # The cemetery name can provide context for a grave query, but a
+        # cemetery-only query should return the cemetery as its own result
+        # instead of listing every grave in that cemetery.
+        graves = graves.filter(grave_content_match)
+
+        graves = graves.annotate(
+            search_rank=Case(
+                When(search_title=normalized_query, then=Value(0)),
+                When(
+                    search_title__startswith=normalized_query,
+                    then=Value(1),
+                ),
+                When(
+                    search_title__contains=normalized_query,
+                    then=Value(2),
+                ),
+                When(
+                    search_inscription__contains=normalized_query,
+                    then=Value(3),
+                ),
+                When(
+                    search_cemetery_name=normalized_query,
+                    then=Value(4),
+                ),
+                When(
+                    search_cemetery_name__startswith=normalized_query,
+                    then=Value(5),
+                ),
+                default=Value(6),
+                output_field=IntegerField(),
+            )
+        ).order_by("search_rank", "id")
 
         persons = (
             Person.objects
@@ -237,31 +433,349 @@ def search(request):
                 grave__cemetery__status=Cemetery.STATUS_APPROVED,
                 status=Person.STATUS_APPROVED,
             )
-            .filter(
-                Q(first_name__icontains=query) |
-                Q(last_name__icontains=query) |
-                Q(birth_date_text__icontains=query) |
-                Q(death_date_text__icontains=query) 
-            )
             .select_related(
                 "grave",
                 "grave__cemetery",
             )
-            .order_by("last_name", "first_name", "id")
+            .annotate(
+                search_first_name=_normalized_search_expression(
+                    "first_name"
+                ),
+                search_last_name=_normalized_search_expression(
+                    "last_name"
+                ),
+                search_birth_date=_normalized_search_expression(
+                    "birth_date_text"
+                ),
+                search_death_date=_normalized_search_expression(
+                    "death_date_text"
+                ),
+            )
+            .annotate(
+                search_full_name=Concat(
+                    "search_first_name",
+                    Value(" "),
+                    "search_last_name",
+                    output_field=TextField(),
+                ),
+                search_reverse_name=Concat(
+                    "search_last_name",
+                    Value(" "),
+                    "search_first_name",
+                    output_field=TextField(),
+                ),
+            )
         )
 
+        for token in query_tokens:
+            persons = persons.filter(
+                _person_search_token_query(token)
+            )
+
+        name_tokens = [
+            token
+            for token in query_tokens
+            if not (
+                token.isascii() and
+                token.isdigit() and
+                len(token) <= 4
+            )
+        ]
+        name_query_variants = _person_name_query_variants(name_tokens)
+
+        person_rank_conditions = []
+
+        if name_query_variants:
+            exact_full_name_conditions = []
+            exact_name_field_conditions = []
+            starts_with_name_conditions = []
+            contains_name_conditions = []
+
+            for name_query in name_query_variants:
+                exact_full_name_conditions.append(
+                    Q(search_full_name=name_query) |
+                    Q(search_reverse_name=name_query)
+                )
+                exact_name_field_conditions.append(
+                    Q(search_first_name=name_query) |
+                    Q(search_last_name=name_query)
+                )
+                starts_with_name_conditions.append(
+                    Q(search_full_name__startswith=name_query) |
+                    Q(search_reverse_name__startswith=name_query) |
+                    Q(search_first_name__startswith=name_query) |
+                    Q(search_last_name__startswith=name_query)
+                )
+                contains_name_conditions.append(
+                    Q(search_full_name__contains=name_query) |
+                    Q(search_reverse_name__contains=name_query) |
+                    Q(search_first_name__contains=name_query) |
+                    Q(search_last_name__contains=name_query)
+                )
+
+            exact_full_name = exact_full_name_conditions[0]
+            exact_name_field = exact_name_field_conditions[0]
+            starts_with_name = starts_with_name_conditions[0]
+            contains_name = contains_name_conditions[0]
+
+            for condition in exact_full_name_conditions[1:]:
+                exact_full_name |= condition
+            for condition in exact_name_field_conditions[1:]:
+                exact_name_field |= condition
+            for condition in starts_with_name_conditions[1:]:
+                starts_with_name |= condition
+            for condition in contains_name_conditions[1:]:
+                contains_name |= condition
+
+            person_rank_conditions = [
+                When(exact_full_name, then=Value(0)),
+                When(exact_name_field, then=Value(1)),
+                When(starts_with_name, then=Value(2)),
+                When(contains_name, then=Value(3)),
+            ]
+
+        if person_rank_conditions:
+            persons = persons.annotate(
+                search_rank=Case(
+                    *person_rank_conditions,
+                    default=Value(4),
+                    output_field=IntegerField(),
+                )
+            )
+        else:
+            persons = persons.annotate(
+                search_rank=Value(
+                    4,
+                    output_field=IntegerField(),
+                )
+            )
+
+        persons = persons.order_by(
+            "search_rank",
+            "last_name",
+            "first_name",
+            "id",
+        )
+
+        return cemeteries, graves, persons
+
+
+SEARCH_FILTER_NAMES = (
+    "cemetery",
+    "location",
+    "birth_year_from",
+    "birth_year_to",
+    "death_year_from",
+    "death_year_to",
+    "macro_type",
+    "tradition",
+    "monument_type",
+    "condition_classification",
+    "monument_position",
+)
+
+
+def search(request):
+    search_form = SearchFilterForm(request.GET or None)
+    form_submitted = bool(request.GET)
+    form_valid = search_form.is_valid() if form_submitted else False
+    cleaned_data = search_form.cleaned_data if form_valid else {}
+
+    query = (
+        (cleaned_data.get("q") or "").strip()
+        if form_valid
+        else request.GET.get("q", "").strip()
+    )
+    filters_active = bool(
+        form_valid
+        and any(
+            cleaned_data.get(field_name) not in (None, "")
+            for field_name in SEARCH_FILTER_NAMES
+        )
+    )
+    active_filter_count = (
+        sum(
+            cleaned_data.get(field_name) not in (None, "")
+            for field_name in SEARCH_FILTER_NAMES
+        )
+        if form_valid
+        else 0
+    )
+    has_search = bool(form_valid and (query or filters_active))
+
+    cemeteries_page = None
+    graves_page = None
+    persons_page = None
+    map_cemeteries = []
+    map_graves = []
+
+    if has_search:
+        if query:
+            cemeteries, graves, persons = _text_search_querysets(query)
+        else:
+            cemeteries = Cemetery.objects.filter(
+                status=Cemetery.STATUS_APPROVED,
+            )
+            graves = (
+                Grave.objects
+                .filter(
+                    status=Grave.STATUS_APPROVED,
+                    cemetery__status=Cemetery.STATUS_APPROVED,
+                )
+                .select_related("cemetery")
+            )
+            persons = (
+                Person.objects
+                .filter(
+                    status=Person.STATUS_APPROVED,
+                    grave__status=Grave.STATUS_APPROVED,
+                    grave__cemetery__status=Cemetery.STATUS_APPROVED,
+                )
+                .select_related("grave", "grave__cemetery")
+            )
+
+        selected_cemetery = cleaned_data.get("cemetery")
+
+        if selected_cemetery:
+            cemeteries = cemeteries.filter(pk=selected_cemetery.pk)
+            graves = graves.filter(cemetery=selected_cemetery)
+            persons = persons.filter(grave__cemetery=selected_cemetery)
+
+        location = _normalize_search_text(
+            cleaned_data.get("location") or ""
+        )
+
+        if location:
+            cemeteries = cemeteries.annotate(
+                filter_city=_normalized_search_expression("city"),
+                filter_village=_normalized_search_expression("village"),
+            ).filter(
+                Q(filter_city__contains=location) |
+                Q(filter_village__contains=location)
+            )
+            graves = graves.annotate(
+                filter_city=_normalized_search_expression(
+                    "cemetery__city"
+                ),
+                filter_village=_normalized_search_expression(
+                    "cemetery__village"
+                ),
+            ).filter(
+                Q(filter_city__contains=location) |
+                Q(filter_village__contains=location)
+            )
+            persons = persons.annotate(
+                filter_city=_normalized_search_expression(
+                    "grave__cemetery__city"
+                ),
+                filter_village=_normalized_search_expression(
+                    "grave__cemetery__village"
+                ),
+            ).filter(
+                Q(filter_city__contains=location) |
+                Q(filter_village__contains=location)
+            )
+
+        grave_filter_kwargs = {}
+        person_filter_kwargs = {}
+        cemetery_related_filter_kwargs = {}
+
+        classification_fields = (
+            "macro_type",
+            "tradition",
+            "monument_type",
+            "condition_classification",
+            "monument_position",
+        )
+
+        for field_name in classification_fields:
+            selected_value = cleaned_data.get(field_name)
+
+            if selected_value:
+                grave_filter_kwargs[field_name] = selected_value
+                person_filter_kwargs[
+                    f"grave__{field_name}"
+                ] = selected_value
+                cemetery_related_filter_kwargs[
+                    f"graves__{field_name}"
+                ] = selected_value
+
+        year_lookups = (
+            ("birth_year_from", "birth_year__gte"),
+            ("birth_year_to", "birth_year__lte"),
+            ("death_year_from", "death_year__gte"),
+            ("death_year_to", "death_year__lte"),
+        )
+
+        for form_field, model_lookup in year_lookups:
+            year = cleaned_data.get(form_field)
+
+            if year is not None:
+                person_filter_kwargs[model_lookup] = year
+                grave_filter_kwargs[f"persons__{model_lookup}"] = year
+                cemetery_related_filter_kwargs[
+                    f"graves__persons__{model_lookup}"
+                ] = year
+
+        if grave_filter_kwargs:
+            if any(
+                lookup.startswith("persons__")
+                for lookup in grave_filter_kwargs
+            ):
+                grave_filter_kwargs[
+                    "persons__status"
+                ] = Person.STATUS_APPROVED
+
+            graves = graves.filter(**grave_filter_kwargs).distinct()
+
+        if person_filter_kwargs:
+            persons = persons.filter(**person_filter_kwargs).distinct()
+
+        if cemetery_related_filter_kwargs:
+            cemetery_related_filter_kwargs[
+                "graves__status"
+            ] = Grave.STATUS_APPROVED
+
+            if any(
+                lookup.startswith("graves__persons__")
+                for lookup in cemetery_related_filter_kwargs
+            ):
+                cemetery_related_filter_kwargs[
+                    "graves__persons__status"
+                ] = Person.STATUS_APPROVED
+
+            cemeteries = cemeteries.filter(
+                **cemetery_related_filter_kwargs
+            ).distinct()
+
+        if not query:
+            cemeteries = cemeteries.order_by("name", "id")
+            graves = graves.order_by("id")
+            persons = persons.order_by(
+                "last_name",
+                "first_name",
+                "id",
+            )
+
+        cemeteries_paginator = Paginator(cemeteries, 10)
         graves_paginator = Paginator(graves, 10)
         persons_paginator = Paginator(persons, 10)
 
+        cemeteries_page = cemeteries_paginator.get_page(
+            request.GET.get("cemeteries_page")
+        )
         graves_page = graves_paginator.get_page(
             request.GET.get("graves_page")
         )
-
         persons_page = persons_paginator.get_page(
             request.GET.get("persons_page")
         )
 
         grave_ids = set()
+
+        for cemetery in cemeteries_page:
+            if cemetery.location:
+                map_cemeteries.append(cemetery)
 
         for grave in graves_page:
             if grave.location and grave.id not in grave_ids:
@@ -275,13 +789,33 @@ def search(request):
                 grave_ids.add(grave.id)
                 map_graves.append(grave)
 
+    pagination_parameters = request.GET.copy()
+
+    for page_parameter in (
+        "cemeteries_page",
+        "persons_page",
+        "graves_page",
+    ):
+        pagination_parameters.pop(page_parameter, None)
+
+    for parameter_name in list(pagination_parameters):
+        if not pagination_parameters.get(parameter_name):
+            pagination_parameters.pop(parameter_name)
+
     return render(
         request,
         "graves/search.html",
         {
             "query": query,
+            "search_form": search_form,
+            "has_search": has_search,
+            "filters_active": filters_active,
+            "active_filter_count": active_filter_count,
+            "pagination_query": pagination_parameters.urlencode(),
+            "cemeteries": cemeteries_page,
             "graves": graves_page,
             "persons": persons_page,
+            "map_cemeteries": map_cemeteries,
             "map_graves": map_graves,
             "maptiler_api_key": settings.MAPTILER_API_KEY,
         },
@@ -1394,5 +1928,3 @@ def ocr_inscription(request):
             },
             status=500,
         )
-        
-        

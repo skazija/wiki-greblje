@@ -68,3 +68,27 @@ Cilj:
 
 Cilj Sprinta 3 nije napraviti formu za unos groba, nego osmisliti proces digitalizacije koji je jednostavan, dostojanstven i ugodan za korištenje.
 
+## Dopuna sprint historije (naknadno evidentirano)
+
+### Sprint 3 — Digitalizacija groba
+Status: **Osnovni tok implementiran; daljnje dorade otvorene**.
+
+- Jedinstvena stranica sa sekcijama za grob, lokaciju, fotografije, osobe i natpis.
+- Višestruki upload fotografija, izbor glavne fotografije, pomoćni OCR tok za fotografiju natpisa.
+- Uloge `Urednici` i `Stručnjaci` utiču na dostupnost stručnih klasifikacijskih polja.
+- Povezivanje groba dozvoljeno samo s odobrenim grobljima.
+
+### Naknadna cjelina — Klasifikacija spomenika i očuvanosti (septembar 2026.)
+Status: **Implementirano prema potvrđenim migracijama `0018–0025`**.
+
+- Tipologija spomenika, tradicije, motivi; stanje očuvanosti, obrasci degradacije i položaj spomenika.
+
+### Naknadna cjelina — Prijedlog i moderacija groblja (oktobar 2026.)
+Status: **Implementirano i preneseno na DELL; produkcijski korisnički test na čekanju**.
+
+- Prijedlog groblja i fotografija od strane prijavljenih korisnika.
+- Uredničko odobravanje/odbijanje grobalja, odvojeno od fotografija.
+- Javno filtriranje odobrenih grobalja i fotografija.
+- Commit `2f94d59`; migracije `0026`, `0027`.
+
+Historijski nazivi Sprint 1–3 su zadržani. Nove cjeline nisu retroaktivno numerisane kao „Sprint 4/5“ bez potvrde tima.
