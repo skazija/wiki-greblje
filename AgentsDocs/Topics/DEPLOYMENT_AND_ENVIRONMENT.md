@@ -101,6 +101,23 @@ Ispravka prazne osobe:
 
 Ovo ograničenje i dalje važi dok ga noviji dokaz ne poništi.
 
+## Etapa 5 - commit `09dc911`
+
+Napredna javna pretraga i regresijska infrastruktura prenesene su na DELL 23.10.2026:
+
+- prije promjene napravljen je puni PostgreSQL custom-format backup izvan repozitorija i potvrđen pomoću `pg_restore --list`;
+- sačuvana je identična kopija produkcijskog `config/settings.py`;
+- `config/settings.py` je ciljano stashovan, izvršen je fast-forward sa `2f94d59` na `09dc911`, a tačno novi stash je vraćen bez konflikta i zadržan;
+- Django `check` je prošao, svih 27 `graves` migracija bilo je primijenjeno, a `migrate --plan` nije pokazao operacije;
+- `collectstatic` je kopirao 1 datoteku uz 250 neizmijenjenih;
+- servis je restartovan i potvrđen kao aktivan, bez novih upozorenja u desetominutnom journal pregledu;
+- početna stranica i javna pretraga vratile su HTTP 200; novi filteri te odvojene sekcije osoba i grobova potvrđeni su u odgovoru;
+- baza je prije restarta imala 12 groblja, 55 grobova i 40 osoba.
+
+Tokom deploymenta poslovni DNS/UDM vraćao je `0.0.0.0` za `github.com`, čak i za klasične upite prema javnim resolverima. Stvarna GitHub adresa pribavljena je DNS-over-HTTPS upitom i potvrđena TLS certifikatom za `github.com`; `git fetch` je zatim izvršen jednokratnim `http.curloptResolve` parametrom. DNS konfiguracija i SSL provjera nisu mijenjani.
+
+Zatečeno je `DEBUG=True` uz aktivne HTTPS/cookie zaštite. To nije mijenjano u sklopu pretrage i ostaje zaseban sigurnosni zadatak.
+
 ## Siguran obrazac za buduće deploye
 
 1. Lokalno provjeriti kod, testove, `git diff --check`, tačan commit i čist status.

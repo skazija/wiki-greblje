@@ -34,6 +34,8 @@ Ažurirano: 23.10.2026.
 ## Promjene spremne za naredni grupni deploy
 - [x] Ispravka praznih osoba lokalno testirana i poslana na GitHub (`be3a0ec`).
 - [x] Napredna pretraga i testna infrastruktura lokalno provjerene sa 31 testom.
-- [ ] Commitovati i poslati paket napredne pretrage na GitHub.
-- [ ] Prenijeti `be3a0ec` i paket napredne pretrage na DELL u jednom kontrolisanom deployu (backup, zaštita `config/settings.py`, provjere).
+- [x] Commitovati i poslati paket napredne pretrage na GitHub (`09dc911`).
+- [x] Prenijeti `be3a0ec` i paket napredne pretrage na DELL u jednom kontrolisanom deployu (backup, zaštita `config/settings.py`, provjere).
+- [ ] Isključiti produkcijski `DEBUG` nakon zasebne provjere konfiguracije.
+- [ ] Ispraviti poslovni DNS/UDM pravilo koje trenutno vraća `0.0.0.0` za `github.com`.
 - [ ] Naknadno dodati regresijski test za unos mezara bez osobe i s djelimičnim podacima.

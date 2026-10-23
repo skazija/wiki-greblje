@@ -1,6 +1,6 @@
 # Deployment — Wiki Greblje (DELL)
 
-**Ažurirano: 14.10.2026.** Ovo je kontrolna lista, ne komanda za automatsko izvršavanje.
+**Ažurirano: 23.10.2026.** Ovo je kontrolna lista, ne komanda za automatsko izvršavanje.
 
 ## Okruženje
 - Lokalni razvoj: `C:/wiki-groblje` (Windows/Git Bash).
@@ -24,6 +24,9 @@
 - `pg_dump` za cijelu bazu pod korisnikom `wiki_user` prijavio je `permission denied for schema tiger`; nastao je **nepotpun dump** koji se ne smije tretirati kao backup.
 - Ponovljeni `pg_dump -Fc -n public` uspješno je kreirao arhivu i `pg_restore -l` prikazao aplikacijske tabele. **Ograničenje:** to je backup sheme `public`, ne kompletne baze niti provjeren test povrata. Prije ozbiljnih promjena poželjno je osigurati i provjeriti cjelovit postupak oporavka.
 - Za commit `2f94d59` migracije `0026` i `0027` primijenjene su; uredničke dozvole i `collectstatic` potvrđeni. Korisnički produkcijski test još nije dokumentovan kao završen.
+- Commit `09dc911` prenesen je na DELL 23.10.2026. nakon punog PostgreSQL custom-format backupa i kopije produkcijskih postavki. Nije bilo novih migracijskih operacija; `collectstatic`, restart, HTTPS početna stranica i javna pretraga su potvrđeni.
+- Poslovni DNS je tokom tog deploymenta vraćao `0.0.0.0` za `github.com`. Korišten je samo jednokratni `http.curloptResolve` nakon DNS-over-HTTPS i TLS provjere; SSL provjera nije isključena i sistemski DNS nije trajno mijenjan.
+- Produkcijski `DEBUG=True` evidentiran je kao zasebna sigurnosna stavka za naknadnu promjenu.
 - Stari stash-evi i nepoznate lokalne datoteke ne brišu se bez pregleda.
 
 ## Tipični problemi
