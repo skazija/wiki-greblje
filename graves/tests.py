@@ -11,7 +11,19 @@ from .models import (
     MonumentTradition,
     MonumentType,
     Person,
+    Photo,
 )
+from .signals import photo_extract_gps
+
+
+class PhotoSignalTests(TestCase):
+    def test_photo_signal_skips_raw_fixture_loads(self):
+        photo_extract_gps(
+            sender=Photo,
+            instance=object(),
+            created=True,
+            raw=True,
+        )
 
 
 class SearchViewTests(TestCase):

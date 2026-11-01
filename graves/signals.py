@@ -44,7 +44,10 @@ def extract_gps(image_path):
 
 
 @receiver(post_save, sender=Photo)
-def photo_extract_gps(sender, instance, created, **kwargs):
+def photo_extract_gps(sender, instance, created, raw=False, **kwargs):
+    if raw:
+        return
+
     if not instance.image:
         return
 
